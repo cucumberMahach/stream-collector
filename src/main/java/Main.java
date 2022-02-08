@@ -1,5 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -25,7 +27,7 @@ public class Main {
         return "";
     }
 
-    public static void main(String[] args) {
+    public static void get(){
         long startTime = System.currentTimeMillis();
         String data = executeGet("https://tmi.twitch.tv/group/user/jesusavgn/chatters");
         long endTime = System.currentTimeMillis();
@@ -39,5 +41,21 @@ public class Main {
         System.out.println("Chatters count: " + chattersGlobal.chatterCount);
         System.out.println("Viewers: " + chattersGlobal.chatters.viewers.length);
         System.out.println("Moderators: " + chattersGlobal.chatters.moderators.length);
+    }
+
+    public static void main(String[] args) {
+        Session session = DatabaseUtil.getSession();
+        Transaction tx = session.beginTransaction();
+
+        for (int i = 1; i <= 1000; i++) {
+            TestEntity entity = new TestEntity();
+            entity.setS("qweqweqwe"+i);
+            session.save(entity);
+        }
+
+        tx.commit();
+
+        session.close();
+        DatabaseUtil.shutdown();
     }
 }
