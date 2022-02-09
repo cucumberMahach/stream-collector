@@ -1,6 +1,7 @@
 import javax.persistence.*;
 
 @Entity
+@Cacheable
 @Table(name = "testentity")
 public class TestEntity {
     @Id
@@ -8,7 +9,7 @@ public class TestEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String s;
 
 

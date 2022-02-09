@@ -1,14 +1,20 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -44,13 +50,18 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Session session = DatabaseUtil.getSession();
+        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
+
+        StatelessSession session = DatabaseUtil.getStateLessSession();
+
         Transaction tx = session.beginTransaction();
 
-        for (int i = 1; i <= 1000; i++) {
-            TestEntity entity = new TestEntity();
-            entity.setS("qweqweqwe"+i);
-            session.save(entity);
+        for (int i = 1; i <= 100000; i++) {
+            try {
+                TestEntity entity = new TestEntity();
+                entity.setS("qweqweqwe"+i);
+                session.insert(entity);
+            }catch (Exception e){}
         }
 
         tx.commit();
