@@ -1,3 +1,6 @@
+package database;
+
+import database.entities.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -11,7 +14,13 @@ public class DatabaseUtil {
     static {
         try {
             Configuration configuration = new Configuration().configure();
-            configuration.addAnnotatedClass(TestEntity.class);
+
+            configuration.addAnnotatedClass(ChannelEntity.class);
+            configuration.addAnnotatedClass(ChannelToCheckEntity.class);
+            configuration.addAnnotatedClass(CircleEntity.class);
+            configuration.addAnnotatedClass(UserChannelEntity.class);
+            configuration.addAnnotatedClass(UserEntity.class);
+
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {
             throw new ExceptionInInitializerError(ex);

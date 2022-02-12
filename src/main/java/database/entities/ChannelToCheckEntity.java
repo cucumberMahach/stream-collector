@@ -1,0 +1,21 @@
+package database.entities;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Cacheable
+@Table(name = "channelsToCheck")
+public class ChannelToCheckEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    public long id;
+
+    @Column(name = "name", unique = true, nullable = false)
+    public String name;
+
+    @Column(name = "priority")
+    public int priority;
+}

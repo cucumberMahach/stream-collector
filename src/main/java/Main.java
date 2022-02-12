@@ -55,13 +55,13 @@ public class Main {
     public static void main(String[] args) {
         /*java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
 
-        StatelessSession session = DatabaseUtil.getStateLessSession();
+        StatelessSession session = database.DatabaseUtil.getStateLessSession();
 
         Transaction tx = session.beginTransaction();
 
         for (int i = 1; i <= 100000; i++) {
             try {
-                TestEntity entity = new TestEntity();
+                database.entities.TestEntity entity = new database.entities.TestEntity();
                 entity.setS("qweqweqwe"+i);
                 session.insert(entity);
             }catch (Exception e){}
@@ -70,6 +70,8 @@ public class Main {
         tx.commit();
 
         session.close();
-        DatabaseUtil.shutdown();*/
+        database.DatabaseUtil.shutdown();*/
+
+        StatelessSession session = database.DatabaseUtil.getStateLessSession();
     }
 }
