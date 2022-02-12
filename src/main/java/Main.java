@@ -23,6 +23,9 @@ public class Main {
             URL url = new URL(httpsUrl);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 
+            //connection.setRequestMethod("GET");
+            //connection.setRequestProperty("Client-I", "gp762nuuoqcoxypju8c569th9wz7q5");
+
             try(BufferedReader reader = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
                 return reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -50,7 +53,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
+        /*java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
 
         StatelessSession session = DatabaseUtil.getStateLessSession();
 
@@ -67,6 +70,6 @@ public class Main {
         tx.commit();
 
         session.close();
-        DatabaseUtil.shutdown();
+        DatabaseUtil.shutdown();*/
     }
 }
