@@ -1,20 +1,19 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.hibernate.Session;
+import console.ConsoleProvider;
+import json.ChattersGlobal;
 import org.hibernate.StatelessSession;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+import org.hibernate.cfg.Environment;
+import util.MavenData;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.logging.Level;
+import java.util.Collections;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -47,7 +46,7 @@ public class Main {
         ChattersGlobal chattersGlobal = gson.fromJson(data, ChattersGlobal.class);
 
         System.out.println(System.currentTimeMillis()-endTime + " ms");
-        System.out.println("Chatters count: " + chattersGlobal.chatterCount);
+        System.out.println("json.Chatters count: " + chattersGlobal.chatterCount);
         System.out.println("Viewers: " + chattersGlobal.chatters.viewers.length);
         System.out.println("Moderators: " + chattersGlobal.chatters.moderators.length);
     }
@@ -72,6 +71,9 @@ public class Main {
         session.close();
         database.DatabaseUtil.shutdown();*/
 
-        StatelessSession session = database.DatabaseUtil.getStateLessSession();
+        //StatelessSession session = database.DatabaseUtil.getStateLessSession();
+
+        ConsoleProvider.instance.startConsole();
+        System.exit(0);
     }
 }

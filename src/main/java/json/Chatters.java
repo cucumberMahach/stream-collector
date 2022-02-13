@@ -1,15 +1,8 @@
-import com.google.gson.annotations.Expose;
+package json;
+
 import com.google.gson.annotations.SerializedName;
 
-class ChattersGlobal {
-    @SerializedName("chatter_count")
-    public long chatterCount;
-
-    @SerializedName("chatters")
-    public Chatters chatters;
-}
-
-class Chatters {
+public class Chatters {
     @SerializedName("broadcaster")
     public String[] broadcaster;
 
