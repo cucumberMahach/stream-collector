@@ -41,7 +41,7 @@ public class ConsoleProvider {
                     System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
                     System.out.println(colorize("' started", Attribute.BRIGHT_GREEN_TEXT()));
                 }else{
-                    System.out.print(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+                    System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
                 }
                 continue;
             }
@@ -54,7 +54,7 @@ public class ConsoleProvider {
                     System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
                     System.out.println(colorize("' stopped", Attribute.BRIGHT_GREEN_TEXT()));
                 }else{
-                    System.out.print(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+                    System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
                 }
                 continue;
             }
@@ -75,10 +75,10 @@ public class ConsoleProvider {
                         System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
                         System.out.println(colorize("' closed", Attribute.BRIGHT_GREEN_TEXT()));
                     }else{
-                        System.out.print(colorize(resultOff, Attribute.BRIGHT_RED_TEXT()));
+                        System.out.println(colorize(resultOff, Attribute.BRIGHT_RED_TEXT()));
                     }
                 }else{
-                    System.out.print(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+                    System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
                 }
                 continue;
             }

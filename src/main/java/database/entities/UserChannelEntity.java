@@ -15,7 +15,7 @@ public class UserChannelEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     @Unsigned
-    public LongType id;
+    public Long id;
 
     @ManyToOne
     @JoinColumn(name="user_id", nullable = false)
@@ -31,7 +31,7 @@ public class UserChannelEntity {
 
     @ManyToOne
     @JoinColumn(name="lastCircle_id")
-    public ChannelEntity lastCircle;
+    public CircleEntity lastCircle;
 
     @Column(name = "type", nullable = false)
     public String type;

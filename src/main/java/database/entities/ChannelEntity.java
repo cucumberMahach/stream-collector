@@ -14,7 +14,7 @@ public class ChannelEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     @Unsigned
-    public LongType id;
+    public Long id;
 
     @ManyToOne
     @JoinColumn(name="lastCircle_id")

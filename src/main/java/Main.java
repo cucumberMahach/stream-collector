@@ -5,6 +5,8 @@ import json.ChattersGlobal;
 import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Environment;
 import util.MavenData;
+import util.TwitchGrabber;
+import util.grabber.GrabChannelResult;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -14,6 +16,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -72,6 +75,26 @@ public class Main {
         database.DatabaseUtil.shutdown();*/
 
         //StatelessSession session = database.DatabaseUtil.getStateLessSession();
+
+        /*long startTime = System.currentTimeMillis();
+
+        TwitchGrabber grabber = new TwitchGrabber();
+        grabber.getChannelsToGrab().add("csgomc_ru");
+        grabber.getChannelsToGrab().add("juice");
+        grabber.getChannelsToGrab().add("honeymad");
+        try {
+            grabber.startGrabAsyncHttp();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (GrabChannelResult res : grabber.getResults()){
+            System.out.println(res.channelName + ": " + res.chattersGlobal.chatterCount);
+        }
+
+        System.out.println((System.currentTimeMillis() - startTime) + " ms");*/
 
         ConsoleProvider.instance.startConsole();
         System.exit(0);

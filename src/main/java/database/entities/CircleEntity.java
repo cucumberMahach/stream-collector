@@ -16,7 +16,11 @@ public class CircleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     @Unsigned
-    public LongType id;
+    public Long id;
+
+    @Column(name = "number", nullable = false)
+    @Unsigned
+    public Long number;
 
     @Column(name = "startTime")
     public Date startTime;
@@ -25,7 +29,7 @@ public class CircleEntity {
     public Date endTime;
 
     @Column(name = "totalChannels")
-    public int totalChannels;
+    public Integer totalChannels;
 
     @OneToMany(mappedBy="lastCircle")
     public Set<ChannelEntity> channels = new HashSet<>();

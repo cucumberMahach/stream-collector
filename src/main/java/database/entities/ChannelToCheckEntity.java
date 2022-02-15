@@ -14,11 +14,11 @@ public class ChannelToCheckEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     @Unsigned
-    public long id;
+    public Long id;
 
     @Column(name = "name", unique = true, nullable = false)
     public String name;
 
     @Column(name = "priority")
-    public int priority;
+    public Integer priority;
 }
