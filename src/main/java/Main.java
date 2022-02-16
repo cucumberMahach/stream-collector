@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -96,6 +97,7 @@ public class Main {
 
         System.out.println((System.currentTimeMillis() - startTime) + " ms");*/
 
+        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         ConsoleProvider.instance.startConsole();
         System.exit(0);
     }

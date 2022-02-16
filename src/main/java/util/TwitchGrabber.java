@@ -27,7 +27,7 @@ public class TwitchGrabber {
         this.threads = Runtime.getRuntime().availableProcessors();
     }
 
-    public void startGrab() throws ExecutionException, InterruptedException {
+    /*public void startGrab() throws ExecutionException, InterruptedException {
         ExecutorService pool = Executors.newFixedThreadPool(threads);
 
         List<CompletableFuture<GrabChannelResult>> futures = new ArrayList<>();
@@ -49,7 +49,7 @@ public class TwitchGrabber {
         var future = FutureUtils.allOf(futures);
 
         grabResults = future.get();
-    }
+    }*/
 
     public void startGrabAsyncHttp() throws ExecutionException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
@@ -70,7 +70,7 @@ public class TwitchGrabber {
                 result.channelName = channel;
                 result.setError(throwable);
                 return result;
-            });;
+            });
             futures.add(f);
         }
 

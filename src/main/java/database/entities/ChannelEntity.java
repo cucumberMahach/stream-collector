@@ -4,6 +4,7 @@ import jdk.jfr.Unsigned;
 import org.hibernate.type.LongType;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Entity
@@ -24,5 +25,5 @@ public class ChannelEntity {
     public String name;
 
     @Column(name = "lastCheckedTime")
-    public Date lastCheckedTime;
+    public ZonedDateTime lastCheckedTime;
 }

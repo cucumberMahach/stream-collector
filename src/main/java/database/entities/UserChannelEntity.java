@@ -4,6 +4,7 @@ import jdk.jfr.Unsigned;
 import org.hibernate.type.LongType;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Set;
 
@@ -37,8 +38,8 @@ public class UserChannelEntity {
     public String type;
 
     @Column(name = "firstOnlineTime", nullable = false)
-    public Date firstOnlineTime;
+    public ZonedDateTime firstOnlineTime;
 
     @Column(name = "lastOnlineTime", nullable = false)
-    public Date lastOnlineTime;
+    public ZonedDateTime lastOnlineTime;
 }

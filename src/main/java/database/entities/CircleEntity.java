@@ -4,6 +4,7 @@ import jdk.jfr.Unsigned;
 import org.hibernate.type.LongType;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,10 +24,10 @@ public class CircleEntity {
     public Long number;
 
     @Column(name = "startTime")
-    public Date startTime;
+    public ZonedDateTime startTime;
 
     @Column(name = "endTime")
-    public Date endTime;
+    public ZonedDateTime endTime;
 
     @Column(name = "totalChannels")
     public Integer totalChannels;

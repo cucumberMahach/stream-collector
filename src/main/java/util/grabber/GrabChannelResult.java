@@ -1,10 +1,14 @@
 package util.grabber;
 
 import json.ChattersGlobal;
+import util.TimeUtil;
+
+import java.time.ZonedDateTime;
 
 public class GrabChannelResult {
     public ChattersGlobal chattersGlobal;
     public String channelName;
+    public ZonedDateTime timestamp = TimeUtil.getZonedNow();
 
     public GrabChannelError error = GrabChannelError.None;
     public GrabAbstractException exception = null;
