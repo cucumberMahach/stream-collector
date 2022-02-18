@@ -116,6 +116,7 @@ public class CircleService extends AbstractService{
                     allUsers.addAll(Arrays.asList(grabCh.chattersGlobal.chatters.staff));
                     allUsers.addAll(Arrays.asList(grabCh.chattersGlobal.chatters.vips));
 
+                    //Ver 1
                     tx = session.beginTransaction();
                     for (String user : allUsers){
                         UserEntity userEntity = new UserEntity();
@@ -149,12 +150,17 @@ public class CircleService extends AbstractService{
                     List<UserChannelEntity> toUpdate = new ArrayList<>();
                     List<UserChannelEntity> toInsert = new ArrayList<>();
 
+                    var startTime = System.currentTimeMillis();
+
                     updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.viewers, "viewer");
                     updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.moderators, "moderator");
                     updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.admins, "admin");
                     updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.broadcaster, "broadcaster");
                     updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.staff, "staff");
                     updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.vips, "vip");
+
+                    System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (prepare)");
+                    startTime = System.currentTimeMillis();
 
                     tx = session.beginTransaction();
                     for (var user : toUpdate){
@@ -165,12 +171,11 @@ public class CircleService extends AbstractService{
                     }
                     tx.commit();
 
+                    System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (insert and update)");
+
 
 
                     tx = session.beginTransaction();
-                    //currentChannel.lastCheckedTime = TimeUtil.getZonedNow();
-                    //session.update(currentChannel);
-
                     currentCircle.totalChannels++;
                     session.update(currentCircle);
                     tx.commit();
@@ -192,49 +197,47 @@ public class CircleService extends AbstractService{
 
     private void updateViewers(GrabChannelResult grabCh, List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, String[] names, String type){
         for (String name : names){
-            //System.out.println(name);
             if (preCircle != null) {
-                var query = session.createQuery("from UserChannelEntity where user.name = :name and channel.id = :channel_id and type = :userType and lastCircle.id = :preCircle_id", UserChannelEntity.class);
+                var query = session.createNativeQuery("select * from `twitch-collector`.users_channels where user_id = (select user_id from `twitch-collector`.users where name = :name) and lastCircle_id = :preCircle_id and channel_id = :channel_id and type = :userType", UserChannelEntity.class);
+                //var query = session.createQuery("from UserChannelEntity where user.name = :name and channel.id = :channel_id and type = :userType and lastCircle.id = :preCircle_id", UserChannelEntity.class);
                 query.setParameter("name", name);
                 query.setParameter("channel_id", channel.id);
                 query.setParameter("userType", type);
                 query.setParameter("preCircle_id", preCircle.id);
-                var usersChannels = query.list();
-                if (!usersChannels.isEmpty()) {
-                    var userChannel = usersChannels.get(0);
+                query.setFirstResult(0);
+                query.setMaxResults(1);
+                var userChannel = query.uniqueResult();
+                if (userChannel != null) {
                     boolean fitsByTime = circleStartTime.minusSeconds(10 * 60).compareTo(userChannel.lastOnlineTime) < 0;
                     if (fitsByTime) {
-                        //Update
+                        //Add to update
                         userChannel.lastCircle = currentCircle;
                         userChannel.lastOnlineTime = grabCh.timestamp;
-                        //tx = session.beginTransaction();
-                        //session.update(userChannel);
-                        //tx.commit();
                         toUpdate.add(userChannel);
                         continue;
                     }
                 }
             }
 
-            var query = session.createQuery("from UserEntity where name = :name", UserEntity.class);
+            var query = session.createNativeQuery("select * from `twitch-collector`.users where name = :name", UserEntity.class);
+            //var query = session.createQuery("from UserEntity where name = :name", UserEntity.class);
             query.setParameter("name", name);
-            var users = query.list();
+            query.setFirstResult(0);
+            query.setMaxResults(1);
+            var user = query.uniqueResult();
 
-            if (users.isEmpty())
+            if (user == null)
                 return;
 
-            //Insert
+            //Add to insert
             var userChannel = new UserChannelEntity();
-            userChannel.user = users.get(0);
+            userChannel.user = user;
             userChannel.channel = channel;
             userChannel.firstCircle = currentCircle;
             userChannel.lastCircle = currentCircle;
             userChannel.type = type;
             userChannel.firstOnlineTime = grabCh.timestamp;
             userChannel.lastOnlineTime = userChannel.firstOnlineTime;
-            //tx = session.beginTransaction();
-            //session.insert(userChannel);
-            //tx.commit();
             toInsert.add(userChannel);
         }
     }
