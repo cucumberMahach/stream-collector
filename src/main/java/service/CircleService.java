@@ -3,6 +3,8 @@ package service;
 import database.entities.*;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
+import util.FutureUtils;
+import util.Pair;
 import util.TimeUtil;
 import util.TwitchGrabber;
 import util.grabber.GrabChannelError;
@@ -12,6 +14,9 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CircleService extends AbstractService{
 
@@ -143,11 +148,73 @@ public class CircleService extends AbstractService{
                         }
                     }
 
-
-
-                    //int userCount = grabCh.chattersGlobal.calcUsersCount();
-
+                    //Multithreading
+                    var startTime = System.currentTimeMillis();
                     List<UserChannelEntity> toUpdate = new ArrayList<>();
+                    List<UserChannelEntity> toInsert = new ArrayList<>();
+                    updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.moderators, "moderator");
+                    updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.admins, "admin");
+                    updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.broadcaster, "broadcaster");
+                    updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.staff, "staff");
+                    updateViewers(grabCh, toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, grabCh.chattersGlobal.chatters.vips, "vip");
+
+                    final CircleEntity preC = preCircle;
+                    int partsCount = 16;
+                    ExecutorService pool = Executors.newFixedThreadPool(16);
+                    List<Pair<Integer,Integer>> parts = new ArrayList<>();
+                    int lenPerPart = grabCh.chattersGlobal.chatters.viewers.length / partsCount;
+                    for (int i = 0; i < partsCount; i++){
+                        Pair<Integer,Integer> pair = new Pair<>();
+                        pair.first = i * lenPerPart;
+                        if (i == partsCount - 1){
+                            pair.second = grabCh.chattersGlobal.chatters.viewers.length;
+                        }else{
+                            pair.second = (i+1) * lenPerPart;
+                        }
+                        parts.add(pair);
+                    }
+
+                    List<CompletableFuture<Pair<List<UserChannelEntity>,List<UserChannelEntity>>>> futures = new ArrayList<>();
+                    for (final var part : parts) {
+                        final String[] collection = Arrays.stream(grabCh.chattersGlobal.chatters.viewers).skip(part.first).limit(part.second-part.first).toArray(String[]::new);
+                        CompletableFuture<Pair<List<UserChannelEntity>,List<UserChannelEntity>>> f = CompletableFuture.supplyAsync(() -> {
+                            Pair<List<UserChannelEntity>,List<UserChannelEntity>> pair = new Pair<>();
+                            pair.first = new ArrayList<>();
+                            pair.second = new ArrayList<>();
+                            StatelessSession s = database.DatabaseUtil.getStateLessSession();
+                            updateViewers(grabCh, pair.first, pair.second, s, currentChannel, currentCircle, preC, collection, "viewer");
+                            s.close();
+                            return pair;
+                        }, pool).exceptionally(throwable -> {
+                            throwable.printStackTrace();
+                            return null;
+                        });
+                        futures.add(f);
+                    }
+
+                    var future = FutureUtils.allOf(futures);
+
+                    var results = future.get();
+
+                    System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (prepare)");
+                    startTime = System.currentTimeMillis();
+
+                    tx = session.beginTransaction();
+                    for (var r : results){
+                        if (r != null){
+                            for (var user : r.first){
+                                session.update(user);
+                            }
+                            for (var user : r.second){
+                                session.insert(user);
+                            }
+                        }
+                    }
+                    tx.commit();
+                    System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (insert and update)");
+
+                    //Not multithreading
+                    /*List<UserChannelEntity> toUpdate = new ArrayList<>();
                     List<UserChannelEntity> toInsert = new ArrayList<>();
 
                     var startTime = System.currentTimeMillis();
@@ -171,7 +238,7 @@ public class CircleService extends AbstractService{
                     }
                     tx.commit();
 
-                    System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (insert and update)");
+                    System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (insert and update)");*/
 
 
 
