@@ -34,12 +34,7 @@ public class UserChannelEntity {
     @JoinColumn(name="lastCircle_id")
     public CircleEntity lastCircle;
 
-    @Column(name = "type", nullable = false)
-    public String type;
-
-    @Column(name = "firstOnlineTime", nullable = false)
-    public ZonedDateTime firstOnlineTime;
-
-    @Column(name = "lastOnlineTime", nullable = false)
-    public ZonedDateTime lastOnlineTime;
+    @ManyToOne
+    @JoinColumn(name="type_id", nullable = false)
+    public UserTypeEntity type;
 }

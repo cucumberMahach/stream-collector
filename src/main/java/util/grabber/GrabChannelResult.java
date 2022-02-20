@@ -4,6 +4,7 @@ import json.ChattersGlobal;
 import util.TimeUtil;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 public class GrabChannelResult {
     public ChattersGlobal chattersGlobal;
@@ -38,5 +39,23 @@ public class GrabChannelResult {
         }
 
         exception = (GrabAbstractException) ex;
+    }
+
+    public String getError(){
+        if (error == GrabChannelError.None)
+            return "";
+
+        String s = error.name() + " -> ";
+        if (error == GrabChannelError.Unknown && unknownException != null){
+            return s + unknownException.getMessage() + " " + Arrays.toString(unknownException.getStackTrace()); //TODO Не выводит ошибку
+        }else if (exception != null){
+            return s + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace());
+        }
+
+        return "";
+    }
+
+    public boolean isError(){
+        return error != GrabChannelError.None || chattersGlobal == null;
     }
 }

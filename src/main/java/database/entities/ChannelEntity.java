@@ -6,6 +6,8 @@ import org.hibernate.type.LongType;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Cacheable
@@ -26,4 +28,10 @@ public class ChannelEntity {
 
     @Column(name = "lastCheckedTime")
     public ZonedDateTime lastCheckedTime;
+
+    @OneToMany(mappedBy="channel")
+    public Set<UserChannelEntity> usersChannels = new HashSet<>();
+
+    @OneToMany(mappedBy="channel")
+    public Set<ChannelCircleEntity> channelsCircles = new HashSet<>();
 }

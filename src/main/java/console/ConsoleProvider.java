@@ -31,84 +31,92 @@ public class ConsoleProvider {
         while (!cmd.equals("exit")){
             System.out.print("> ");
             cmd = scanner.nextLine().trim().toLowerCase(Locale.ROOT);
-            //System.out.println(cmd);
 
-            if (cmd.startsWith("start ")){
-                String serviceName = cmd.substring("start ".length()).trim().toLowerCase(Locale.ROOT);
-                String result = ServiceManager.instance.setServiceEnabled(serviceName, true);
-                if (result == null){
-                    System.out.print(colorize("Service '", Attribute.BRIGHT_GREEN_TEXT()));
-                    System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
-                    System.out.println(colorize("' started", Attribute.BRIGHT_GREEN_TEXT()));
-                }else{
-                    System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
-                }
-                continue;
-            }
-
-            if (cmd.startsWith("stop ")){
-                String serviceName = cmd.substring("stop ".length()).trim().toLowerCase(Locale.ROOT);
-                String result = ServiceManager.instance.setServiceEnabled(serviceName, false);
-                if (result == null){
-                    System.out.print(colorize("Service '", Attribute.BRIGHT_GREEN_TEXT()));
-                    System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
-                    System.out.println(colorize("' stopped", Attribute.BRIGHT_GREEN_TEXT()));
-                }else{
-                    System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
-                }
-                continue;
-            }
-
-            if (cmd.startsWith("log ")){
-                String logName = cmd.substring("log ".length()).trim().toLowerCase(Locale.ROOT);
-                String result = ServiceManager.instance.setLogEnabled(logName, true);
-                if (result == null){
-                    System.out.print(colorize("Log for service '", Attribute.BRIGHT_GREEN_TEXT()));
-                    System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
-                    System.out.println(colorize("' opened. Press Enter to close", Attribute.BRIGHT_GREEN_TEXT()));
-
-                    scanner.nextLine();
-
-                    String resultOff = ServiceManager.instance.setLogEnabled(logName, false);
-                    if (resultOff == null) {
-                        System.out.print(colorize("Log for service '", Attribute.BRIGHT_GREEN_TEXT()));
-                        System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
-                        System.out.println(colorize("' closed", Attribute.BRIGHT_GREEN_TEXT()));
-                    }else{
-                        System.out.println(colorize(resultOff, Attribute.BRIGHT_RED_TEXT()));
-                    }
-                }else{
-                    System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
-                }
-                continue;
-            }
-
-            switch (cmd){
-                case "help":
-                    printHelp();
-                    break;
-                case "version":
-                    printProgramHeader();
-                    break;
-                case "services":
-                    System.out.println("All services: " + colorize(String.join(" ", ServiceManager.allServices), Attribute.BRIGHT_CYAN_TEXT(), Attribute.BOLD()));
-                    break;
-                case "running":
-                    if (ServiceManager.instance.getServices().isEmpty())
-                        System.out.println("No service is running");
-                    else
-                        System.out.println("Running services: " + colorize(String.join(" ", ServiceManager.instance.getServices().keySet()), Attribute.BRIGHT_CYAN_TEXT(), Attribute.BOLD()));
-                    break;
-                case "exit":
-                    break;
-                default:
-                    System.out.print(colorize("Unknown command '", Attribute.BRIGHT_RED_TEXT()));
-                    System.out.print(colorize(cmd, Attribute.BRIGHT_RED_TEXT(), Attribute.BOLD()));
-                    System.out.println(colorize("'. Enter 'help' for view all commands", Attribute.BRIGHT_RED_TEXT()));
-                    break;
+            var commands = cmd.split("\\|");
+            for (var i : commands){
+                var prepI = i.trim();
+                parseCmd(prepI);
             }
         }
         System.out.println(colorize("Closing console...", Attribute.BRIGHT_GREEN_TEXT()));
+    }
+
+    private boolean parseCmd(String cmd){
+        if (cmd.startsWith("start ")){
+            String serviceName = cmd.substring("start ".length()).trim().toLowerCase(Locale.ROOT);
+            String result = ServiceManager.instance.setServiceEnabled(serviceName, true);
+            if (result == null){
+                System.out.print(colorize("Service '", Attribute.BRIGHT_GREEN_TEXT()));
+                System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                System.out.println(colorize("' started", Attribute.BRIGHT_GREEN_TEXT()));
+            }else{
+                System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+            }
+            return true;
+        }
+
+        if (cmd.startsWith("stop ")){
+            String serviceName = cmd.substring("stop ".length()).trim().toLowerCase(Locale.ROOT);
+            String result = ServiceManager.instance.setServiceEnabled(serviceName, false);
+            if (result == null){
+                System.out.print(colorize("Service '", Attribute.BRIGHT_GREEN_TEXT()));
+                System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                System.out.println(colorize("' stopped", Attribute.BRIGHT_GREEN_TEXT()));
+            }else{
+                System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+            }
+            return true;
+        }
+
+        if (cmd.startsWith("log ")){
+            String logName = cmd.substring("log ".length()).trim().toLowerCase(Locale.ROOT);
+            String result = ServiceManager.instance.setLogEnabled(logName, true);
+            if (result == null){
+                System.out.print(colorize("Log for service '", Attribute.BRIGHT_GREEN_TEXT()));
+                System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                System.out.println(colorize("' opened. Press Enter to close", Attribute.BRIGHT_GREEN_TEXT()));
+
+                scanner.nextLine();
+
+                String resultOff = ServiceManager.instance.setLogEnabled(logName, false);
+                if (resultOff == null) {
+                    System.out.print(colorize("Log for service '", Attribute.BRIGHT_GREEN_TEXT()));
+                    System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                    System.out.println(colorize("' closed", Attribute.BRIGHT_GREEN_TEXT()));
+                }else{
+                    System.out.println(colorize(resultOff, Attribute.BRIGHT_RED_TEXT()));
+                }
+            }else{
+                System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+            }
+            return true;
+        }
+
+        switch (cmd){
+            case "help":
+                printHelp();
+                break;
+            case "version":
+                printProgramHeader();
+                break;
+            case "services":
+                System.out.println("All services: " + colorize(String.join(" ", ServiceManager.allServices), Attribute.BRIGHT_CYAN_TEXT(), Attribute.BOLD()));
+                break;
+            case "running":
+                if (ServiceManager.instance.getServices().isEmpty())
+                    System.out.println("No service is running");
+                else
+                    System.out.println("Running services: " + colorize(String.join(" ", ServiceManager.instance.getServices().keySet()), Attribute.BRIGHT_CYAN_TEXT(), Attribute.BOLD()));
+                break;
+            case "exit":
+                break;
+            default:
+                System.out.print(colorize("Unknown command '", Attribute.BRIGHT_RED_TEXT()));
+                System.out.print(colorize(cmd, Attribute.BRIGHT_RED_TEXT(), Attribute.BOLD()));
+                System.out.println(colorize("'. Enter 'help' for view all commands", Attribute.BRIGHT_RED_TEXT()));
+                break;
+        }
+        return false;
     }
 
     public void printProgramHeader(){

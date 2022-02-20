@@ -33,11 +33,14 @@ public class CircleEntity {
     public Integer totalChannels;
 
     @OneToMany(mappedBy="lastCircle")
-    public Set<ChannelEntity> channels = new HashSet<>();
+    public Set<UserChannelEntity> usersChannelsLast = new HashSet<>();
 
     @OneToMany(mappedBy="firstCircle")
     public Set<UserChannelEntity> usersChannelsFirst = new HashSet<>();
 
     @OneToMany(mappedBy="lastCircle")
-    public Set<UserChannelEntity> usersChannelsLast = new HashSet<>();
+    public Set<ChannelEntity> channels = new HashSet<>();
+
+    @OneToMany(mappedBy="circle")
+    public Set<ChannelCircleEntity> channelsCircles = new HashSet<>();
 }

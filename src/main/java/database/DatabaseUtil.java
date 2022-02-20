@@ -20,6 +20,8 @@ public class DatabaseUtil {
             configuration.addAnnotatedClass(CircleEntity.class);
             configuration.addAnnotatedClass(UserChannelEntity.class);
             configuration.addAnnotatedClass(UserEntity.class);
+            configuration.addAnnotatedClass(UserTypeEntity.class);
+            configuration.addAnnotatedClass(ChannelCircleEntity.class);
 
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {
