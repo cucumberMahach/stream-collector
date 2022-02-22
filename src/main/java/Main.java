@@ -2,6 +2,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import console.ConsoleProvider;
 import json.ChattersGlobal;
+import logging.LogStatus;
+import logging.Logger;
 import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Environment;
 import util.MavenData;
@@ -98,6 +100,7 @@ public class Main {
         System.out.println((System.currentTimeMillis() - startTime) + " ms");*/
 
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
+        Logger.instance.writeLog(LogStatus.Success, "Программа запущена");
         ConsoleProvider.instance.startConsole();
         System.exit(0);
     }

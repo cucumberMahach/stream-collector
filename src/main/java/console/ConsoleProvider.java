@@ -1,13 +1,11 @@
 package console;
 
 import com.diogonunes.jcolor.Attribute;
+import logging.Logger;
 import service.ServiceManager;
 import util.MavenData;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
@@ -17,6 +15,8 @@ public class ConsoleProvider {
     public static final ConsoleProvider instance = new ConsoleProvider();
 
     private Scanner scanner;
+    private ArrayList<String> logsEnabled = new ArrayList<>();
+    private boolean logsChanged = false;
 
     private ConsoleProvider(){
 
@@ -36,6 +36,30 @@ public class ConsoleProvider {
             for (var i : commands){
                 var prepI = i.trim();
                 parseCmd(prepI);
+            }
+            // Logs
+            if (logsChanged){
+                logsChanged = false;
+                scanner.nextLine();
+
+                for (var logName : logsEnabled){
+                    String resultOff = null;
+
+                    if (logName.equals(Logger.GLOBAL_LOG_SERVICE_NAME))
+                        Logger.instance.setGlobalLogEnabled(false);
+                    else
+                        resultOff = ServiceManager.instance.setLogEnabled(logName, false);
+
+                    if (resultOff == null) {
+                        System.out.print(colorize("Log for '", Attribute.BRIGHT_GREEN_TEXT()));
+                        System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                        System.out.println(colorize("' closed", Attribute.BRIGHT_GREEN_TEXT()));
+                    }else{
+                        System.out.println(colorize(resultOff, Attribute.BRIGHT_RED_TEXT()));
+                    }
+                }
+
+                logsEnabled.clear();
             }
         }
         System.out.println(colorize("Closing console...", Attribute.BRIGHT_GREEN_TEXT()));
@@ -70,13 +94,22 @@ public class ConsoleProvider {
 
         if (cmd.startsWith("log ")){
             String logName = cmd.substring("log ".length()).trim().toLowerCase(Locale.ROOT);
-            String result = ServiceManager.instance.setLogEnabled(logName, true);
+            String result = null;
+
+            if (logName.equals(Logger.GLOBAL_LOG_SERVICE_NAME))
+                Logger.instance.setGlobalLogEnabled(true);
+            else
+                result = ServiceManager.instance.setLogEnabled(logName, true);
+
             if (result == null){
-                System.out.print(colorize("Log for service '", Attribute.BRIGHT_GREEN_TEXT()));
+                System.out.print(colorize("Log for '", Attribute.BRIGHT_GREEN_TEXT()));
                 System.out.print(colorize(logName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
                 System.out.println(colorize("' opened. Press Enter to close", Attribute.BRIGHT_GREEN_TEXT()));
 
-                scanner.nextLine();
+                logsEnabled.add(logName);
+                logsChanged = true;
+
+                /*scanner.nextLine();
 
                 String resultOff = ServiceManager.instance.setLogEnabled(logName, false);
                 if (resultOff == null) {
@@ -85,7 +118,7 @@ public class ConsoleProvider {
                     System.out.println(colorize("' closed", Attribute.BRIGHT_GREEN_TEXT()));
                 }else{
                     System.out.println(colorize(resultOff, Attribute.BRIGHT_RED_TEXT()));
-                }
+                }*/
             }else{
                 System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
             }

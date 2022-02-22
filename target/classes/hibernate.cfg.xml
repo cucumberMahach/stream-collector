@@ -20,6 +20,15 @@
 
         <property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.internal.EhcacheRegionFactory</property>
 
+
+
+        <property name="hibernate.order_inserts">true</property>
+        <property name="hibernate.order_updates">true</property>
+
+        <property name="hibernate.jdbc.batch_size">50</property>
+
+
+
         <!-- manage automatic database creation -->
         <!--<property name="hibernate.hbm2ddl.auto">create-drop</property>-->
 

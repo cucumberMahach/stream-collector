@@ -25,11 +25,11 @@ public class ServiceManager {
             if (sname.equals(name)){
                 if (value) {
                     if (services.containsKey(sname)) {
-                        return "Service already enabled";
+                        return "Service '"+sname+"' already enabled";
                     } else {
                         AbstractService service = createService(name);
                         if (service == null){
-                            return "Cannot create service. Unknown service";
+                            return "Cannot create service. Unknown service '"+name+"'";
                         }else {
                             services.put(sname, service);
                             service.startService();
@@ -38,7 +38,7 @@ public class ServiceManager {
                     }
                 }else{
                     if (!services.containsKey(sname)) {
-                        return "Service is not running";
+                        return "Service '"+sname+"' is not running";
                     }else{
                         services.get(sname).stopService();
                         services.remove(sname);
@@ -47,7 +47,7 @@ public class ServiceManager {
                 }
             }
         }
-        return "Unknown service";
+        return "Unknown service '"+name+"'";
     }
 
     public String setLogEnabled(String serviceName, boolean value){
@@ -57,11 +57,11 @@ public class ServiceManager {
                     services.get(sname).setLogEnabled(value);
                     return null;
                 }else{
-                    return "Service is not running";
+                    return "Service '"+serviceName+"' is not running";
                 }
             }
         }
-        return "Unknown service";
+        return "Unknown service '"+serviceName+"'";
     }
 
     public HashMap<String, AbstractService> getServices() {

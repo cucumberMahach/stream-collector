@@ -1,6 +1,7 @@
 package util.grabber;
 
 import json.ChattersGlobal;
+import util.DataUtil;
 import util.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -47,9 +48,15 @@ public class GrabChannelResult {
 
         String s = error.name() + " -> ";
         if (error == GrabChannelError.Unknown && unknownException != null){
-            return s + unknownException.getMessage() + " " + Arrays.toString(unknownException.getStackTrace()); //TODO Не выводит ошибку
+            var ps = DataUtil.getPrintStream();
+            unknownException.printStackTrace(ps.first);
+            ps.first.close();
+            return s + unknownException.getMessage() + " " + ps.second.toString();
         }else if (exception != null){
-            return s + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace());
+            var ps = DataUtil.getPrintStream();
+            exception.printStackTrace(ps.first);
+            ps.first.close();
+            return s + exception.getMessage() + " " + ps.second.toString();
         }
 
         return "";

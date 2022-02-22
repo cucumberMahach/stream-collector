@@ -136,7 +136,7 @@ public class CircleService extends AbstractService{
                 session.update(currentCircle);
                 session.getTransaction().commit();
 
-                writeLog(LogStatus.Success, String.format("Обработано каналов: %d (%s)", currentCircle.totalChannels, Duration.between(currentCircle.startTime, currentCircle.endTime)));
+                writeLog(LogStatus.Success, String.format("Обработано каналов: %d (%s)", currentCircle.totalChannels, TimeUtil.formatDuration(Duration.between(currentCircle.startTime, currentCircle.endTime))));
                 sleep(30000);
             }
         }catch (Exception e){

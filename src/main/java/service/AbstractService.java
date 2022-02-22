@@ -2,6 +2,7 @@ package service;
 
 import logging.LogMessage;
 import logging.LogStatus;
+import logging.Logger;
 
 import java.util.ArrayList;
 
@@ -25,6 +26,9 @@ public abstract class AbstractService extends Thread{
         logMessages.add(msg);
         if (logEnabled)
             System.out.println(msg.getLine());
+
+        Logger.instance.constraintLogArray(logMessages);
+        Logger.instance.processToFile(msg);
     }
 
     public void setLogEnabled(boolean enabled){
@@ -37,6 +41,7 @@ public abstract class AbstractService extends Thread{
 
     @Override
     public void run() {
+        writeLog(LogStatus.Success, "Сервис запущен");
         work();
     }
 
