@@ -9,25 +9,23 @@ import util.grabber.GrabChannelResult;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
-public class CircleService extends AbstractService{
+public class CircleService extends AbstractService {
 
     public CircleService() {
         super("circle");
     }
 
     private ZonedDateTime circleStartTime;
+    public int threadsToUse = Runtime.getRuntime().availableProcessors();
+    public int toNextCircleMs = 60000;
 
     @Override
     protected void work() {
         StatelessSession session = database.DatabaseUtil.getStateLessSession();
         try {
             while (true) {
-                sleep(1000);
                 TwitchGrabber grabber = new TwitchGrabber(0);
 
                 var query = session.createQuery("FROM ChannelToCheckEntity ORDER BY priority asc", ChannelToCheckEntity.class);
@@ -39,7 +37,7 @@ public class CircleService extends AbstractService{
                     continue;
                 }
 
-                for (var channel : channels){
+                for (var channel : channels) {
                     grabber.getChannelsToGrab().add(channel.name);
                 }
                 circleStartTime = TimeUtil.getZonedNow();
@@ -47,7 +45,7 @@ public class CircleService extends AbstractService{
                 var grabbedChannels = grabber.getResults();
 
                 int errorsCount = 0;
-                for (var grabCh : grabbedChannels){
+                for (var grabCh : grabbedChannels) {
                     if (grabCh.isError()) {
                         errorsCount++;
                         writeLog(LogStatus.Error, "Ошибка при сборе информации о канале " + grabCh.channelName + ": " + grabCh.getError());
@@ -61,11 +59,11 @@ public class CircleService extends AbstractService{
 
                 var userTypes = getUsersTypes(session);
 
-                Pair<CircleEntity,CircleEntity> currentAndLastCircles = doCurrentCircle(session);
+                Pair<CircleEntity, CircleEntity> currentAndLastCircles = doCurrentCircle(session);
                 var currentCircle = currentAndLastCircles.first;
                 var lastCircle = currentAndLastCircles.second;
 
-                for (var grabCh : grabbedChannels){
+                for (var grabCh : grabbedChannels) {
                     if (grabCh.isError())
                         continue;
 
@@ -75,7 +73,7 @@ public class CircleService extends AbstractService{
                     var currentChannel = currentChannelPair.first;
 
                     ChannelCircleEntity lastChannelCircle = null;
-                    if (lastCircle != null && !currentChannelPair.second){
+                    if (lastCircle != null && !currentChannelPair.second) {
                         lastChannelCircle = getLastChannelCircle(session, lastCircle, currentChannel);
                     }
 
@@ -95,9 +93,9 @@ public class CircleService extends AbstractService{
                     session.beginTransaction();
 
                     //Channel
-                    if (currentChannelPair.second){
+                    if (currentChannelPair.second) {
                         session.insert(currentChannel);
-                    }else{
+                    } else {
                         session.update(currentChannel);
                     }
 
@@ -107,13 +105,13 @@ public class CircleService extends AbstractService{
                     //Users Channels
                     startTime = System.currentTimeMillis();
                     int usersInserts = 0, usersUpdate = 0;
-                    for (var r : usersChannels){
-                        if (r != null){
-                            for (var user : r.first){
+                    for (var r : usersChannels) {
+                        if (r != null) {
+                            for (var user : r.first) {
                                 session.update(user);
                                 usersUpdate++;
                             }
-                            for (var user : r.second){
+                            for (var user : r.second) {
                                 session.insert(user);
                                 usersInserts++;
                             }
@@ -134,33 +132,33 @@ public class CircleService extends AbstractService{
                 session.getTransaction().commit();
 
                 writeLog(LogStatus.Success, String.format("Обработано каналов: %d (%s)", currentCircle.totalChannels, TimeUtil.formatDuration(Duration.between(currentCircle.startTime, currentCircle.endTime))));
-                sleep(30000);
+                sleep(toNextCircleMs);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             session.close();
             if (!(e instanceof InterruptedException))
                 writeLog(LogStatus.Error, "Исключение в сервисе: " + e.getMessage() + " " + DataUtil.getStackTrace(e));
         }
     }
 
-    public HashMap<String, UserTypeEntity> getUsersTypes(StatelessSession session){
+    public HashMap<String, UserTypeEntity> getUsersTypes(StatelessSession session) {
         HashMap<String, UserTypeEntity> usersTypes = new HashMap<>();
         var query = session.createQuery("from UserTypeEntity", UserTypeEntity.class);
         var list = query.list();
-        for (var i : list){
+        for (var i : list) {
             usersTypes.put(i.type, i);
         }
         return usersTypes;
     }
 
-    public Pair<CircleEntity,CircleEntity> doCurrentCircle(StatelessSession session){
+    public Pair<CircleEntity, CircleEntity> doCurrentCircle(StatelessSession session) {
         var lastCircleQuery = session.createQuery("FROM CircleEntity order by number desc", CircleEntity.class);
         lastCircleQuery.setMaxResults(1);
         var lastCircle = lastCircleQuery.uniqueResult();
 
         CircleEntity currentCircle;
 
-        if (lastCircle == null){
+        if (lastCircle == null) {
             currentCircle = new CircleEntity();
             currentCircle.startTime = circleStartTime;
             currentCircle.totalChannels = 0;
@@ -169,7 +167,7 @@ public class CircleService extends AbstractService{
             session.beginTransaction();
             session.insert(currentCircle);
             session.getTransaction().commit();
-        }else{
+        } else {
             currentCircle = new CircleEntity();
             currentCircle.startTime = circleStartTime;
             currentCircle.totalChannels = 0;
@@ -183,14 +181,14 @@ public class CircleService extends AbstractService{
         return new Pair<>(currentCircle, lastCircle);
     }
 
-    public Pair<ChannelEntity,Boolean> doCurrentChannel(StatelessSession session, CircleEntity currentCircle, GrabChannelResult grabCh){
-        Pair<ChannelEntity,Boolean> pair = new Pair<>();
+    public Pair<ChannelEntity, Boolean> doCurrentChannel(StatelessSession session, CircleEntity currentCircle, GrabChannelResult grabCh) {
+        Pair<ChannelEntity, Boolean> pair = new Pair<>();
         var channelsQuery = session.createQuery("FROM ChannelEntity where name = :name", ChannelEntity.class);
         channelsQuery.setMaxResults(1);
         channelsQuery.setParameter("name", grabCh.channelName);
         var currentChannel = channelsQuery.uniqueResult();
 
-        if (currentChannel == null){
+        if (currentChannel == null) {
             currentChannel = new ChannelEntity();
             currentChannel.lastCheckedTime = grabCh.timestamp;
             currentChannel.name = grabCh.channelName;
@@ -200,7 +198,7 @@ public class CircleService extends AbstractService{
             /*session.beginTransaction();
             session.insert(currentChannel);
             session.getTransaction().commit();*/
-        }else{
+        } else {
             currentChannel.lastCheckedTime = grabCh.timestamp;
             currentChannel.lastCircle = currentCircle;
             pair.second = false;
@@ -214,7 +212,7 @@ public class CircleService extends AbstractService{
         return pair;
     }
 
-    public ChannelCircleEntity doChannelCircle(CircleEntity currentCircle, ChannelEntity currentChannel, GrabChannelResult grabCh){
+    public ChannelCircleEntity doChannelCircle(CircleEntity currentCircle, ChannelEntity currentChannel, GrabChannelResult grabCh) {
         ChannelCircleEntity channelCircle = new ChannelCircleEntity();
         channelCircle.circle = currentCircle;
         channelCircle.channel = currentChannel;
@@ -222,7 +220,7 @@ public class CircleService extends AbstractService{
         return channelCircle;
     }
 
-    public ChannelCircleEntity getLastChannelCircle(StatelessSession session, CircleEntity lastCircle, ChannelEntity currentChannel){
+    public ChannelCircleEntity getLastChannelCircle(StatelessSession session, CircleEntity lastCircle, ChannelEntity currentChannel) {
         var query = session.createQuery("from ChannelCircleEntity where circle = :circle and channel = :channel", ChannelCircleEntity.class);
         query.setParameter("circle", lastCircle);
         query.setParameter("channel", currentChannel);
@@ -232,12 +230,12 @@ public class CircleService extends AbstractService{
 
     /**
      * Добавление пользователей
-     *
+     * <p>
      * Возвращает:
      * Первое число - вставки
      * Второе число - проигнорировано
      */
-    public Pair<Integer, Integer> doUsers(StatelessSession session, GrabChannelResult grabCh){
+    public Pair<Integer, Integer> doUsers(StatelessSession session, GrabChannelResult grabCh) {
         Pair<Integer, Integer> counts = new Pair<>(0, 0);
         ArrayList<String> allUsers = new ArrayList<>();
         allUsers.addAll(Arrays.asList(grabCh.chattersGlobal.chatters.viewers));
@@ -248,13 +246,13 @@ public class CircleService extends AbstractService{
         allUsers.addAll(Arrays.asList(grabCh.chattersGlobal.chatters.vips));
 
         session.beginTransaction();
-        for (String user : allUsers){
+        for (String user : allUsers) {
             UserEntity userEntity = new UserEntity();
             userEntity.name = user;
             try {
                 session.insert(userEntity);
                 counts.first++;
-            }catch (Exception ignored){
+            } catch (Exception ignored) {
                 counts.second++;
             }
         }
@@ -269,14 +267,14 @@ public class CircleService extends AbstractService{
     private List<Pair<List<UserChannelEntity>, List<UserChannelEntity>>> doUsersChannels(StatelessSession session, ChannelEntity currentChannel, CircleEntity currentCircle, ChannelCircleEntity lastChannelCircle, HashMap<String, UserTypeEntity> userTypes, GrabChannelResult grabCh) throws ExecutionException, InterruptedException {
         CircleEntity preCircle = null;
 
-        if (currentCircle.number != 1){
+        if (currentCircle.number != 1) {
             session.beginTransaction();
             var preCircleQuery = session.createQuery("from CircleEntity where number = :num", CircleEntity.class);
-            preCircleQuery.setParameter("num", currentCircle.number-1);
+            preCircleQuery.setParameter("num", currentCircle.number - 1);
             var preCircles = preCircleQuery.list();
             session.getTransaction().commit();
 
-            if (!preCircles.isEmpty()){
+            if (!preCircles.isEmpty()) {
                 preCircle = preCircles.get(0);
             }
         }
@@ -291,26 +289,26 @@ public class CircleService extends AbstractService{
         updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.vips, userTypes.get("vip"));
 
         final CircleEntity preC = preCircle;
-        int partsCount = 16;
-        ExecutorService pool = Executors.newFixedThreadPool(16);
-        List<Pair<Integer,Integer>> parts = new ArrayList<>();
+        int partsCount = threadsToUse;
+        ExecutorService pool = Executors.newFixedThreadPool(partsCount);
+        List<Pair<Integer, Integer>> parts = new ArrayList<>();
         int lenPerPart = grabCh.chattersGlobal.chatters.viewers.length / partsCount;
-        for (int i = 0; i < partsCount; i++){
-            Pair<Integer,Integer> pair = new Pair<>();
+        for (int i = 0; i < partsCount; i++) {
+            Pair<Integer, Integer> pair = new Pair<>();
             pair.first = i * lenPerPart;
-            if (i == partsCount - 1){
+            if (i == partsCount - 1) {
                 pair.second = grabCh.chattersGlobal.chatters.viewers.length;
-            }else{
-                pair.second = (i+1) * lenPerPart;
+            } else {
+                pair.second = (i + 1) * lenPerPart;
             }
             parts.add(pair);
         }
 
-        List<CompletableFuture<Pair<List<UserChannelEntity>,List<UserChannelEntity>>>> futures = new ArrayList<>();
+        List<CompletableFuture<Pair<List<UserChannelEntity>, List<UserChannelEntity>>>> futures = new ArrayList<>();
         for (final var part : parts) {
-            final String[] collection = Arrays.stream(grabCh.chattersGlobal.chatters.viewers).skip(part.first).limit(part.second-part.first).toArray(String[]::new);
-            CompletableFuture<Pair<List<UserChannelEntity>,List<UserChannelEntity>>> f = CompletableFuture.supplyAsync(() -> {
-                Pair<List<UserChannelEntity>,List<UserChannelEntity>> pair = new Pair<>();
+            final String[] collection = Arrays.stream(grabCh.chattersGlobal.chatters.viewers).skip(part.first).limit(part.second - part.first).toArray(String[]::new);
+            CompletableFuture<Pair<List<UserChannelEntity>, List<UserChannelEntity>>> f = CompletableFuture.supplyAsync(() -> {
+                Pair<List<UserChannelEntity>, List<UserChannelEntity>> pair = new Pair<>();
                 pair.first = new ArrayList<>();
                 pair.second = new ArrayList<>();
                 StatelessSession s = database.DatabaseUtil.getStateLessSession();
@@ -348,10 +346,11 @@ public class CircleService extends AbstractService{
         System.out.println(System.currentTimeMillis()-startTime + " ms - Update viewers (insert and update)");*/
     }
 
-    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type){
-        for (String name : names){
+    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type) {
+        HashMap<Pair<Long, Long>, ChannelCircleEntity> channelsCirclesHash = new HashMap<>();
+        for (String name : names) {
             if (preCircle != null) {
-                var query = session.createNativeQuery("select * from `twitch-collector`.users_channels where user_id = (select user_id from `twitch-collector`.users where name = :name) and lastCircle_id = :preCircle_id and channel_id = :channel_id and type_id = :userType", UserChannelEntity.class);
+                var query = session.createNativeQuery("select * from `twitch-collector`.users_channels where user_id = (select id from `twitch-collector`.users where name = :name) and lastCircle_id = :preCircle_id and channel_id = :channel_id and type_id = :userType", UserChannelEntity.class);
                 //var query = session.createQuery("from UserChannelEntity where user.name = :name and channel.id = :channel_id and type = :userType and lastCircle.id = :preCircle_id", UserChannelEntity.class);
                 query.setParameter("name", name);
                 query.setParameter("channel_id", channel.id);
@@ -360,13 +359,28 @@ public class CircleService extends AbstractService{
                 query.setFirstResult(0);
                 query.setMaxResults(1);
                 var userChannel = query.uniqueResult();
-                if (userChannel != null && lastChannelCircle != null) {
-                    boolean fitsByTime = circleStartTime.minusSeconds(10 * 60).compareTo(lastChannelCircle.collectTime) < 0;
-                    if (fitsByTime) {
-                        //Add to update
-                        userChannel.lastCircle = currentCircle;
-                        toUpdate.add(userChannel);
-                        continue;
+                if (userChannel != null) {
+                    //Fits by time
+                    var key = new Pair<>(userChannel.lastCircle.id, channel.id);
+                    ChannelCircleEntity lastUserChannelCircle;
+                    if (channelsCirclesHash.containsKey(key)) {
+                        lastUserChannelCircle = channelsCirclesHash.get(key);
+                    } else {
+                        var q = session.createNativeQuery("select * from `twitch-collector`.channels_circles where circle_id = :circle and channel_id = :channel", ChannelCircleEntity.class);
+                        q.setParameter("circle", userChannel.lastCircle.id);
+                        q.setParameter("channel", channel.id);
+                        lastUserChannelCircle = q.uniqueResult();
+                        if (lastUserChannelCircle != null)
+                            channelsCirclesHash.put(key, lastUserChannelCircle);
+                    }
+                    if (lastUserChannelCircle != null) {
+                        boolean fitsByTime = circleStartTime.minusSeconds(10 * 60).compareTo(lastUserChannelCircle.collectTime) < 0;
+                        if (fitsByTime) {
+                            //Add to update
+                            userChannel.lastCircle = currentCircle;
+                            toUpdate.add(userChannel);
+                            continue;
+                        }
                     }
                 }
             }
