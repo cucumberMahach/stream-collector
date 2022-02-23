@@ -48,15 +48,9 @@ public class GrabChannelResult {
 
         String s = error.name() + " -> ";
         if (error == GrabChannelError.Unknown && unknownException != null){
-            var ps = DataUtil.getPrintStream();
-            unknownException.printStackTrace(ps.first);
-            ps.first.close();
-            return s + unknownException.getMessage() + " " + ps.second.toString();
+            return s + unknownException.getMessage() + " " + DataUtil.getStackTrace(unknownException);
         }else if (exception != null){
-            var ps = DataUtil.getPrintStream();
-            exception.printStackTrace(ps.first);
-            ps.first.close();
-            return s + exception.getMessage() + " " + ps.second.toString();
+            return s + exception.getMessage() + " " + DataUtil.getStackTrace(exception);
         }
 
         return "";

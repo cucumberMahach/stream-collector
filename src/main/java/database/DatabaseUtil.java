@@ -12,9 +12,11 @@ import util.DataUtil;
 
 public class DatabaseUtil {
 
-    private static final SessionFactory sessionFactory;
+    private static SessionFactory sessionFactory = null;
 
-    static {
+    private static void init(){
+        if (sessionFactory != null)
+            return;
         try {
             Configuration configuration = new Configuration().configure();
 
@@ -28,19 +30,18 @@ public class DatabaseUtil {
 
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {
-            var ps = DataUtil.getPrintStream();
-            ex.printStackTrace(ps.first);
-            ps.first.close();
-            Logger.instance.writeLog(LogStatus.Error, "Ошибка инициализации БД: " + ex.getMessage() + " " + ps.second.toString());
+            Logger.instance.writeLog(LogStatus.Error, "Ошибка инициализации БД: " + ex.getMessage() + " " + DataUtil.getStackTrace(ex));
             throw new ExceptionInInitializerError(ex);
         }
     }
 
     public static Session getSession() throws HibernateException {
+        init();
         return sessionFactory.openSession();
     }
 
     public static StatelessSession getStateLessSession() throws HibernateException{
+        init();
         return sessionFactory.openStatelessSession();
     }
 

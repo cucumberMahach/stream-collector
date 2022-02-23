@@ -3,10 +3,7 @@ package service;
 import database.entities.*;
 import logging.LogStatus;
 import org.hibernate.StatelessSession;
-import util.FutureUtils;
-import util.Pair;
-import util.TimeUtil;
-import util.TwitchGrabber;
+import util.*;
 import util.grabber.GrabChannelResult;
 
 import java.time.Duration;
@@ -20,7 +17,7 @@ import java.util.concurrent.Executors;
 public class CircleService extends AbstractService{
 
     public CircleService() {
-        super("CircleService");
+        super("circle");
     }
 
     private ZonedDateTime circleStartTime;
@@ -141,7 +138,8 @@ public class CircleService extends AbstractService{
             }
         }catch (Exception e){
             session.close();
-            e.printStackTrace();
+            if (!(e instanceof InterruptedException))
+                writeLog(LogStatus.Error, "Исключение в сервисе: " + e.getMessage() + " " + DataUtil.getStackTrace(e));
         }
     }
 

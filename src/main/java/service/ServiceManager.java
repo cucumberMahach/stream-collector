@@ -21,6 +21,10 @@ public class ServiceManager {
     }
 
     public String setServiceEnabled(String name, boolean value){
+        return setServiceEnabled(name, value, false);
+    }
+
+    public String setServiceEnabled(String name, boolean value, boolean internalStop){
         for (String sname : allServices){
             if (sname.equals(name)){
                 if (value) {
@@ -40,7 +44,8 @@ public class ServiceManager {
                     if (!services.containsKey(sname)) {
                         return "Service '"+sname+"' is not running";
                     }else{
-                        services.get(sname).stopService();
+                        if (!internalStop)
+                            services.get(sname).stopService();
                         services.remove(sname);
                         return null;
                     }

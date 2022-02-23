@@ -66,6 +66,9 @@ public class ConsoleProvider {
     }
 
     private boolean parseCmd(String cmd){
+        if (cmd.isBlank())
+            return false;
+
         if (cmd.startsWith("start ")){
             String serviceName = cmd.substring("start ".length()).trim().toLowerCase(Locale.ROOT);
             String result = ServiceManager.instance.setServiceEnabled(serviceName, true);

@@ -3,6 +3,7 @@ package service;
 import logging.LogMessage;
 import logging.LogStatus;
 import logging.Logger;
+import util.DataUtil;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public abstract class AbstractService extends Thread{
         msg.status = status;
         logMessages.add(msg);
         if (logEnabled)
-            System.out.println(msg.getLine());
+            System.out.println(msg.getColorizedLine());
 
         Logger.instance.constraintLogArray(logMessages);
         Logger.instance.processToFile(msg);
@@ -42,7 +43,14 @@ public abstract class AbstractService extends Thread{
     @Override
     public void run() {
         writeLog(LogStatus.Success, "Сервис запущен");
-        work();
+        try {
+            work();
+        }catch (Throwable ex){
+            writeLog(LogStatus.Error, "Исключение в абстрактном сервисе: " + ex.getMessage() + " " + DataUtil.getStackTrace(ex));
+            ex.printStackTrace();
+        }
+        writeLog(LogStatus.Success, "Сервис завершён");
+        ServiceManager.instance.setServiceEnabled(serviceName, false);
     }
 
     public void startService(){

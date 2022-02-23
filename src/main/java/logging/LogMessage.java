@@ -4,7 +4,6 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 import com.diogonunes.jcolor.Attribute;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class LogMessage {
@@ -14,11 +13,11 @@ public class LogMessage {
     public String message = "";
     public LogStatus status = LogStatus.None;
 
-    public static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    public static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
 
-    public String getLine(){
+    public String getColorizedLine(){
         String timestamp = formatter.format(dateTime);
-        String colorized = "";
+        String colorized = "[]";
         switch (status){
             case Success -> {
                 colorized = colorize("[SUCCESS]", Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD());
@@ -34,5 +33,25 @@ public class LogMessage {
             }
         }
         return timestamp + " " + colorized + " (" + serviceName + ") " + message;
+    }
+
+    public String getLine(){
+        String timestamp = formatter.format(dateTime);
+        String tag = "[]";
+        switch (status){
+            case Success -> {
+                tag = "[SUCCESS]";
+            }
+            case Warning -> {
+                tag = "[WARNING]";
+            }
+            case Error -> {
+                tag = "[ERROR]";
+            }
+            case None -> {
+                tag = "[-]";
+            }
+        }
+        return timestamp + " " + tag + " (" + serviceName + ") " + message;
     }
 }
