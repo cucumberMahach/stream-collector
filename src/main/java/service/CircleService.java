@@ -6,6 +6,7 @@ import org.hibernate.StatelessSession;
 import util.*;
 import util.grabber.GrabChannelResult;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -56,6 +57,8 @@ public class CircleService extends AbstractService {
                     sleep(10000);
                     continue;
                 }
+
+                var maxTime = getMaxTimePerChannel(session, 10); //TODO
 
                 var userTypes = getUsersTypes(session);
 
@@ -141,7 +144,17 @@ public class CircleService extends AbstractService {
         }
     }
 
-    public HashMap<String, UserTypeEntity> getUsersTypes(StatelessSession session) {
+    /**
+     * @return Время в миллисекундах
+     */
+    private int getMaxTimePerChannel(StatelessSession session, int processCirclesCount){
+        var q = session.createNativeQuery("select MAX(q.time) as `time` from (select TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `twitch-collector`.`circles` where `endTime` IS NOT NULL order by endTime desc limit :lim) as q");
+        q.setParameter("lim", processCirclesCount);
+        var res = (BigDecimal) q.getSingleResult();
+        return (int) (res.floatValue() * 1000);
+    }
+
+    private HashMap<String, UserTypeEntity> getUsersTypes(StatelessSession session) {
         HashMap<String, UserTypeEntity> usersTypes = new HashMap<>();
         var query = session.createQuery("from UserTypeEntity", UserTypeEntity.class);
         var list = query.list();
@@ -151,7 +164,7 @@ public class CircleService extends AbstractService {
         return usersTypes;
     }
 
-    public Pair<CircleEntity, CircleEntity> doCurrentCircle(StatelessSession session) {
+    private Pair<CircleEntity, CircleEntity> doCurrentCircle(StatelessSession session) {
         var lastCircleQuery = session.createQuery("FROM CircleEntity order by number desc", CircleEntity.class);
         lastCircleQuery.setMaxResults(1);
         var lastCircle = lastCircleQuery.uniqueResult();
@@ -181,7 +194,7 @@ public class CircleService extends AbstractService {
         return new Pair<>(currentCircle, lastCircle);
     }
 
-    public Pair<ChannelEntity, Boolean> doCurrentChannel(StatelessSession session, CircleEntity currentCircle, GrabChannelResult grabCh) {
+    private Pair<ChannelEntity, Boolean> doCurrentChannel(StatelessSession session, CircleEntity currentCircle, GrabChannelResult grabCh) {
         Pair<ChannelEntity, Boolean> pair = new Pair<>();
         var channelsQuery = session.createQuery("FROM ChannelEntity where name = :name", ChannelEntity.class);
         channelsQuery.setMaxResults(1);
@@ -212,7 +225,7 @@ public class CircleService extends AbstractService {
         return pair;
     }
 
-    public ChannelCircleEntity doChannelCircle(CircleEntity currentCircle, ChannelEntity currentChannel, GrabChannelResult grabCh) {
+    private ChannelCircleEntity doChannelCircle(CircleEntity currentCircle, ChannelEntity currentChannel, GrabChannelResult grabCh) {
         ChannelCircleEntity channelCircle = new ChannelCircleEntity();
         channelCircle.circle = currentCircle;
         channelCircle.channel = currentChannel;
@@ -220,7 +233,7 @@ public class CircleService extends AbstractService {
         return channelCircle;
     }
 
-    public ChannelCircleEntity getLastChannelCircle(StatelessSession session, CircleEntity lastCircle, ChannelEntity currentChannel) {
+    private ChannelCircleEntity getLastChannelCircle(StatelessSession session, CircleEntity lastCircle, ChannelEntity currentChannel) {
         var query = session.createQuery("from ChannelCircleEntity where circle = :circle and channel = :channel", ChannelCircleEntity.class);
         query.setParameter("circle", lastCircle);
         query.setParameter("channel", currentChannel);
@@ -235,7 +248,7 @@ public class CircleService extends AbstractService {
      * Первое число - вставки
      * Второе число - проигнорировано
      */
-    public Pair<Integer, Integer> doUsers(StatelessSession session, GrabChannelResult grabCh) {
+    private Pair<Integer, Integer> doUsers(StatelessSession session, GrabChannelResult grabCh) {
         Pair<Integer, Integer> counts = new Pair<>(0, 0);
         ArrayList<String> allUsers = new ArrayList<>();
         allUsers.addAll(Arrays.asList(grabCh.chattersGlobal.chatters.viewers));
