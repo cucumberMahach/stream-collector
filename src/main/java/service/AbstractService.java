@@ -11,15 +11,21 @@ public abstract class AbstractService extends Thread{
 
     private final ArrayList<LogMessage> logMessages = new ArrayList<>();
     protected String serviceName;
+    protected boolean isStoppable;
     private boolean logEnabled = false;
 
     public AbstractService(String serviceName){
+        this(serviceName, true);
+    }
+
+    public AbstractService(String serviceName, boolean isStoppable){
         this.serviceName = serviceName;
+        this.isStoppable = isStoppable;
     }
 
     protected abstract void work();
 
-    protected void writeLog(LogStatus status, String message){
+    public void writeLog(LogStatus status, String message){
         LogMessage msg = new LogMessage();
         msg.serviceName = serviceName;
         msg.message = message;

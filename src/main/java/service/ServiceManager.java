@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class ServiceManager {
     public static final ServiceManager instance = new ServiceManager();
-    public static final String[] allServices = {"circle"};
+    public static final String[] allServices = {"circle","bot"};
 
     private final HashMap<String, AbstractService> services = new HashMap<>();
 
@@ -16,6 +16,8 @@ public class ServiceManager {
         switch (name){
             case "circle":
                 return new CircleService();
+            case "bot":
+                return new BotService();
         }
         return null;
     }
