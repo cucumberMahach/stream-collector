@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import service.AbstractService;
+import service.BotService;
 import util.DataUtil;
 import util.TimeUtil;
 
@@ -21,14 +22,14 @@ import java.util.Date;
 public class Bot extends TelegramLongPollingBot {
     private final int RECONNECT_PAUSE = 3000;
 
-    private final AbstractService service;
+    private final BotService service;
     private final String name;
     private final String token;
     private BotSession session;
 
     private ZonedDateTime botStartTime;
 
-    public Bot(AbstractService service, String name, String token){
+    public Bot(BotService service, String name, String token){
         this.service = service;
         this.name = name;
         this.token = token;
@@ -49,11 +50,14 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        var msgTime = TimeUtil.getZonedFromUnix(update.getMessage().getDate());
+        /*var msgTime = TimeUtil.getZonedFromUnix(update.getMessage().getDate());
         if (msgTime.isBefore(botStartTime))
             return;
         System.out.println(update.getMessage().getFrom().getLanguageCode());
-        sendSticker(update.getMessage().getChatId().toString(), "CAACAgIAAxkBAAEERyxiP1p-8qp8alVe51jr5SnwpQxLrgAChhsAAs7QiElhmJB0PqwN7yME", null);
+        sendSticker(update.getMessage().getChatId().toString(), "CAACAgIAAxkBAAEERyxiP1p-8qp8alVe51jr5SnwpQxLrgAChhsAAs7QiElhmJB0PqwN7yME", null);*/
+        /*if (botAlgorithm != null)
+            botAlgorithm.onUpdate(update);*/
+        service.addUpdateToQueue(update);
     }
 
     public synchronized void sendSticker(String chatId, String stickerId, Integer replyToMessageId) {

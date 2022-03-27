@@ -13,13 +13,18 @@
         <property name="hibernate.connection.password"></property>
         <property name="hibernate.dialect">org.hibernate.dialect.MariaDB103Dialect</property>
 
+        <!-- c3p0 config http://www.hibernate.org/214.html -->
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">200</property>
+        <property name="hibernate.c3p0.max_statements">200</property>
+
         <!-- show mysql queries output in console -->
         <property name="hibernate.show_sql">false</property>
 
+        <!-- cache -->
         <property name="hibernate.cache.use_second_level_cache">true</property>
         <property name="hibernate.cache.default_cache_concurrency_strategy">read-write</property>
-
-        <property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.internal.EhcacheRegionFactory</property>
+        <property name="hibernate.cache.region.factory_class">org.hibernate.cache.jcache.JCacheRegionFactory</property>
 
 
 
