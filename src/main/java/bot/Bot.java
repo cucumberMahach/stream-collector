@@ -12,6 +12,11 @@ import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import service.AbstractService;
 import util.DataUtil;
+import util.TimeUtil;
+
+import java.sql.Time;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 public class Bot extends TelegramLongPollingBot {
     private final int RECONNECT_PAUSE = 3000;
@@ -21,19 +26,22 @@ public class Bot extends TelegramLongPollingBot {
     private final String token;
     private BotSession session;
 
+    private ZonedDateTime botStartTime;
+
     public Bot(AbstractService service, String name, String token){
         this.service = service;
         this.name = name;
         this.token = token;
+        botStartTime = TimeUtil.getZonedNow();
     }
 
     public void botConnect() throws InterruptedException {
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             session = telegramBotsApi.registerBot(this);
-            service.writeLog(LogStatus.Success,"TelegramAPI запущено");
+            service.writeLog(LogStatus.Success,"TelegramAPI запущен");
         } catch (Exception e) {
-            service.writeLog(LogStatus.Error,"Не возможно подключиться. Пауза " + RECONNECT_PAUSE / 1000 + " сек. Ошибка: " + DataUtil.getStackTrace(e));
+            service.writeLog(LogStatus.Error,"Невозможно подключиться. Пауза " + RECONNECT_PAUSE / 1000 + " сек. Ошибка: " + DataUtil.getStackTrace(e));
             Thread.sleep(RECONNECT_PAUSE);
             botConnect();
         }
@@ -41,7 +49,10 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        String message = update.getMessage().getText();
+        var msgTime = TimeUtil.getZonedFromUnix(update.getMessage().getDate());
+        if (msgTime.isBefore(botStartTime))
+            return;
+        System.out.println(update.getMessage().getFrom().getLanguageCode());
         sendSticker(update.getMessage().getChatId().toString(), "CAACAgIAAxkBAAEERyxiP1p-8qp8alVe51jr5SnwpQxLrgAChhsAAs7QiElhmJB0PqwN7yME", null);
     }
 

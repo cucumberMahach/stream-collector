@@ -6,9 +6,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class TimeUtil {
+    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+
     public static ZonedDateTime getZonedNow(){
-        ZoneId zoneId = ZoneId.of("Europe/Moscow");
         return ZonedDateTime.ofInstant(Instant.now(), zoneId);
+    }
+
+    public static ZonedDateTime getZonedFromUnix(long unix){
+        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(unix), zoneId);
     }
 
     public static String formatDuration(Duration duration) {
