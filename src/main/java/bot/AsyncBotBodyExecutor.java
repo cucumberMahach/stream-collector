@@ -6,47 +6,46 @@ import service.AbstractService;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class AsyncBotAlgorithmExecutor extends Thread{
+public class AsyncBotBodyExecutor extends Thread{
 
-    protected BotAlgorithm botAlgorithm;
+    protected BotBody botBody;
     protected ArrayBlockingQueue<Update> queue;
     protected AbstractService service;
-    protected String name;
 
-    public AsyncBotAlgorithmExecutor(AbstractService service, String name) {
+    public AsyncBotBodyExecutor(AbstractService service, String name) {
         super();
         this.service = service;
-        this.name = name;
+        setName(name);
     }
 
     @Override
     public void run() {
-        if (botAlgorithm == null){
-            service.writeLog(LogStatus.Error, String.format("AsyncBotAlgorithmExecutor названный %s - не задан алгоритм бота", name));
+        if (botBody == null){
+            service.writeLog(LogStatus.Error, String.format("AsyncBotBodyExecutor названный %s - не задан алгоритм бота", getName()));
             return;
         }
 
         if (queue == null){
-            service.writeLog(LogStatus.Error, String.format("AsyncBotAlgorithmExecutor названный %s - не задана очередь сообщений", name));
+            service.writeLog(LogStatus.Error, String.format("AsyncBotBodyExecutor названный %s - не задана очередь сообщений", getName()));
             return;
         }
 
         while (true) {
             try {
                 Update update = queue.take();
-                botAlgorithm.onUpdate(update);
+                botBody.onUpdate(update);
             } catch (InterruptedException e) {
                 return;
             }
         }
     }
 
-    public void setBotAlgorithm(BotAlgorithm botAlgorithm) {
-        this.botAlgorithm = botAlgorithm;
+    public void setBotBody(BotBody botBody) {
+        this.botBody = botBody;
     }
 
-    public BotAlgorithm getBotAlgorithm() {
-        return botAlgorithm;
+    public BotBody getBotBody() {
+        return botBody;
     }
 
     public ArrayBlockingQueue<Update> getQueue() {

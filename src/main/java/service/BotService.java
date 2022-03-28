@@ -1,9 +1,11 @@
 package service;
 
-import bot.AsyncBotAlgorithmExecutor;
+import bot.AsyncBotBodyExecutor;
 import bot.Bot;
 import bot.BotDatabase;
-import bot.BotStandardAlgorithm;
+import bot.BotStandardBody;
+import bot.logic.BotStandardLogic;
+import bot.view.BotStandardView;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
@@ -11,9 +13,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class BotService extends AbstractService{
 
-    private ArrayBlockingQueue<Update> queue = new ArrayBlockingQueue<Update>(1, true);
+    private final ArrayBlockingQueue<Update> queue = new ArrayBlockingQueue<Update>(1, true);
     private int threadsCount = 4;
-    private ArrayList<AsyncBotAlgorithmExecutor> executors = new ArrayList<>();
+    private final ArrayList<AsyncBotBodyExecutor> executors = new ArrayList<>();
 
     public BotService() {
         super("bot", false);
@@ -31,10 +33,12 @@ public class BotService extends AbstractService{
         }
 
         for (int thread = 0; thread < threadsCount; thread++){
-            var executor = new AsyncBotAlgorithmExecutor(this, String.format("Thread %d", thread+1));
+            var executor = new AsyncBotBodyExecutor(this, String.format("Thread %d", thread+1));
             executor.setQueue(queue);
-            executor.setBotAlgorithm(new BotStandardAlgorithm(new BotDatabase()));
-            executor.getBotAlgorithm().setBot(bot);
+            executor.setBotBody(new BotStandardBody(new BotDatabase()));
+            executor.getBotBody().setBot(bot);
+            executor.getBotBody().setLogic(new BotStandardLogic());
+            executor.getBotBody().getLogic().setBotView(new BotStandardView());
             executor.start();
             executors.add(executor);
         }
