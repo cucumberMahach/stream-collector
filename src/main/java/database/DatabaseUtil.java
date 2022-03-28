@@ -29,6 +29,7 @@ public class DatabaseUtil {
             configuration.addAnnotatedClass(ChannelCircleEntity.class);
             configuration.addAnnotatedClass(TgUserEntity.class);
             configuration.addAnnotatedClass(TgHistoryEntity.class);
+            configuration.addAnnotatedClass(TgBanEntity.class);
 
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {

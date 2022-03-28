@@ -10,14 +10,14 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import service.AbstractService;
 import service.BotService;
 import util.DataUtil;
 import util.TimeUtil;
 
-import java.sql.Time;
 import java.time.ZonedDateTime;
-import java.util.Date;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Bot extends TelegramLongPollingBot {
     private final int RECONNECT_PAUSE = 3000;
@@ -27,13 +27,14 @@ public class Bot extends TelegramLongPollingBot {
     private final String token;
     private BotSession session;
 
-    private ZonedDateTime botStartTime;
+    private final ZonedDateTime startTime;
+    private Set<String> startupNotificationsSet = Collections.synchronizedSet(new HashSet<>());
 
     public Bot(BotService service, String name, String token){
         this.service = service;
         this.name = name;
         this.token = token;
-        botStartTime = TimeUtil.getZonedNow();
+        startTime = TimeUtil.getZonedNow();
     }
 
     public void botConnect() throws InterruptedException {
@@ -50,17 +51,10 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        /*var msgTime = TimeUtil.getZonedFromUnix(update.getMessage().getDate());
-        if (msgTime.isBefore(botStartTime))
-            return;
-        System.out.println(update.getMessage().getFrom().getLanguageCode());
-        sendSticker(update.getMessage().getChatId().toString(), "CAACAgIAAxkBAAEERyxiP1p-8qp8alVe51jr5SnwpQxLrgAChhsAAs7QiElhmJB0PqwN7yME", null);*/
-        /*if (botAlgorithm != null)
-            botAlgorithm.onUpdate(update);*/
         service.addUpdateToQueue(update);
     }
 
-    public synchronized void sendSticker(String chatId, String stickerId, Integer replyToMessageId) {
+    public synchronized boolean sendSticker(String chatId, String stickerId, Integer replyToMessageId) {
         SendSticker sticker = new SendSticker(chatId, new InputFile(stickerId));
 
         if (replyToMessageId != null)
@@ -70,20 +64,24 @@ public class Bot extends TelegramLongPollingBot {
             execute(sticker);
         } catch (TelegramApiException e) {
             service.writeLog(LogStatus.Warning, "Ошибка отправки стикера: " + DataUtil.getStackTrace(e));
+            return false;
         }
+        return true;
     }
 
-    public synchronized void sendMsg(String chatId, String text) {
+    public synchronized boolean sendMsg(String chatId, String text) {
         SendMessage msg = new SendMessage();
         msg.enableMarkdown(true);
         msg.setChatId(chatId);
         msg.setText(text);
-
+        msg.setParseMode("html");
         try {
             execute(msg);
         } catch (TelegramApiException e) {
             service.writeLog(LogStatus.Error, "Ошибка отправки сообщения: " + DataUtil.getStackTrace(e));
+            return false;
         }
+        return true;
     }
 
     public BotSession getSession(){
@@ -98,5 +96,13 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return token;
+    }
+
+    public ZonedDateTime getStartTime() {
+        return startTime;
+    }
+
+    public Set<String> getStartupNotificationsSet() {
+        return startupNotificationsSet;
     }
 }

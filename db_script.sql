@@ -155,11 +155,11 @@ CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgUsers` (
   `tg_id` VARCHAR(25) NOT NULL,
   `firstName` VARCHAR(64) NOT NULL,
   `lastName` VARCHAR(64) NULL,
-  `username` VARCHAR(32) NOT NULL,
+  `username` VARCHAR(32) NULL,
   `language` VARCHAR(8) NOT NULL,
   `messagesTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0,
-  `banned` TINYINT(1) NOT NULL DEFAULT 0,
   `state` VARCHAR(100) NOT NULL,
+  `firstOnlineTime` DATETIME(3) NOT NULL,
   `lastOnlineTime` DATETIME(3) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `tg_id_UNIQUE` (`tg_id` ASC) VISIBLE)
@@ -180,6 +180,25 @@ CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgHistory` (
   PRIMARY KEY (`id`),
   INDEX `fk_tgHistory_tgUsers1_idx` (`tgUser_id` ASC),
   CONSTRAINT `fk_tgHistory_tgUsers1`
+    FOREIGN KEY (`tgUser_id`)
+    REFERENCES `twitch-collector`.`tgUsers` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `twitch-collector`.`tgBans`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgBans` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tgUser_id` BIGINT UNSIGNED NOT NULL,
+  `reason` VARCHAR(100) NOT NULL,
+  `fromTime` DATETIME(3) NOT NULL,
+  `untilTime` DATETIME(3) NOT NULL,
+  INDEX `fk_tgBans_tgUsers1_idx` (`tgUser_id` ASC),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_tgBans_tgUsers1`
     FOREIGN KEY (`tgUser_id`)
     REFERENCES `twitch-collector`.`tgUsers` (`id`)
     ON DELETE NO ACTION

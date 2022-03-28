@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @Cacheable
 @Table(name = "tgusers")
-public class TgUserEntity implements Cloneable {
+public class TgUserEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -27,7 +27,7 @@ public class TgUserEntity implements Cloneable {
     @Column(name = "lastName")
     public String lastName;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username")
     public String username;
 
     @Column(name = "language", nullable = false)
@@ -37,11 +37,11 @@ public class TgUserEntity implements Cloneable {
     @Unsigned
     public Long messagesTotal = 0L;
 
-    @Column(name = "banned", nullable = false)
-    public boolean banned = false;
-
     @Column(name = "state", nullable = false)
     public String state;
+
+    @Column(name = "firstOnlineTime", nullable = false)
+    public ZonedDateTime firstOnlineTime;
 
     @Column(name = "lastOnlineTime", nullable = false)
     public ZonedDateTime lastOnlineTime;
@@ -49,24 +49,6 @@ public class TgUserEntity implements Cloneable {
     @OneToMany(mappedBy="tgUser")
     public Set<TgHistoryEntity> tgHistory = new HashSet<>();
 
-    public TgUserEntity copy(){
-        try {
-            return (TgUserEntity) clone();
-        }catch (CloneNotSupportedException ex){
-            return null;
-        }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TgUserEntity tgUser = (TgUserEntity) o;
-        return banned == tgUser.banned && Objects.equals(id, tgUser.id) && Objects.equals(tgId, tgUser.tgId) && Objects.equals(firstName, tgUser.firstName) && Objects.equals(lastName, tgUser.lastName) && Objects.equals(username, tgUser.username) && Objects.equals(language, tgUser.language) && Objects.equals(messagesTotal, tgUser.messagesTotal) && Objects.equals(state, tgUser.state) && Objects.equals(lastOnlineTime, tgUser.lastOnlineTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, tgId, firstName, lastName, username, language, messagesTotal, banned, state);
-    }
+    @OneToMany(mappedBy="tgUser")
+    public Set<TgBanEntity> tgBans = new HashSet<>();
 }

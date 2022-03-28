@@ -36,7 +36,6 @@ public class AsyncBotAlgorithmExecutor extends Thread{
                 Update update = queue.take();
                 botAlgorithm.onUpdate(update);
             } catch (InterruptedException e) {
-                e.printStackTrace();
                 return;
             }
         }

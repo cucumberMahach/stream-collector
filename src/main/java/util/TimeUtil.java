@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalUnit;
 
 public class TimeUtil {
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
@@ -25,5 +26,13 @@ public class TimeUtil {
                 (absSeconds % 3600) / 60,
                 absSeconds % 60);
         return seconds < 0 ? "-" + positive : positive;
+    }
+
+    public static String formatDurationDays(Duration duration){
+        return String.format("%d д %02d ч %02d мин %02d сек",
+                duration.toDaysPart(),
+                duration.toHoursPart(),
+                duration.toMinutesPart(),
+                duration.toSecondsPart());
     }
 }

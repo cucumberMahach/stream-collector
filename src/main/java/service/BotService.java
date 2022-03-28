@@ -43,8 +43,7 @@ public class BotService extends AbstractService{
             while(true){
                 Thread.sleep(100);
             }
-        }catch (Throwable e){
-            e.printStackTrace();
+        }catch (InterruptedException e){
             destroyAllExecutors();
             bot.getSession().stop();
         }

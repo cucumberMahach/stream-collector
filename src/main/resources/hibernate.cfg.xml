@@ -12,11 +12,15 @@
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password"></property>
         <property name="hibernate.dialect">org.hibernate.dialect.MariaDB103Dialect</property>
+        <property name="connection.autoReconnect">true</property>
+        <property name="connection.autoReconnectForPools">true</property>
+        <property name="connection.is-connection-validation-required">true</property>
 
         <!-- c3p0 config http://www.hibernate.org/214.html -->
         <property name="hibernate.c3p0.min_size">5</property>
         <property name="hibernate.c3p0.max_size">200</property>
         <property name="hibernate.c3p0.max_statements">200</property>
+        <property name="hibernate.c3p0.timeout">100</property> <!-- wait_timeout -->
 
         <!-- show mysql queries output in console -->
         <property name="hibernate.show_sql">false</property>
