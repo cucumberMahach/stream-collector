@@ -24,9 +24,13 @@ public class CircleService extends AbstractService {
     public int threadsToUse = Runtime.getRuntime().availableProcessors();
     public int toNextCircleMs = 60000;
 
+    private StatelessSession getSession(){
+        return database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+    }
+
     @Override
     protected void work() {
-        StatelessSession session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        StatelessSession session = getSession();
         try {
             while (true) {
                 TwitchGrabber grabber = new TwitchGrabber(0);
@@ -44,8 +48,13 @@ public class CircleService extends AbstractService {
                     grabber.getChannelsToGrab().add(channel.name);
                 }
                 circleStartTime = TimeUtil.getZonedNow();
+
+                session.close();
+
                 grabber.startGrabAsyncHttp();
                 var grabbedChannels = grabber.getResults();
+
+                session = getSession();
 
                 int errorsCount = 0;
                 for (var grabCh : grabbedChannels) {
@@ -326,7 +335,7 @@ public class CircleService extends AbstractService {
                 Pair<List<UserChannelEntity>, List<UserChannelEntity>> pair = new Pair<>();
                 pair.first = new ArrayList<>();
                 pair.second = new ArrayList<>();
-                StatelessSession s = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+                StatelessSession s = getSession();
                 updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get("viewer"));
                 s.close();
                 return pair;

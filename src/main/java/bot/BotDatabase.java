@@ -10,20 +10,17 @@ import org.hibernate.StatelessSession;
 import java.time.ZonedDateTime;
 
 public class BotDatabase {
-    protected StatelessSession session;
-
     public BotDatabase(){
-        var session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        var session = getSession();
         session.close();
     }
 
     public TgUserEntity getOrCreateTgUser(TgUserEntity tgUser){
-        var session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
-        var query = session.createNativeQuery("select * from `twitch-collector`.tgUsers where tg_id = :tgId", TgUserEntity.class);
+        var session = getSession();
+        var query = session.createNativeQuery("select * from `twitch-collector`.tgusers where tg_id = :tgId", TgUserEntity.class);
         query.setParameter("tgId", tgUser.tgId);
         query.setMaxResults(1);
         var user = query.uniqueResult();
-        session.close();
 
         if (user == null){
             session.beginTransaction();
@@ -36,7 +33,7 @@ public class BotDatabase {
     }
 
     public void updateTgUser(TgUserEntity tgUser){
-        var session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        var session = getSession();
         session.beginTransaction();
         session.update(tgUser);
         session.getTransaction().commit();
@@ -44,7 +41,7 @@ public class BotDatabase {
     }
 
     public TgBanEntity getLastBanOrNull(TgUserEntity tgUser){
-        var session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        var session = getSession();
         org.hibernate.query.NativeQuery<TgBanEntity> query;
         if (tgUser.id == null) {
             query = session.createNativeQuery("select * from `twitch-collector`.tgbans where (select id from `twitch-collector`.tgusers where tgusers.tg_id = :tgId) = tgbans.tgUser_id order by tgbans.untilTime desc", TgBanEntity.class);
@@ -60,10 +57,14 @@ public class BotDatabase {
     }
 
     public void addToHistory(TgHistoryEntity tgHistory){
-        var session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        var session = getSession();
         session.beginTransaction();
         session.insert(tgHistory);
         session.getTransaction().commit();
         session.close();
+    }
+
+    private StatelessSession getSession(){
+        return database.DatabaseUtil.getStateLessSession(ConfigType.LocalOnServer);
     }
 }

@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Entity
 @Cacheable
-@Table(name = "channelsToCheck")
+@Table(name = "channelstocheck")
 public class ChannelToCheckEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

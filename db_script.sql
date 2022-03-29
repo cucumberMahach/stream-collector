@@ -112,9 +112,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `twitch-collector`.`channelsToCheck`
+-- Table `twitch-collector`.`channelstocheck`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `twitch-collector`.`channelsToCheck` (
+CREATE TABLE IF NOT EXISTS `twitch-collector`.`channelstocheck` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `priority` INT NULL,
@@ -148,9 +148,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `twitch-collector`.`tgUsers`
+-- Table `twitch-collector`.`tgusers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgUsers` (
+CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgusers` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tg_id` VARCHAR(25) NOT NULL,
   `firstName` VARCHAR(64) NOT NULL,
@@ -167,9 +167,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `twitch-collector`.`tgHistory`
+-- Table `twitch-collector`.`tghistory`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgHistory` (
+CREATE TABLE IF NOT EXISTS `twitch-collector`.`tghistory` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tgUser_id` BIGINT UNSIGNED NOT NULL,
   `message` VARCHAR(300) NOT NULL,
@@ -181,16 +181,16 @@ CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgHistory` (
   INDEX `fk_tgHistory_tgUsers1_idx` (`tgUser_id` ASC),
   CONSTRAINT `fk_tgHistory_tgUsers1`
     FOREIGN KEY (`tgUser_id`)
-    REFERENCES `twitch-collector`.`tgUsers` (`id`)
+    REFERENCES `twitch-collector`.`tgusers` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `twitch-collector`.`tgBans`
+-- Table `twitch-collector`.`tgbans`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgBans` (
+CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgbans` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tgUser_id` BIGINT UNSIGNED NOT NULL,
   `reason` VARCHAR(100) NOT NULL,
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `twitch-collector`.`tgBans` (
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_tgBans_tgUsers1`
     FOREIGN KEY (`tgUser_id`)
-    REFERENCES `twitch-collector`.`tgUsers` (`id`)
+    REFERENCES `twitch-collector`.`tgusers` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
