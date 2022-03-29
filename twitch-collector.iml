@@ -32,8 +32,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.apache.maven:maven-model:3.8.4" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-utils:3.3.0" level="project" />
     <orderEntry type="library" name="Maven: com.diogonunes:JColor:5.2.0" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna:5.8.0" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna-platform:5.8.0" level="project" />
@@ -107,5 +105,13 @@
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.11" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.5.13" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.11.0" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:win:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:win:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:18" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:win:18" level="project" />
   </component>
 </module>

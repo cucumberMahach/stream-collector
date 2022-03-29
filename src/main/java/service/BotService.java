@@ -18,7 +18,7 @@ public class BotService extends AbstractService{
     private final ArrayList<AsyncBotBodyExecutor> executors = new ArrayList<>();
 
     public BotService() {
-        super("bot", false);
+        super("bot", true, false);
     }
 
     @Override

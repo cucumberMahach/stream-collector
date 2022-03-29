@@ -3,10 +3,9 @@ package console;
 import com.diogonunes.jcolor.Attribute;
 import logging.Logger;
 import service.ServiceManager;
-import util.MavenData;
+import util.PropertiesFile;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
@@ -156,10 +155,10 @@ public class ConsoleProvider {
     }
 
     public void printProgramHeader(){
-        System.out.print(colorize(MavenData.instance.getModel().getArtifactId().toUpperCase(Locale.ROOT), Attribute.BRIGHT_MAGENTA_TEXT()));
-        System.out.print(colorize(" v" + MavenData.instance.getModel().getVersion(), Attribute.BRIGHT_YELLOW_TEXT()));
+        System.out.print(colorize(PropertiesFile.instance.getArtifactId().toUpperCase(Locale.ROOT), Attribute.BRIGHT_MAGENTA_TEXT()));
+        System.out.print(colorize(" v" + PropertiesFile.instance.getVersion(), Attribute.BRIGHT_YELLOW_TEXT()));
         System.out.println();
-        System.out.println(colorize(MavenData.instance.getModel().getDescription(), Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize(PropertiesFile.instance.getDescription(), Attribute.BRIGHT_CYAN_TEXT()));
     }
 
     private void printHelp(){

@@ -6,9 +6,10 @@ import java.util.HashMap;
 
 public class ServiceManager {
     public static final ServiceManager instance = new ServiceManager();
-    public static final String[] allServices = {"circle","bot"};
+    public static final String[] allServices = {"circle","bot","admin"};
 
     private final HashMap<String, AbstractService> services = new HashMap<>();
+    private final ArrayList<String> usedServices = new ArrayList<>();
 
     private ServiceManager(){ }
 
@@ -18,6 +19,8 @@ public class ServiceManager {
                 return new CircleService();
             case "bot":
                 return new BotService();
+            case "admin":
+                return new AdminService();
         }
         return null;
     }
@@ -37,19 +40,28 @@ public class ServiceManager {
                         if (service == null){
                             return "Cannot create service. Unknown service '"+name+"'";
                         }else {
-                            services.put(sname, service);
-                            service.startService();
-                            return null;
+                            if (!service.isReusable && usedServices.contains(sname)){
+                                return "Unable to start again a non-reusable service '" + sname + "'";
+                            }else {
+                                services.put(sname, service);
+                                usedServices.add(sname);
+                                service.startService();
+                                return null;
+                            }
                         }
                     }
                 }else{
                     if (!services.containsKey(sname)) {
                         return "Service '"+sname+"' is not running";
                     }else{
-                        if (!internalStop)
-                            services.get(sname).stopService();
-                        services.remove(sname);
-                        return null;
+                        if (services.get(sname).isStoppable) {
+                            if (!internalStop)
+                                services.get(sname).stopService();
+                            services.remove(sname);
+                            return null;
+                        }else{
+                            return "Cannot stop unstoppable service '" + sname + "'";
+                        }
                     }
                 }
             }
