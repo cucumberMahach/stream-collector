@@ -1,5 +1,6 @@
 package service;
 
+import database.ConfigType;
 import database.entities.*;
 import logging.LogStatus;
 import org.hibernate.StatelessSession;
@@ -25,7 +26,7 @@ public class CircleService extends AbstractService {
 
     @Override
     protected void work() {
-        StatelessSession session = database.DatabaseUtil.getStateLessSession();
+        StatelessSession session = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
         try {
             while (true) {
                 TwitchGrabber grabber = new TwitchGrabber(0);
@@ -325,7 +326,7 @@ public class CircleService extends AbstractService {
                 Pair<List<UserChannelEntity>, List<UserChannelEntity>> pair = new Pair<>();
                 pair.first = new ArrayList<>();
                 pair.second = new ArrayList<>();
-                StatelessSession s = database.DatabaseUtil.getStateLessSession();
+                StatelessSession s = database.DatabaseUtil.getStateLessSession(ConfigType.Local);
                 updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get("viewer"));
                 s.close();
                 return pair;

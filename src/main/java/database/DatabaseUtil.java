@@ -14,11 +14,11 @@ public class DatabaseUtil {
 
     private static SessionFactory sessionFactory = null;
 
-    private static void init(){
+    private static void init(String configName){
         if (sessionFactory != null)
             return;
         try {
-            Configuration configuration = new Configuration().configure();
+            Configuration configuration = new Configuration().configure(configName);
 
             configuration.addAnnotatedClass(ChannelEntity.class);
             configuration.addAnnotatedClass(ChannelToCheckEntity.class);
@@ -38,13 +38,15 @@ public class DatabaseUtil {
         }
     }
 
-    public static Session getSession() throws HibernateException {
-        init();
+
+    public static Session getSession(ConfigType configType) throws HibernateException {
+        init(configType.getFileName());
         return sessionFactory.openSession();
     }
 
-    public static StatelessSession getStateLessSession() throws HibernateException{
-        init();
+
+    public static StatelessSession getStateLessSession(ConfigType configType) throws HibernateException{
+        init(configType.getFileName());
         return sessionFactory.openStatelessSession();
     }
 
