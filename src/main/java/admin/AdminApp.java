@@ -1,39 +1,57 @@
 package admin;
 
+
+import admin.stages.BanStage;
 import javafx.application.Application;
-import javafx.scene.Group;
-import javafx.scene.Scene;
+import javafx.event.ActionEvent;
+import javafx.event.EventType;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import service.AdminService;
+import util.StageUtil;
 
-public class AdminApp extends Application {
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+
+public class AdminApp extends Application implements Initializable {
 
     private static AdminService service;
+
+    @FXML
+    private Button btnBans;
+
     public static void startApp(AdminService service){
         AdminApp.service = service;
         launch();
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
-        Label label = new Label("Hello");               // текстовая метка
-        Button button = new Button("Button");           // кнопка
-        Group group = new Group(button);                // вложенный узел Group
+    public void start(Stage stage){
+        try {
+            StageUtil.loadFXML(new URL("resources/stages/MainStage.fxml"), stage, null, 0, 0, true, true);
 
-        FlowPane root = new FlowPane(label, group);       // корневой узел
-        Scene scene = new Scene(root, 300, 150);        // создание Scene
-        stage.setScene(scene);                          // установка Scene для Stage
-
-        stage.setTitle("Hello JavaFX");
-
-        stage.show();
+            //new BanStage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        btnBans.setOnAction(actionEvent -> {
+            CompletableFuture.runAsync(() -> {
+                new BanStage();
+            });
+        });
     }
 }
