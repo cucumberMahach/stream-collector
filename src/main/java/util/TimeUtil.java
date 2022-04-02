@@ -1,13 +1,12 @@
 package util;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalUnit;
 
 public class TimeUtil {
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static ZonedDateTime getZonedNow(){
         return ZonedDateTime.ofInstant(Instant.now(), zoneId);
@@ -34,5 +33,17 @@ public class TimeUtil {
                 duration.toHoursPart(),
                 duration.toMinutesPart(),
                 duration.toSecondsPart());
+    }
+
+    public static String formatZoned(ZonedDateTime zoned){
+        return formatter.format(zoned);
+    }
+
+    public static ZonedDateTime fromLocalDate(LocalDate localDate){
+        return localDate.atStartOfDay().atZone(zoneId);
+    }
+
+    public static ZonedDateTime maxZoned(){
+        return ZonedDateTime.of(9999, 12, 31, 23, 59, 59, 0, zoneId);
     }
 }

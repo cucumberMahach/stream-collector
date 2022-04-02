@@ -1,22 +1,18 @@
 package admin;
 
 
-import admin.stages.BanStage;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import service.AdminService;
 import util.StageUtil;
 
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.CompletableFuture;
 
 public class AdminApp extends Application implements Initializable {
 
@@ -33,9 +29,8 @@ public class AdminApp extends Application implements Initializable {
     @Override
     public void start(Stage stage){
         try {
-            StageUtil.loadFXML(new URL("resources/stages/MainStage.fxml"), stage, null, 0, 0, true, true);
-
-            //new BanStage();
+            stage.getIcons().add(new Image(AdminApp.class.getClassLoader().getResource("icons/admin.png").openStream()));
+            StageUtil.loadFXML("stages/MainStage.fxml", stage, "Админ панель", 0, 0, true, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,10 +43,15 @@ public class AdminApp extends Application implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        btnBans.setText("Баны");
         btnBans.setOnAction(actionEvent -> {
-            CompletableFuture.runAsync(() -> {
-                new BanStage();
-            });
+            try {
+                var stage = new Stage();
+                stage.getIcons().add(new Image(AdminApp.class.getClassLoader().getResource("icons/police.png").openStream()));
+                StageUtil.loadFXML("stages/Bans.fxml", stage, "Баны", 0, 0, false, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 }

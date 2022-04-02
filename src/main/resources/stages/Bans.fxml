@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="612.0" prefWidth="920.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.stages.BanStage">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" text="Поиск:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
+      <TextField fx:id="search" layoutX="54.0" layoutY="10.0" prefHeight="25.0" prefWidth="782.0" AnchorPane.leftAnchor="54.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="10.0" />
+      <SplitPane dividerPositions="0.615" layoutX="13.0" layoutY="42.0" orientation="VERTICAL" prefHeight="402.0" prefWidth="883.0" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="42.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <TableView fx:id="usersTable" prefHeight="184.0" prefWidth="881.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                      <TableColumn prefWidth="65.0" text="ID">
+                          <cellValueFactory>
+                              <PropertyValueFactory property="id" />
+                          </cellValueFactory>
+                      </TableColumn>
+                      <TableColumn prefWidth="98.0" text="TG_ID">
+                          <cellValueFactory>
+                              <PropertyValueFactory property="tg_id" />
+                          </cellValueFactory>
+                      </TableColumn>
+                        <TableColumn prefWidth="196.0" text="Имя">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="name" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="111.0" text="Ник">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="username" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn minWidth="7.0" prefWidth="51.0" text="Язык">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="language" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="75.0" text="Сообщений">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="messagesTotal" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="154.0" text="Первый онлайн">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="firstOnlineTime" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="139.0" text="Последний онлайн">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="lastOnlineTime" />
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                      <items>
+                          <FXCollections fx:factory="observableArrayList">
+              </FXCollections>
+                      </items>
+                  </TableView>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="881.0">
+               <children>
+                  <TableView fx:id="bansTable" prefHeight="182.0" prefWidth="881.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                      <TableColumn prefWidth="75.0" text="BAN_ID">
+                          <cellValueFactory>
+                              <PropertyValueFactory property="ban_id" />
+                          </cellValueFactory>
+                      </TableColumn>
+                      <TableColumn prefWidth="75.0" text="USER_ID">
+                          <cellValueFactory>
+                              <PropertyValueFactory property="user_id" />
+                          </cellValueFactory>
+                      </TableColumn>
+                        <TableColumn prefWidth="198.0" text="Причина">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="reason" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn minWidth="0.0" prefWidth="120.0" text="Дата с">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="fromTime" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn minWidth="0.0" prefWidth="123.0" text="Дата по">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="untilTime" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="146.0" text="Продолжительность">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="duration" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="152.0" text="Осталось">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="remain" />
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                  </TableView>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+      <Button fx:id="btnBan" disable="true" layoutX="630.0" layoutY="451.0" mnemonicParsing="false" prefHeight="106.0" prefWidth="101.0" text="Забанить" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="14.0" />
+      <VBox layoutX="14.0" layoutY="452.0" prefHeight="152.0" prefWidth="94.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="14.0">
+         <children>
+            <RadioButton fx:id="rb_byTime" mnemonicParsing="false" prefWidth="9999999.0" text="По времени">
+               <toggleGroup>
+                  <ToggleGroup fx:id="ban_time" />
+               </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="rb_1day" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9999999.0" selected="true" text="На 1 день" toggleGroup="$ban_time" />
+            <RadioButton fx:id="rb_3days" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9.999999999999E12" text="На 3 дня" toggleGroup="$ban_time" />
+            <RadioButton fx:id="rb_5days" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9.99999999999999E14" text="На 5 дней" toggleGroup="$ban_time" />
+            <RadioButton fx:id="rb_14days" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9999999.0" text="На 14 дней" toggleGroup="$ban_time" />
+            <RadioButton fx:id="rb_30days" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9999999.0" text="На 30 дней" toggleGroup="$ban_time" />
+            <RadioButton fx:id="rb_byDate" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9999999.0" text="По дате" toggleGroup="$ban_time" />
+            <RadioButton fx:id="rb_forever" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9999999.0" text="Навсегда" toggleGroup="$ban_time" />
+         </children>
+      </VBox>
+      <Spinner fx:id="hours" disable="true" editable="true" layoutX="291.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="291.0">
+          <valueFactory>
+              <SpinnerValueFactory.IntegerSpinnerValueFactory max="24" min="0" />
+          </valueFactory>
+      </Spinner>
+      <Label layoutX="260.0" layoutY="457.0" text="Часы:" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="260.0" />
+      <Spinner fx:id="minutes" disable="true" editable="true" layoutX="394.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="394.0">
+          <valueFactory>
+              <SpinnerValueFactory.IntegerSpinnerValueFactory max="60" min="0" />
+          </valueFactory>
+      </Spinner>
+      <Label layoutX="366.0" layoutY="457.0" text="Мин:" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="366.0" />
+      <Spinner fx:id="seconds" disable="true" editable="true" layoutX="492.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="492.0">
+          <valueFactory>
+              <SpinnerValueFactory.IntegerSpinnerValueFactory max="60" min="0" />
+          </valueFactory>
+      </Spinner>
+      <Label layoutX="469.0" layoutY="457.0" text="Сек:" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="469.0" />
+      <Label layoutX="139.0" layoutY="490.0" text="Дата:" AnchorPane.bottomAnchor="104.0" AnchorPane.leftAnchor="139.0" />
+      <DatePicker fx:id="date" disable="true" layoutX="168.0" layoutY="486.0" prefHeight="25.0" prefWidth="216.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="168.0" />
+      <Button fx:id="btnUnban" disable="true" layoutX="796.0" layoutY="451.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="101.0" text="Снять бан" AnchorPane.bottomAnchor="125.0" AnchorPane.rightAnchor="14.0" />
+      <Label layoutX="115.0" layoutY="521.0" text="Причина:" AnchorPane.bottomAnchor="74.0" AnchorPane.leftAnchor="115.0" />
+      <TextArea fx:id="txtReason" layoutX="169.0" layoutY="521.0" prefHeight="81.0" prefWidth="616.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="169.0" AnchorPane.rightAnchor="126.0" />
+      <Label fx:id="labBans" alignment="CENTER" layoutX="556.0" layoutY="457.0" prefHeight="17.0" prefWidth="236.0" text="Кол-во банов: 0" textAlignment="CENTER" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="556.0" AnchorPane.rightAnchor="128.0" />
+      <ChoiceBox fx:id="cbShowCount" layoutX="839.0" layoutY="10.0" prefHeight="25.0" prefWidth="58.0" value="50" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0">
+          <items>
+              <FXCollections fx:factory="observableArrayList">
+                  <String fx:value="10" />
+                  <String fx:value="30" />
+                  <String fx:value="50" />
+                  <String fx:value="100" />
+                  <String fx:value="200" />
+                  <String fx:value="500" />
+                  <String fx:value="Все" />
+              </FXCollections>
+          </items>
+      </ChoiceBox>
+      <Spinner fx:id="days" disable="true" editable="true" layoutX="168.0" layoutY="453.0" prefHeight="25.0" prefWidth="86.0">
+         <valueFactory>
+            <SpinnerValueFactory.IntegerSpinnerValueFactory max="999999999" min="0" />
+         </valueFactory>
+      </Spinner>
+      <Label layoutX="142.0" layoutY="457.0" text="Дни:" />
+   </children>
+</AnchorPane>

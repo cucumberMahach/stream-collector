@@ -8,10 +8,18 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class StageUtil {
-    public static void loadFXML(URL filename, Stage stage, String title, double width, double height, boolean alwaysOnTop, boolean show) throws IOException {
-        Parent root = FXMLLoader.load(filename);
+    public static void loadFXML(String filename, Stage stage, String title, double width, double height, boolean alwaysOnTop, boolean show) throws IOException {
+        var url = StageUtil.class.getClassLoader().getResource(filename);
+        assert url != null;
+
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setResources(ResourceBundle.getBundle("stages/ru", new Locale("ru", "RU")));
+
+        Parent root = fxmlLoader.load(url.openStream());
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
@@ -28,7 +36,7 @@ public class StageUtil {
             stage.show();
     }
 
-    public static void loadFXML(URL filename, Stage stage, boolean show) throws IOException {
+    public static void loadFXML(String filename, Stage stage, boolean show) throws IOException {
         loadFXML(filename, stage, null, 0, 0, false, show);
     }
 }
