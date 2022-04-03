@@ -1,11 +1,14 @@
 package admin;
 
-import admin.stages.bans.BanLine;
-import admin.stages.bans.BanUser;
+import admin.stages.dataViews.TgBanView;
+import admin.stages.dataViews.TgHistoryView;
+import admin.stages.dataViews.TgUserView;
 import database.ConfigType;
 import database.entities.TgBanEntity;
+import database.entities.TgHistoryEntity;
 import database.entities.TgUserEntity;
 import org.hibernate.StatelessSession;
+import org.hibernate.query.NativeQuery;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -16,11 +19,41 @@ public class AdminDatabase {
         session.close();
     }
 
-    public ArrayList<BanUser> searchBanUsers(String text, Integer count){
-        var users = new ArrayList<BanUser>();
+    public ArrayList<TgHistoryView> searchHistory(TgUserEntity tgUser, String text, Integer count, ZonedDateTime date){
+        var history = new ArrayList<TgHistoryView>();
 
         var session = getSession();
-        var query = session.createNativeQuery("select * from `twitch-collector`.tgusers where id like :text or tg_id like :text or firstName like :text or lastName like :text or username like :text or language like :text or messagesTotal like :text or state like :text or firstOnlineTime like :text or lastOnlineTime like :text", TgUserEntity.class);
+        NativeQuery<TgHistoryEntity> query = null;
+        String q = "select * from `twitch-collector`.tghistory where (id like :text or tgUser_id like :text or message like :text or result like :text)";
+        if (tgUser != null)
+            q += " and tgUser_id = :userId";
+        if (date != null)
+            q += " and (date(messageTime) = date(:date) or date(requestTime) = date(:date) or date(answerTime) = date(:date))";
+        q += " order by messageTime desc";
+
+        query = session.createNativeQuery(q, TgHistoryEntity.class);
+        query.setParameter("text", "%" + text + "%");
+        if (tgUser != null)
+            query.setParameter("userId", tgUser.id);
+        if (date != null)
+            query.setParameter("date", date);
+        if (count != null)
+            query.setMaxResults(count);
+
+        var result = query.list();
+        result.sort((o1, o2) -> o1.messageTime.toInstant().compareTo(o2.messageTime.toInstant()));
+        for (var hist : result){
+            history.add(TgHistoryView.fromTgHistory(hist));
+        }
+
+        return history;
+    }
+
+    public ArrayList<TgUserView> searchUsers(String text, Integer count){
+        var users = new ArrayList<TgUserView>();
+
+        var session = getSession();
+        var query = session.createNativeQuery("select * from `twitch-collector`.tgusers where id like :text or tg_id like :text or firstName like :text or lastName like :text or username like :text or language like :text or messagesTotal like :text or state like :text", TgUserEntity.class);
         query.setParameter("text", "%" + text + "%");
         if (count != null)
             query.setMaxResults(count);
@@ -28,14 +61,14 @@ public class AdminDatabase {
         var result = query.list();
 
         for (var user : result){
-            users.add(BanUser.fromTgUserEntity(user));
+            users.add(TgUserView.fromTgUser(user));
         }
 
         return users;
     }
 
-    public ArrayList<BanLine> getBans(TgUserEntity tgUser, ZonedDateTime currentTime){
-        var bans = new ArrayList<BanLine>();
+    public ArrayList<TgBanView> getBans(TgUserEntity tgUser, ZonedDateTime currentTime){
+        var bans = new ArrayList<TgBanView>();
 
         var session = getSession();
         var query = session.createNativeQuery("select * from `twitch-collector`.tgbans where tgUser_id = :id order by fromTime,untilTime", TgBanEntity.class);
@@ -44,7 +77,7 @@ public class AdminDatabase {
         var result = query.list();
 
         for (var ban : result){
-            bans.add(BanLine.fromTgBan(ban, currentTime));
+            bans.add(TgBanView.fromTgBan(ban, currentTime));
         }
 
         return bans;

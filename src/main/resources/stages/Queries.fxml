@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
+
+<AnchorPane prefHeight="670.0" prefWidth="1147.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.stages.queries.QueriesStage">
+      <SplitPane dividerPositions="0.2981651376146789, 0.7828746177370031" layoutX="7.0" layoutY="7.0" orientation="VERTICAL" prefHeight="641.0" prefWidth="1109.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
+         <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <Label layoutX="4.0" layoutY="8.0" text="Поиск:" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="8.0" />
+                  <TextField fx:id="searchUsers" layoutX="44.0" layoutY="4.0" prefHeight="25.0" prefWidth="984.0" AnchorPane.leftAnchor="44.0" AnchorPane.rightAnchor="67.0" AnchorPane.topAnchor="4.0" />
+               <ChoiceBox fx:id="cbShowCountUsers" layoutX="1032.0" layoutY="4.0" prefHeight="25.0" prefWidth="58.0" value="50" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="4.0">
+                  <items>
+                     <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="10" />
+                        <String fx:value="30" />
+                        <String fx:value="50" />
+                        <String fx:value="100" />
+                        <String fx:value="200" />
+                        <String fx:value="500" />
+                        <String fx:value="Все" />
+                     </FXCollections>
+                  </items>
+               </ChoiceBox>
+                  <TableView fx:id="usersTable" prefHeight="144.0" prefWidth="1095.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0">
+                     <columns>
+                        <TableColumn prefWidth="65.0" text="ID">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="id" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="112.0" text="TG_ID">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="tg_id" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="264.0" text="Имя">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="name" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="267.0" text="Ник">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="username" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn minWidth="7.0" prefWidth="51.0" text="Язык">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="language" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="88.0" text="Сообщений">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="messagesTotal" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="130.0" text="Первый онлайн">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="firstOnlineTime" />
+                           </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="139.0" text="Последний онлайн">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="lastOnlineTime" />
+                           </cellValueFactory>
+                        </TableColumn>
+                     </columns>
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                        </FXCollections>
+                     </items>
+                  </TableView>
+               </children>
+            </AnchorPane>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="881.0">
+               <children>
+                  <TableView fx:id="historyTable" prefHeight="213.0" prefWidth="1095.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0">
+                  <columns>
+                     <TableColumn prefWidth="75.0" text="HISTORY_ID">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="history_id" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="75.0" text="USER_ID">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="user_id" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="262.0" text="Сообщение">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="message" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="137.0" text="Результат">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="result" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="149.0" text="Сообщение в">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="messageTime" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="145.0" text="Обработка в">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="requestTime" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="149.0" text="Ответ в">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="answerTime" />
+                        </cellValueFactory>
+                     </TableColumn>
+                     <TableColumn prefWidth="129.0" text="Продолжительность">
+                        <cellValueFactory>
+                           <PropertyValueFactory property="duration" />
+                        </cellValueFactory>
+                     </TableColumn>
+                  </columns>
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                        </FXCollections>
+                     </items>
+                  </TableView>
+               <Label layoutX="4.0" layoutY="8.0" text="Поиск:" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="8.0" />
+               <TextField fx:id="searchHistory" layoutX="44.0" layoutY="4.0" prefHeight="25.0" prefWidth="714.0" AnchorPane.leftAnchor="44.0" AnchorPane.rightAnchor="349.0" AnchorPane.topAnchor="4.0" />
+               <CheckBox fx:id="checkGlobalHistory" layoutX="985.0" layoutY="8.0" mnemonicParsing="false" text="Глобально" AnchorPane.rightAnchor="66.0" AnchorPane.topAnchor="8.0" />
+               <ChoiceBox fx:id="cbShowCountHistory" layoutX="1032.0" layoutY="4.0" prefHeight="25.0" prefWidth="58.0" value="50" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="4.0">
+                  <items>
+                     <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="10" />
+                        <String fx:value="30" />
+                        <String fx:value="50" />
+                        <String fx:value="100" />
+                        <String fx:value="200" />
+                        <String fx:value="500" />
+                        <String fx:value="Все" />
+                     </FXCollections>
+                  </items>
+               </ChoiceBox>
+               <DatePicker fx:id="historyDate" disable="true" layoutX="806.0" layoutY="4.0" AnchorPane.rightAnchor="151.0" AnchorPane.topAnchor="4.0" />
+               <CheckBox fx:id="checkHistoryDate" layoutX="786.0" layoutY="8.0" mnemonicParsing="false" AnchorPane.rightAnchor="329.0" AnchorPane.topAnchor="8.0" />
+               </children>
+            </AnchorPane>
+         <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <children>
+               <WebView fx:id="infoWeb" prefHeight="173.0" prefWidth="1093.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            </children>
+         </AnchorPane>
+         </items>
+      </SplitPane>
+</AnchorPane>

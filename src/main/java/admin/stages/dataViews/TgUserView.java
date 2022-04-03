@@ -1,11 +1,11 @@
-package admin.stages.bans;
+package admin.stages.dataViews;
 
 import database.entities.TgUserEntity;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import util.TimeUtil;
 
-public class BanUser {
+public class TgUserView {
     public final StringProperty id = new SimpleStringProperty("");
     public final StringProperty tg_id = new SimpleStringProperty("");
     public final StringProperty name = new SimpleStringProperty("");
@@ -15,8 +15,8 @@ public class BanUser {
     public final StringProperty firstOnlineTime = new SimpleStringProperty("");
     public final StringProperty lastOnlineTime = new SimpleStringProperty("");
 
-    public static BanUser fromTgUserEntity(TgUserEntity tgUser){
-        var user = new BanUser();
+    public static TgUserView fromTgUser(TgUserEntity tgUser){
+        var user = new TgUserView();
 
         user.id.set(tgUser.id.toString());
         user.tg_id.set(tgUser.tgId);

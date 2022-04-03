@@ -5,14 +5,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="250.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.AdminApp">
+<AnchorPane prefHeight="250.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.stages.main.AdminApp">
    <children>
       <VBox prefHeight="250.0" prefWidth="250.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Button fx:id="btnBans" mnemonicParsing="false" prefWidth="9.99999999E8" text="Баны">
+            <Button fx:id="btnBans" mnemonicParsing="false" prefHeight="33.0" prefWidth="9.99999999E8" text="Баны">
                <font>
                   <Font name="Calibri" size="17.0" />
                </font></Button>
+            <Button fx:id="btnQueries" mnemonicParsing="false" prefHeight="33.0" prefWidth="9.99999999E8" text="Запросы">
+               <font>
+                  <Font name="Calibri" size="17.0" />
+               </font>
+            </Button>
          </children>
          <opaqueInsets>
             <Insets />

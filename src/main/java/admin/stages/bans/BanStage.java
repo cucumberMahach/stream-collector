@@ -1,8 +1,8 @@
-package admin.stages;
+package admin.stages.bans;
 
 import admin.AdminDatabase;
-import admin.stages.bans.BanLine;
-import admin.stages.bans.BanUser;
+import admin.stages.dataViews.TgBanView;
+import admin.stages.dataViews.TgUserView;
 import database.entities.TgBanEntity;
 import database.entities.TgUserEntity;
 import javafx.application.Platform;
@@ -24,8 +24,8 @@ public class BanStage implements Initializable {
     public Button btnUnban;
     public TextArea txtReason;
     public TextField search;
-    public TableView<BanUser> usersTable;
-    public TableView<BanLine> bansTable;
+    public TableView<TgUserView> usersTable;
+    public TableView<TgBanView> bansTable;
     public Button btnBan;
     public RadioButton rb_byTime;
     public ToggleGroup ban_time;
@@ -46,7 +46,7 @@ public class BanStage implements Initializable {
 
     private final AdminDatabase database;
     private boolean hasActiveBan = false;
-    private BanUser currentUser;
+    private TgUserView currentUser;
 
     public BanStage() {
         database = new AdminDatabase();
@@ -61,14 +61,14 @@ public class BanStage implements Initializable {
             count = Integer.valueOf(showCount);
         }
 
-        ObservableList<BanUser> data = usersTable.getItems();
+        ObservableList<TgUserView> data = usersTable.getItems();
         data.clear();
-        var newData = database.searchBanUsers(text, count);
+        var newData = database.searchUsers(text, count);
         data.addAll(newData);
     }
 
     private void getBans(TgUserEntity tgUser){
-        ObservableList<BanLine> data = bansTable.getItems();
+        ObservableList<TgBanView> data = bansTable.getItems();
         data.clear();
         var newData = database.getBans(tgUser, TimeUtil.getZonedNow());
         data.addAll(newData);
@@ -77,7 +77,7 @@ public class BanStage implements Initializable {
         updateButtonsStates(newData);
     }
 
-    private void updateButtonsStates(ArrayList<BanLine> data){
+    private void updateButtonsStates(ArrayList<TgBanView> data){
         hasActiveBan = false;
         for (var line : data){
             if (!line.remain.get().isEmpty()){
@@ -97,7 +97,7 @@ public class BanStage implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        UnaryOperator<TextFormatter.Change> daysFilter = change -> {
+        UnaryOperator<TextFormatter.Change> numbersFilter = change -> {
             String newText = change.getControlNewText();
             if (newText.matches("[0-9]+") || newText.equals("0")) {
                 return change;
@@ -105,10 +105,10 @@ public class BanStage implements Initializable {
             return null;
         };
 
-        days.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, daysFilter));
-        hours.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, daysFilter));
-        minutes.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, daysFilter));
-        seconds.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, daysFilter));
+        days.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, numbersFilter));
+        hours.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, numbersFilter));
+        minutes.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, numbersFilter));
+        seconds.getEditor().setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), 0, numbersFilter));
 
         txtReason.setTextFormatter(new TextFormatter<String>(change -> change.getControlNewText().length() <= 100 ? change : null));
 
@@ -154,7 +154,7 @@ public class BanStage implements Initializable {
         });
 
         search.setOnAction(actionEvent -> {
-            searchUsers(search.getText());
+            updateUsersTable();
         });
 
         usersTable.setOnMouseClicked(mouseEvent -> {
@@ -226,7 +226,11 @@ public class BanStage implements Initializable {
         });
     }
 
-    private void showNewReasonDialog(BanLine banLine, String reason){
+    private void updateUsersTable(){
+        searchUsers(search.getText());
+    }
+
+    private void showNewReasonDialog(TgBanView tgBanView, String reason){
         TextInputDialog inputDialog = new TextInputDialog(reason);
         inputDialog.setTitle("Ввод причины бана");
         inputDialog.setHeaderText("Введите новую причину бана");
@@ -238,9 +242,9 @@ public class BanStage implements Initializable {
                 alert.setHeaderText("Некорректная длина причины");
                 alert.setContentText("Длина причины должна быть не больше 100 символов");
                 alert.showAndWait();
-                showNewReasonDialog(banLine, s);
+                showNewReasonDialog(tgBanView, s);
             }else {
-                var tgBan = banLine.toTgBan();
+                var tgBan = tgBanView.toTgBan();
                 tgBan.reason = s;
                 database.updateTgBan(tgBan);
 

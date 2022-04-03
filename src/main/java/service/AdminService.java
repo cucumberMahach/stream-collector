@@ -1,16 +1,6 @@
 package service;
 
-import admin.AdminApp;
-import bot.AsyncBotBodyExecutor;
-import bot.Bot;
-import bot.BotDatabase;
-import bot.BotStandardBody;
-import bot.logic.BotStandardLogic;
-import bot.view.BotStandardView;
-import org.telegram.telegrambots.meta.api.objects.Update;
-
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
+import admin.stages.main.AdminApp;
 
 public class AdminService extends AbstractService{
 

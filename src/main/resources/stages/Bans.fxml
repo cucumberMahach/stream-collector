@@ -6,7 +6,7 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="612.0" prefWidth="920.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.stages.BanStage">
+<AnchorPane prefHeight="612.0" prefWidth="1120.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.stages.bans.BanStage">
    <children>
       <Label layoutX="14.0" layoutY="14.0" text="Поиск:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
       <TextField fx:id="search" layoutX="54.0" layoutY="10.0" prefHeight="25.0" prefWidth="782.0" AnchorPane.leftAnchor="54.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="10.0" />
@@ -21,37 +21,37 @@
                               <PropertyValueFactory property="id" />
                           </cellValueFactory>
                       </TableColumn>
-                      <TableColumn prefWidth="98.0" text="TG_ID">
+                      <TableColumn prefWidth="119.0" text="TG_ID">
                           <cellValueFactory>
                               <PropertyValueFactory property="tg_id" />
                           </cellValueFactory>
                       </TableColumn>
-                        <TableColumn prefWidth="196.0" text="Имя">
+                        <TableColumn prefWidth="257.0" text="Имя">
                             <cellValueFactory>
                               <PropertyValueFactory property="name" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="111.0" text="Ник">
+                        <TableColumn prefWidth="212.0" text="Ник">
                             <cellValueFactory>
                               <PropertyValueFactory property="username" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn minWidth="7.0" prefWidth="51.0" text="Язык">
+                        <TableColumn minWidth="7.0" prefWidth="43.0" text="Язык">
                             <cellValueFactory>
                               <PropertyValueFactory property="language" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="75.0" text="Сообщений">
+                        <TableColumn prefWidth="85.0" text="Сообщений">
                             <cellValueFactory>
                               <PropertyValueFactory property="messagesTotal" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="154.0" text="Первый онлайн">
+                        <TableColumn prefWidth="145.0" text="Первый онлайн">
                             <cellValueFactory>
                               <PropertyValueFactory property="firstOnlineTime" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="139.0" text="Последний онлайн">
+                        <TableColumn prefWidth="148.0" text="Последний онлайн">
                             <cellValueFactory>
                               <PropertyValueFactory property="lastOnlineTime" />
                             </cellValueFactory>
@@ -78,27 +78,27 @@
                               <PropertyValueFactory property="user_id" />
                           </cellValueFactory>
                       </TableColumn>
-                        <TableColumn prefWidth="198.0" text="Причина">
+                        <TableColumn prefWidth="315.0" text="Причина">
                             <cellValueFactory>
                               <PropertyValueFactory property="reason" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn minWidth="0.0" prefWidth="120.0" text="Дата с">
+                        <TableColumn minWidth="0.0" prefWidth="149.0" text="Дата с">
                             <cellValueFactory>
                               <PropertyValueFactory property="fromTime" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn minWidth="0.0" prefWidth="123.0" text="Дата по">
+                        <TableColumn minWidth="0.0" prefWidth="125.0" text="Дата по">
                             <cellValueFactory>
                               <PropertyValueFactory property="untilTime" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="146.0" text="Продолжительность">
+                        <TableColumn prefWidth="170.0" text="Продолжительность">
                             <cellValueFactory>
                               <PropertyValueFactory property="duration" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="152.0" text="Осталось">
+                        <TableColumn prefWidth="166.0" text="Осталось">
                             <cellValueFactory>
                               <PropertyValueFactory property="remain" />
                             </cellValueFactory>
@@ -126,19 +126,19 @@
             <RadioButton fx:id="rb_forever" mnemonicParsing="false" prefHeight="9.9999999999E10" prefWidth="9999999.0" text="Навсегда" toggleGroup="$ban_time" />
          </children>
       </VBox>
-      <Spinner fx:id="hours" disable="true" editable="true" layoutX="291.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="291.0">
+      <Spinner fx:id="hours" editable="true" layoutX="291.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="291.0">
           <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory max="24" min="0" />
           </valueFactory>
       </Spinner>
       <Label layoutX="260.0" layoutY="457.0" text="Часы:" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="260.0" />
-      <Spinner fx:id="minutes" disable="true" editable="true" layoutX="394.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="394.0">
+      <Spinner fx:id="minutes" editable="true" layoutX="394.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="394.0">
           <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory max="60" min="0" />
           </valueFactory>
       </Spinner>
       <Label layoutX="366.0" layoutY="457.0" text="Мин:" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="366.0" />
-      <Spinner fx:id="seconds" disable="true" editable="true" layoutX="492.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="492.0">
+      <Spinner fx:id="seconds" editable="true" layoutX="492.0" layoutY="453.0" prefHeight="25.0" prefWidth="68.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="492.0">
           <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory max="60" min="0" />
           </valueFactory>
@@ -163,11 +163,11 @@
               </FXCollections>
           </items>
       </ChoiceBox>
-      <Spinner fx:id="days" disable="true" editable="true" layoutX="168.0" layoutY="453.0" prefHeight="25.0" prefWidth="86.0">
+      <Spinner fx:id="days" disable="true" editable="true" layoutX="168.0" layoutY="453.0" prefHeight="25.0" prefWidth="86.0" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="168.0">
          <valueFactory>
             <SpinnerValueFactory.IntegerSpinnerValueFactory max="999999999" min="0" />
          </valueFactory>
       </Spinner>
-      <Label layoutX="142.0" layoutY="457.0" text="Дни:" />
+      <Label layoutX="142.0" layoutY="457.0" text="Дни:" AnchorPane.bottomAnchor="138.0" AnchorPane.leftAnchor="142.0" />
    </children>
 </AnchorPane>

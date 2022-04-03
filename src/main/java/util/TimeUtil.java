@@ -7,6 +7,7 @@ import java.time.temporal.TemporalUnit;
 public class TimeUtil {
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter formatterMs = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public static ZonedDateTime getZonedNow(){
         return ZonedDateTime.ofInstant(Instant.now(), zoneId);
@@ -35,8 +36,20 @@ public class TimeUtil {
                 duration.toSecondsPart());
     }
 
+    public static String formatDurationHoursMs(Duration duration){
+        return String.format("%02d:%02d:%02d.%03d",
+                duration.toDays(),
+                duration.toMinutesPart(),
+                duration.toSecondsPart(),
+                duration.toMillisPart());
+    }
+
     public static String formatZoned(ZonedDateTime zoned){
         return formatter.format(zoned);
+    }
+
+    public static String formatZonedMs(ZonedDateTime zoned){
+        return formatterMs.format(zoned);
     }
 
     public static ZonedDateTime fromLocalDate(LocalDate localDate){

@@ -1,4 +1,4 @@
-package admin.stages.bans;
+package admin.stages.dataViews;
 
 import database.entities.TgBanEntity;
 import database.entities.TgUserEntity;
@@ -9,7 +9,7 @@ import util.TimeUtil;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
-public class BanLine {
+public class TgBanView {
     public final StringProperty ban_id = new SimpleStringProperty("");
     public final StringProperty user_id = new SimpleStringProperty("");
     public final StringProperty reason = new SimpleStringProperty("");
@@ -21,8 +21,8 @@ public class BanLine {
     public ZonedDateTime fromTimeZoned;
     public ZonedDateTime untilTimeZoned;
 
-    public static BanLine fromTgBan(TgBanEntity tgBan, ZonedDateTime currentTime){
-        var banLine = new BanLine();
+    public static TgBanView fromTgBan(TgBanEntity tgBan, ZonedDateTime currentTime){
+        var banLine = new TgBanView();
         banLine.ban_id.set(tgBan.id.toString());
         banLine.user_id.set(tgBan.tgUser.id.toString());
         banLine.reason.set(tgBan.reason);
