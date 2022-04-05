@@ -107,14 +107,8 @@ public class QueriesStage implements Initializable {
         try {
             var engine = infoWeb.getEngine();
             var html = new String(QueriesStage.class.getClassLoader().getResourceAsStream("html/history.html").readAllBytes(), StandardCharsets.UTF_8);
-            html = html.replaceAll("%history_id%", tgHistoryView.history_id.get());
-            html = html.replaceAll("%user_id%", tgHistoryView.user_id.get());
-            html = html.replaceAll("%message%", tgHistoryView.message.get());
-            html = html.replaceAll("%result%", tgHistoryView.result.get());
-            html = html.replaceAll("%messageTime%", tgHistoryView.messageTime.get());
-            html = html.replaceAll("%requestTime%", tgHistoryView.requestTime.get());
-            html = html.replaceAll("%answerTime%", tgHistoryView.answerTime.get());
-            html = html.replaceAll("%duration%", tgHistoryView.duration.get());
+            html = html.replaceAll("%message%", tgHistoryView.message.get().replaceAll("\n", "<br>"));
+            html = html.replaceAll("%result%", tgHistoryView.result.get().replaceAll("\n", "<br>"));
             engine.loadContent(html);
         } catch (IOException e) {
             e.printStackTrace();

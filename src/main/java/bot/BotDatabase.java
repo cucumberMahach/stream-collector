@@ -65,6 +65,6 @@ public class BotDatabase {
     }
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(ConfigType.LocalOnServer);
+        return database.DatabaseUtil.getStateLessSession(ConfigType.Local);
     }
 }

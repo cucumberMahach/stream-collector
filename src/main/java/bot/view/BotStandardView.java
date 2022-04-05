@@ -26,6 +26,6 @@ public class BotStandardView extends BotView{
     @Override
     public void sendBanReply(Update update, TgBanEntity tgBan) {
         var banUntil = TimeUtil.formatDurationDays(Duration.between(botLogic.getBotBody().getCurrentTime(), tgBan.untilTime));
-        botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), String.format("<b>&#10060;Вы забанены&#10060;</b>\n\n&#128221; Причина: <i>%s</i>.\n&#128197; До конца бана осталось <b>%s</b>", tgBan.reason, banUntil));
+        botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), String.format("<b>&#10060;Вы забанены&#10060;</b>\n\n&#128221; Причина: <i>%s</i>\n&#128197; До конца бана осталось <b>%s</b>", tgBan.reason, banUntil));
     }
 }

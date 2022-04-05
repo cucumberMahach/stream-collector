@@ -8,12 +8,33 @@
     body{
         background-color: cornflowerblue;
     }
-    p{
-        font: 13px Arial, sans-serif;
+    span{
+        font: 14px Arial, sans-serif;
         color: black;
+    }
+    span.red{
+        color: rgb(255, 106, 0);
+        font-size: 14px;
+        font-style: italic;
+        font-weight: bold;
+    }
+    div.mrg{
+        margin-top: 20px;
+    }
+    .unselectable {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none;   /* Chrome/Safari/Opera */
+        -khtml-user-select: none;    /* Konqueror */
+        -moz-user-select: none;      /* Firefox */
+        -ms-user-select: none;       /* Internet Explorer/Edge */
+        user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
     }
 </style>
 <body>
-<p>Text</p>
+<div><span class="red unselectable">Сообщение:</span></div>
+<div><span>%message%</span></div>
+<div class="mrg"><span class="red unselectable">Результат:</span></div>
+<div><span>%result%</span></div>
 </body>
 </html>

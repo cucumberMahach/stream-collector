@@ -23,7 +23,7 @@ public class AdminDatabase {
         var history = new ArrayList<TgHistoryView>();
 
         var session = getSession();
-        NativeQuery<TgHistoryEntity> query = null;
+
         String q = "select * from `twitch-collector`.tghistory where (id like :text or tgUser_id like :text or message like :text or result like :text)";
         if (tgUser != null)
             q += " and tgUser_id = :userId";
@@ -31,7 +31,7 @@ public class AdminDatabase {
             q += " and (date(messageTime) = date(:date) or date(requestTime) = date(:date) or date(answerTime) = date(:date))";
         q += " order by messageTime desc";
 
-        query = session.createNativeQuery(q, TgHistoryEntity.class);
+        var query = session.createNativeQuery(q, TgHistoryEntity.class);
         query.setParameter("text", "%" + text + "%");
         if (tgUser != null)
             query.setParameter("userId", tgUser.id);
