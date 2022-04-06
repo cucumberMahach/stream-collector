@@ -1,5 +1,7 @@
 package settings;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import database.DatabaseConfigType;
 
@@ -12,4 +14,15 @@ public class SettingsObject {
 
     @SerializedName("admin_database")
     public DatabaseConfigType adminDatabase;
+
+    public String getString(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        return gson.toJson(this);
+    }
+
+    public boolean isSettingsCorrect(){
+        return circlesDatabase != null && botDatabase != null && adminDatabase != null;
+    }
 }

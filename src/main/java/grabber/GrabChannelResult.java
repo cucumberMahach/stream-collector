@@ -1,11 +1,10 @@
-package util.grabber;
+package grabber;
 
 import json.ChattersGlobal;
 import util.DataUtil;
 import util.TimeUtil;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 
 public class GrabChannelResult {
     public ChattersGlobal chattersGlobal;

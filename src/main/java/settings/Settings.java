@@ -17,13 +17,26 @@ public class Settings {
     private static final String SETTINGS_FILE_NAME = "settings.json";
     private static final String STATIC_SETTINGS_FILE_NAME = "settings/settings.json";
     private SettingsObject settingsObject;
+    private boolean tryLoadFromCustomFile = false;
+    private boolean criticalError = false;
+    private boolean customFileError = false;
 
     private Settings() {
         var file = new File(SETTINGS_FILE_NAME);
         boolean staticSettings = !file.exists();
+        if (!staticSettings){
+            tryLoadFromCustomFile = true;
+        }
         boolean result = load(staticSettings);
+        if (result)
+            result = settingsObject.isSettingsCorrect();
         if (!result && !staticSettings){
-            load(true);
+            customFileError = true;
+            if (!load(true)){
+                criticalError = true;
+            }
+        }else if (!result){
+            criticalError = true;
         }
     }
 
@@ -64,5 +77,17 @@ public class Settings {
 
     public SettingsObject getSettings(){
         return settingsObject;
+    }
+
+    public boolean isTryLoadFromCustomFile() {
+        return tryLoadFromCustomFile;
+    }
+
+    public boolean isCriticalError() {
+        return criticalError;
+    }
+
+    public boolean isCustomFileError() {
+        return customFileError;
     }
 }

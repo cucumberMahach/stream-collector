@@ -1,4 +1,4 @@
-package util.grabber;
+package grabber;
 
 public enum GrabChannelError {
     None,

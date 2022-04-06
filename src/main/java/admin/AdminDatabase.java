@@ -8,6 +8,7 @@ import database.entities.TgBanEntity;
 import database.entities.TgHistoryEntity;
 import database.entities.TgUserEntity;
 import org.hibernate.StatelessSession;
+import settings.Settings;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -131,6 +132,7 @@ public class AdminDatabase {
     }
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(DatabaseConfigType.Local);
+        var settings = Settings.instance.getSettings();
+        return database.DatabaseUtil.getStateLessSession(settings.adminDatabase);
     }
 }

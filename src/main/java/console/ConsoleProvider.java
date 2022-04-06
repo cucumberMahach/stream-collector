@@ -3,6 +3,7 @@ package console;
 import com.diogonunes.jcolor.Attribute;
 import logging.Logger;
 import service.ServiceManager;
+import settings.Settings;
 import util.PropertiesFile;
 
 import java.util.*;
@@ -21,9 +22,27 @@ public class ConsoleProvider {
 
     }
 
+    private void printSettingsStatus(){
+        if (Settings.instance.isCriticalError()){
+            System.out.println(colorize("*** Критическая ошибка при загрузке настроек ***", Attribute.BRIGHT_RED_TEXT(), Attribute.ITALIC()));
+        }else{
+            if (Settings.instance.isTryLoadFromCustomFile()){
+                if (Settings.instance.isCustomFileError()){
+                    System.out.println(colorize("*** Ошибка при загрузке настроек из внешнего файла ***", Attribute.BRIGHT_RED_TEXT(), Attribute.ITALIC()));
+                    System.out.println(colorize("*** Настройки загружены из внутреннего файла ***", Attribute.BRIGHT_WHITE_TEXT(), Attribute.ITALIC()));
+                }else{
+                    System.out.println(colorize("*** Настройки загружены из внешнего файла ***", Attribute.BRIGHT_WHITE_TEXT(), Attribute.ITALIC()));
+                }
+            }else{
+                System.out.println(colorize("*** Настройки загружены из внутреннего файла ***", Attribute.BRIGHT_WHITE_TEXT(), Attribute.ITALIC()));
+            }
+        }
+    }
+
     public void startConsole(){
         ConsoleProvider.instance.printProgramHeader();
         scanner = new Scanner(System.in);
+        printSettingsStatus();
         System.out.println(colorize("Opening console...", Attribute.BRIGHT_GREEN_TEXT()));
         System.out.println(colorize("Enter 'help' for view all commands, 'exit' for quit from program", Attribute.BRIGHT_GREEN_TEXT()));
         String cmd = "";
@@ -145,6 +164,13 @@ public class ConsoleProvider {
                 break;
             case "exit":
                 break;
+            case "settings":
+                System.out.println("-----------------------------------------------");
+                printSettingsStatus();
+                System.out.println("-----------------------------------------------");
+                System.out.println(Settings.instance.getSettings().getString());
+                System.out.println("-----------------------------------------------");
+                break;
             default:
                 System.out.print(colorize("Unknown command '", Attribute.BRIGHT_RED_TEXT()));
                 System.out.print(colorize(cmd, Attribute.BRIGHT_RED_TEXT(), Attribute.BOLD()));
@@ -171,5 +197,6 @@ public class ConsoleProvider {
         System.out.println(colorize("\t log [service name] - open log for service", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t services - show all services names", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t running - show all running services", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t settings - show current settings", Attribute.BRIGHT_CYAN_TEXT()));
     }
 }

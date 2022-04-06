@@ -5,6 +5,7 @@ import database.entities.TgBanEntity;
 import database.entities.TgHistoryEntity;
 import database.entities.TgUserEntity;
 import org.hibernate.StatelessSession;
+import settings.Settings;
 
 public class BotDatabase {
     public BotDatabase(){
@@ -62,6 +63,7 @@ public class BotDatabase {
     }
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(DatabaseConfigType.Local);
+        var settings = Settings.instance.getSettings();
+        return database.DatabaseUtil.getStateLessSession(settings.botDatabase);
     }
 }

@@ -1,12 +1,12 @@
 package service;
 
-import database.DatabaseConfigType;
 import database.entities.*;
 import logging.LogStatus;
 import org.hibernate.StatelessSession;
+import settings.Settings;
 import util.*;
-import util.grabber.GrabChannelResult;
-import util.grabber.TwitchGrabber;
+import grabber.GrabChannelResult;
+import grabber.TwitchGrabber;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -25,7 +25,8 @@ public class CircleService extends AbstractService {
     public int toNextCircleMs = 60000;
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(DatabaseConfigType.Local);
+        var settings = Settings.instance.getSettings();
+        return database.DatabaseUtil.getStateLessSession(settings.circlesDatabase);
     }
 
     @Override

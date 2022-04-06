@@ -1,8 +1,6 @@
-package util.grabber;
+package grabber;
 
 import util.FutureUtils;
-import util.grabber.GrabChannelResult;
-import util.grabber.GrabUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;
