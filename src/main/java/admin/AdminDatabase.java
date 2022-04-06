@@ -3,12 +3,11 @@ package admin;
 import admin.stages.dataViews.TgBanView;
 import admin.stages.dataViews.TgHistoryView;
 import admin.stages.dataViews.TgUserView;
-import database.ConfigType;
+import database.DatabaseConfigType;
 import database.entities.TgBanEntity;
 import database.entities.TgHistoryEntity;
 import database.entities.TgUserEntity;
 import org.hibernate.StatelessSession;
-import org.hibernate.query.NativeQuery;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -132,6 +131,6 @@ public class AdminDatabase {
     }
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        return database.DatabaseUtil.getStateLessSession(DatabaseConfigType.Local);
     }
 }

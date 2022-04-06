@@ -1,13 +1,10 @@
 package bot;
 
-import database.ConfigType;
-import database.entities.ChannelToCheckEntity;
+import database.DatabaseConfigType;
 import database.entities.TgBanEntity;
 import database.entities.TgHistoryEntity;
 import database.entities.TgUserEntity;
 import org.hibernate.StatelessSession;
-
-import java.time.ZonedDateTime;
 
 public class BotDatabase {
     public BotDatabase(){
@@ -65,6 +62,6 @@ public class BotDatabase {
     }
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        return database.DatabaseUtil.getStateLessSession(DatabaseConfigType.Local);
     }
 }

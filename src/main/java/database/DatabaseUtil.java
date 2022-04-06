@@ -39,14 +39,14 @@ public class DatabaseUtil {
     }
 
 
-    public static Session getSession(ConfigType configType) throws HibernateException {
-        init(configType.getFileName());
+    public static Session getSession(DatabaseConfigType databaseConfigType) throws HibernateException {
+        init(databaseConfigType.getFileName());
         return sessionFactory.openSession();
     }
 
 
-    public static StatelessSession getStateLessSession(ConfigType configType) throws HibernateException{
-        init(configType.getFileName());
+    public static StatelessSession getStateLessSession(DatabaseConfigType databaseConfigType) throws HibernateException{
+        init(databaseConfigType.getFileName());
         return sessionFactory.openStatelessSession();
     }
 

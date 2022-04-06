@@ -1,6 +1,6 @@
 package service;
 
-import database.ConfigType;
+import database.DatabaseConfigType;
 import database.entities.*;
 import logging.LogStatus;
 import org.hibernate.StatelessSession;
@@ -25,7 +25,7 @@ public class CircleService extends AbstractService {
     public int toNextCircleMs = 60000;
 
     private StatelessSession getSession(){
-        return database.DatabaseUtil.getStateLessSession(ConfigType.Local);
+        return database.DatabaseUtil.getStateLessSession(DatabaseConfigType.Local);
     }
 
     @Override
