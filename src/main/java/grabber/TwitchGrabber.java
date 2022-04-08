@@ -15,40 +15,11 @@ public class TwitchGrabber {
 
     private final ArrayList<String> channelsToGrab = new ArrayList<>();
     private List<GrabChannelResult> grabResults = new ArrayList<>();
-    private int threads;
     private long timeoutMsec = 5000;
 
-    public TwitchGrabber(int threads){
-        this.threads = threads;
-    }
-
     public TwitchGrabber(){
-        this.threads = Runtime.getRuntime().availableProcessors();
+
     }
-
-    /*public void startGrab() throws ExecutionException, InterruptedException {
-        ExecutorService pool = Executors.newFixedThreadPool(threads);
-
-        List<CompletableFuture<GrabChannelResult>> futures = new ArrayList<>();
-        for (final String channel : channelsToGrab) {
-            CompletableFuture<GrabChannelResult> f = CompletableFuture.supplyAsync(() -> {
-                GrabChannelResult result = new GrabChannelResult();
-                result.channelName = channel;
-                result.chattersGlobal = GrabUtil.getChattersGlobal(channel);
-                return result;
-            }, pool).exceptionally(throwable -> {
-                GrabChannelResult result = new GrabChannelResult();
-                result.channelName = channel;
-                result.setError(throwable);
-                return result;
-            });
-            futures.add(f);
-        }
-
-        var future = FutureUtils.allOf(futures);
-
-        grabResults = future.get();
-    }*/
 
     public void startGrabAsyncHttp() throws ExecutionException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
@@ -76,14 +47,6 @@ public class TwitchGrabber {
         var future = FutureUtils.allOf(futures);
 
         grabResults = future.get();
-    }
-
-    public int getThreads() {
-        return threads;
-    }
-
-    public void setThreads(int threads) {
-        this.threads = threads;
     }
 
     public long getTimeoutMsec() {

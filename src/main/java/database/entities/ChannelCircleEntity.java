@@ -25,4 +25,8 @@ public class ChannelCircleEntity {
 
     @Column(name = "collectTime")
     public ZonedDateTime collectTime;
+
+    @Column(name = "chattersCount")
+    @Unsigned
+    public Integer chattersCount;
 }

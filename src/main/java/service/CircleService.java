@@ -34,7 +34,7 @@ public class CircleService extends AbstractService {
         StatelessSession session = getSession();
         try {
             while (true) {
-                TwitchGrabber grabber = new TwitchGrabber(0);
+                TwitchGrabber grabber = new TwitchGrabber();
 
                 var query = session.createQuery("FROM ChannelToCheckEntity ORDER BY priority asc", ChannelToCheckEntity.class);
                 var channels = query.list();
@@ -163,6 +163,9 @@ public class CircleService extends AbstractService {
         var q = session.createNativeQuery("select MAX(q.time) as `time` from (select TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `twitch-collector`.`circles` where `endTime` IS NOT NULL order by endTime desc limit :lim) as q");
         q.setParameter("lim", processCirclesCount);
         var res = (BigDecimal) q.getSingleResult();
+        if (res == null){
+            return 0;
+        }
         return (int) (res.floatValue() * 1000);
     }
 
@@ -242,6 +245,7 @@ public class CircleService extends AbstractService {
         channelCircle.circle = currentCircle;
         channelCircle.channel = currentChannel;
         channelCircle.collectTime = grabCh.timestamp;
+        channelCircle.chattersCount = grabCh.chattersGlobal.chatterCount;
         return channelCircle;
     }
 

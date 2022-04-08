@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class ChattersGlobal {
     @SerializedName("chatter_count")
-    public long chatterCount;
+    public int chatterCount;
 
     @SerializedName("chatters")
     public Chatters chatters;
