@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.*?>
 
-<AnchorPane prefHeight="670.0" prefWidth="1147.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.stages.queries.QueriesStage">
+<AnchorPane prefHeight="670.0" prefWidth="1147.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.twitchcollector.app.admin.stages.queries.QueriesStage">
       <SplitPane dividerPositions="0.2981651376146789, 0.7828746177370031" layoutX="7.0" layoutY="7.0" orientation="VERTICAL" prefHeight="641.0" prefWidth="1109.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
          <items>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">

@@ -5,13 +5,14 @@
 <hibernate-configuration>
     <session-factory>
 
-        <!-- database connection properties -->
+        <!-- com.twitchcollector.app.database connection properties -->
         <property name="hibernate.connection.driver_class">org.mariadb.jdbc.Driver</property>
         <property name="hibernate.jdbc.time_zone">Europe/Moscow</property>
         <property name="hibernate.connection.url">jdbc:mariadb://localhost:3306/twitch-collector?serverTimezone=Europe/Moscow</property>
         <property name="hibernate.connection.username">sosiskin</property>
         <property name="hibernate.connection.password">l79ds2j8m6e20l986f5j9p5g</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.MariaDB103Dialect</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MariaDB10Dialect</property>
+        <property name="hibernate.globally_quoted_identifiers">false</property>
         <property name="connection.autoReconnect">true</property>
         <property name="connection.autoReconnectForPools">true</property>
         <property name="connection.is-connection-validation-required">true</property>
@@ -22,8 +23,8 @@
         <property name="hibernate.c3p0.max_statements">200</property>
         <property name="hibernate.c3p0.timeout">100</property> <!-- wait_timeout -->
 
-        <!-- show mysql queries output in console -->
-        <property name="hibernate.show_sql">false</property>
+        <!-- show mysql queries output in com.twitchcollector.app.console -->
+        <!--<property name="hibernate.show_sql">true</property>-->
 
         <!-- cache -->
         <property name="hibernate.cache.use_second_level_cache">true</property>
@@ -39,7 +40,7 @@
 
 
 
-        <!-- manage automatic database creation -->
+        <!-- manage automatic com.twitchcollector.app.database creation -->
         <!--<property name="hibernate.hbm2ddl.auto">create-drop</property>-->
 
     </session-factory>

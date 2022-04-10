@@ -1,0 +1,58 @@
+package com.twitchcollector.app.bot;
+
+import com.twitchcollector.app.logging.LogStatus;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import com.twitchcollector.app.service.AbstractService;
+
+import java.util.concurrent.ArrayBlockingQueue;
+
+public class AsyncBotBodyExecutor extends Thread{
+
+    protected BotBody botBody;
+    protected ArrayBlockingQueue<Update> queue;
+    protected AbstractService service;
+
+    public AsyncBotBodyExecutor(AbstractService service, String name) {
+        super();
+        this.service = service;
+        setName(name);
+    }
+
+    @Override
+    public void run() {
+        if (botBody == null){
+            service.writeLog(LogStatus.Error, String.format("AsyncBotBodyExecutor названный %s - не задан алгоритм бота", getName()));
+            return;
+        }
+
+        if (queue == null){
+            service.writeLog(LogStatus.Error, String.format("AsyncBotBodyExecutor названный %s - не задана очередь сообщений", getName()));
+            return;
+        }
+
+        while (true) {
+            try {
+                Update update = queue.take();
+                botBody.onUpdate(update);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+
+    public void setBotBody(BotBody botBody) {
+        this.botBody = botBody;
+    }
+
+    public BotBody getBotBody() {
+        return botBody;
+    }
+
+    public ArrayBlockingQueue<Update> getQueue() {
+        return queue;
+    }
+
+    public void setQueue(ArrayBlockingQueue<Update> queue) {
+        this.queue = queue;
+    }
+}

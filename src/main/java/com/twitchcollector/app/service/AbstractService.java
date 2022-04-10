@@ -1,0 +1,71 @@
+package com.twitchcollector.app.service;
+
+import com.twitchcollector.app.logging.LogMessage;
+import com.twitchcollector.app.logging.LogStatus;
+import com.twitchcollector.app.logging.Logger;
+import com.twitchcollector.app.util.DataUtil;
+
+import java.util.ArrayList;
+
+public abstract class AbstractService extends Thread{
+
+    private final ArrayList<LogMessage> logMessages = new ArrayList<>();
+    protected String serviceName;
+    protected boolean isStoppable;
+    protected boolean isReusable;
+    private boolean logEnabled = false;
+
+    public AbstractService(String serviceName){
+        this(serviceName, true, true);
+    }
+
+    public AbstractService(String serviceName, boolean isStoppable, boolean isReusable){
+        this.serviceName = serviceName;
+        this.isStoppable = isStoppable;
+        this.isReusable = isReusable;
+    }
+
+    protected abstract void work();
+
+    public void writeLog(LogStatus status, String message){
+        LogMessage msg = new LogMessage();
+        msg.serviceName = serviceName;
+        msg.message = message;
+        msg.status = status;
+        logMessages.add(msg);
+        if (logEnabled)
+            System.out.println(msg.getColorizedLine());
+
+        Logger.instance.constraintLogArray(logMessages);
+        Logger.instance.processToFile(msg);
+    }
+
+    public void setLogEnabled(boolean enabled){
+        logEnabled = enabled;
+    }
+
+    public boolean isLogEnabled(){
+        return logEnabled;
+    }
+
+    @Override
+    public void run() {
+        writeLog(LogStatus.Success, "Сервис запущен");
+        try {
+            work();
+        }catch (Throwable ex){
+            writeLog(LogStatus.Error, "Исключение в абстрактном сервисе: " + ex.getMessage() + " " + DataUtil.getStackTrace(ex));
+            ex.printStackTrace();
+        }
+        writeLog(LogStatus.Success, "Сервис завершён");
+        ServiceManager.instance.setServiceEnabled(serviceName, false);
+    }
+
+    public void startService(){
+        start();
+    }
+
+    public void stopService(){
+        interrupt();
+    }
+}
