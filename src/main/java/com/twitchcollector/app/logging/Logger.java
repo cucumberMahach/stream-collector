@@ -21,8 +21,8 @@ public class Logger {
     private final ArrayList<LogMessage> globalLogMessages = new ArrayList<>();
 
     private int maxLogMessages = 100;
-    private int maxFileSizeKB = 40 * 1024;
-    private int fileSizeToTrimKB = 35 * 1024;
+    private int maxFileSizeKB = 115 * 1024;
+    private int fileSizeToTrimKB = 100 * 1024;
 
     private Logger(){}
 

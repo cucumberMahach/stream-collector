@@ -15,6 +15,8 @@ public class GrabChannelResult {
     public GrabAbstractException exception = null;
     public Throwable unknownException = null;
 
+    public GrabChannelResult previous = null;
+
     public void setError(Throwable ex){
         exception = null;
         unknownException = null;

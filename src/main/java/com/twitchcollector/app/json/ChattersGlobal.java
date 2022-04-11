@@ -12,4 +12,11 @@ public class ChattersGlobal {
     public int calcUsersCount(){
         return chatters.viewers.length + chatters.moderators.length + chatters.admins.length + chatters.vips.length + chatters.broadcaster.length + chatters.staff.length;
     }
+
+    public boolean isEqual(ChattersGlobal other){
+        return (chatterCount == other.chatterCount &&
+                calcUsersCount() == other.calcUsersCount() &&
+                chatters.isEqual(other.chatters)
+        );
+    }
 }
