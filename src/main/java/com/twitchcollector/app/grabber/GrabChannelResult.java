@@ -30,12 +30,10 @@ public class GrabChannelResult {
 
     @SerializedName("error")
     public GrabChannelError error = GrabChannelError.None;
-
     public transient GrabAbstractException exception = null;
     public transient Throwable unknownException = null;
 
-    @SerializedName("previous")
-    public GrabChannelResult previous = null;
+    public transient GrabChannelResult previous = null;
 
     public void setError(Throwable ex){
         exception = null;

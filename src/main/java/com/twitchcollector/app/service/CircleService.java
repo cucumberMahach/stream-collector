@@ -9,7 +9,6 @@ import com.twitchcollector.app.util.*;
 import com.twitchcollector.app.grabber.GrabChannelResult;
 import com.twitchcollector.app.grabber.TwitchGrabber;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,6 +16,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class CircleService extends AbstractService {
     private final String LAST_GRABS_FILENAME = "lastGrabs.json";
@@ -27,6 +27,7 @@ public class CircleService extends AbstractService {
     private int noUpdatesWaitMs = 5000;
 
     private int viewerLeaveSec = 10 * 60;
+    private int lastGrabActualDurationSec = 10 * 60;
 
     private ZonedDateTime circleStartTime;
     private final int threadsToUse;
@@ -39,17 +40,19 @@ public class CircleService extends AbstractService {
         pool = Executors.newFixedThreadPool(threadsToUse);
     }
 
-
     private StatelessSession getSession(){
         var settings = Settings.instance.getSettings();
         return DatabaseUtil.getStateLessSession(settings.circlesDatabase);
     }
 
-    private void loadSerializedData(){
+    private void loadLastGrabs(){
         if (Files.exists(Paths.get(LAST_GRABS_FILENAME))){
             try {
                 lastGrabResult = GrabChannelResult.deserializeGrabsFromFile(LAST_GRABS_FILENAME);
-                writeLog(LogStatus.Success, String.format("Подгружены lastGrabs с диска - %d записей", lastGrabResult.size()));
+                int loadedSize = lastGrabResult.size();
+                var nowTime = TimeUtil.getZonedNow();
+                lastGrabResult = lastGrabResult.stream().filter(result -> nowTime.minusSeconds(lastGrabActualDurationSec).isBefore(result.timestamp)).collect(Collectors.toList());
+                writeLog(LogStatus.Success, String.format("Подгружены lastGrabs с диска - %d записей, актуальных - %d", loadedSize, lastGrabResult.size()));
             } catch (Throwable e) {
                 writeLog(LogStatus.Error, "Ошибка при загрузке lastGrabs с диска: " + DataUtil.getStackTrace(e));
                 e.printStackTrace();
@@ -71,7 +74,7 @@ public class CircleService extends AbstractService {
 
     @Override
     protected void work() {
-        loadSerializedData();
+        loadLastGrabs();
         StatelessSession session = null;
         try {
             while (true) {
@@ -482,14 +485,10 @@ public class CircleService extends AbstractService {
             //boolean b_lastChannelCircle = false;
             //boolean b_fitsToUpdate = false;
             if (preCircle != null) {
-                //var query = session.createNativeQuery("select * from `twitch-collector`.users_channels where user_id = (select id from `twitch-collector`.users where name = :name) and lastCircle_id = :preCircle_id and channel_id = :channel_id and type_id = :userType", UserChannelEntity.class);
-                //var query = session.createQuery("from UserChannelEntity where user.name = :name and channel.id = :channel_id and type = :userType and lastCircle.id = :preCircle_id", UserChannelEntity.class);
                 var query = session.createNativeQuery("select * from (select * from `twitch-collector`.users_channels where user_id = (select id from `twitch-collector`.users where name = :name) and channel_id = :channel_id and type_id = :userType) as q join `twitch-collector`.circles on (q.lastCircle_id = circles.id) where endTime is not null order by endTime desc", UserChannelEntity.class);
                 query.setParameter("name", name);
                 query.setParameter("channel_id", channel.id);
                 query.setParameter("userType", type.id);
-                //query.setParameter("preCircle_id", preCircle.id);
-                //query.setFirstResult(0);
                 query.setMaxResults(1);
                 var userChannel = query.uniqueResult();
                 /*if (userChannel == null){
@@ -537,7 +536,6 @@ public class CircleService extends AbstractService {
             }
 
             var query = session.createNativeQuery("select * from `twitch-collector`.users where name = :name", UserEntity.class);
-            //var query = session.createQuery("from UserEntity where name = :name", UserEntity.class);
             query.setParameter("name", name);
             query.setFirstResult(0);
             query.setMaxResults(1);
