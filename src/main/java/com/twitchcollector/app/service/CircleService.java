@@ -9,24 +9,28 @@ import com.twitchcollector.app.util.*;
 import com.twitchcollector.app.grabber.GrabChannelResult;
 import com.twitchcollector.app.grabber.TwitchGrabber;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class CircleService extends AbstractService {
-
-    private ZonedDateTime circleStartTime;
-
-    private final int threadsToUse;
-    private final ExecutorService pool;
+    private final String LAST_GRABS_FILENAME = "lastGrabs.json";
 
     private int toNextCircleMs = 5000;//60000
     private int noChannelsWaitMs = 10000;
     private int allChannelsErrorsWaitMs = 5000;
     private int noUpdatesWaitMs = 5000;
 
+    private int viewerLeaveSec = 10 * 60;
+
+    private ZonedDateTime circleStartTime;
+    private final int threadsToUse;
+    private final ExecutorService pool;
     private List<GrabChannelResult> lastGrabResult = new ArrayList<>();
 
     public CircleService() {
@@ -41,8 +45,33 @@ public class CircleService extends AbstractService {
         return DatabaseUtil.getStateLessSession(settings.circlesDatabase);
     }
 
+    private void loadSerializedData(){
+        if (Files.exists(Paths.get(LAST_GRABS_FILENAME))){
+            try {
+                lastGrabResult = GrabChannelResult.deserializeGrabsFromFile(LAST_GRABS_FILENAME);
+                writeLog(LogStatus.Success, String.format("Подгружены lastGrabs с диска - %d записей", lastGrabResult.size()));
+            } catch (Throwable e) {
+                writeLog(LogStatus.Error, "Ошибка при загрузке lastGrabs с диска: " + DataUtil.getStackTrace(e));
+                e.printStackTrace();
+            }
+        }else{
+            writeLog(LogStatus.Warning, "LastGrabs отсутствуют на диске");
+        }
+    }
+
+    private void saveLastGrabs(){
+        try {
+            GrabChannelResult.serializeGrabsToFile(lastGrabResult, LAST_GRABS_FILENAME);
+            writeLog(LogStatus.Success, "LastGrabs сохранены на диск");
+        } catch (Throwable e) {
+            writeLog(LogStatus.Error, "Ошибка при сохранении lastGrabs на диск: " + DataUtil.getStackTrace(e));
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void work() {
+        loadSerializedData();
         StatelessSession session = null;
         try {
             while (true) {
@@ -177,6 +206,7 @@ public class CircleService extends AbstractService {
                     //=================================================================================
                 }
 
+                // Удаление старых grabs и добавление новых, сброс на диск
                 if (!lastGrabResult.isEmpty()) {
                     for (var grab : updatedGrabs){
                         if (grab.previous != null && lastGrabResult.contains(grab.previous)){
@@ -189,6 +219,7 @@ public class CircleService extends AbstractService {
                 }else{
                     lastGrabResult.addAll(updatedGrabs);
                 }
+                saveLastGrabs();
 
                 session.beginTransaction();
                 currentCircle.endTime = TimeUtil.getZonedNow();
@@ -227,6 +258,7 @@ public class CircleService extends AbstractService {
                 if (newGrab.channelName.equals(oldGrab.channelName)){
                     if (!(newGrab.chattersGlobal.isEqual(oldGrab.chattersGlobal))){
                         newGrab.previous = oldGrab;
+                        oldGrab.previous = null;
                         updated.add(newGrab);
                     }
                     i.remove();
@@ -481,19 +513,18 @@ public class CircleService extends AbstractService {
                     if (lastUserChannelCircle != null) {
                         //b_lastChannelCircle = true;
                         boolean fitsByPrevious = false;
-                        /*if (grab.previous != null) {
-                            String[] array = grab.previous.chattersGlobal.chatters.getByUserType(type.type);
-                            if (array != null){
-                                for (String s : array){
-                                    if (name.equals(s)) {
-                                        fitsByPrevious = true;
-                                        break;
-                                    }
-                                }
+                        if (grab.previous != null) {
+                            var set = grab.previous.chattersGlobal.chatters.getSetByUserType(type.type);
+                            if (set != null){
+                                fitsByPrevious = set.contains(name);
                             }
-                        }*/
+                        }
 
-                        boolean fitsToUpdate = fitsByPrevious || circleStartTime.minusSeconds(10 * 60).compareTo(lastUserChannelCircle.collectTime) < 0;
+                        if (fitsByPrevious){
+                            writeLog(LogStatus.Warning, "fitsByPrevious = true; " + name);
+                        }
+
+                        boolean fitsToUpdate = fitsByPrevious || circleStartTime.minusSeconds(viewerLeaveSec).compareTo(lastUserChannelCircle.collectTime) < 0;
                         if (fitsToUpdate) {
                             //b_fitsToUpdate = true;
                             //Add to update

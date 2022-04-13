@@ -43,6 +43,7 @@ public class TwitchGrabber {
                 GrabChannelResult result = new GrabChannelResult();
                 result.channelName = channel;
                 result.chattersGlobal = GrabUtil.createChattersGlobalObject(s);
+                result.chattersGlobal.chatters.fillSetsFromArrays();
                 return result;
             }).exceptionally(throwable -> {
                 GrabChannelResult result = new GrabChannelResult();
