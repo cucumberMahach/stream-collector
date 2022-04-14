@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class CircleService extends AbstractService {
     private final String LAST_GRABS_FILENAME = "lastGrabs.json";
 
-    private int toNextCircleMs = 5000;//60000
+    private int toNextCircleMs = 5000;
     private int noChannelsWaitMs = 10000;
     private int allChannelsErrorsWaitMs = 5000;
     private int noUpdatesWaitMs = 5000;
@@ -30,14 +30,12 @@ public class CircleService extends AbstractService {
     private int lastGrabActualDurationSec = 10 * 60;
 
     private ZonedDateTime circleStartTime;
-    private final int threadsToUse;
-    private final ExecutorService pool;
+    private static final int threadsToUse = (int) (Runtime.getRuntime().availableProcessors() * 1.5f);
+    private static final ExecutorService pool = Executors.newFixedThreadPool(threadsToUse);
     private List<GrabChannelResult> lastGrabResult = new ArrayList<>();
 
     public CircleService() {
         super("circle");
-        threadsToUse = Runtime.getRuntime().availableProcessors();
-        pool = Executors.newFixedThreadPool(threadsToUse);
     }
 
     private StatelessSession getSession(){
@@ -52,6 +50,7 @@ public class CircleService extends AbstractService {
                 int loadedSize = lastGrabResult.size();
                 var nowTime = TimeUtil.getZonedNow();
                 lastGrabResult = lastGrabResult.stream().filter(result -> nowTime.minusSeconds(lastGrabActualDurationSec).isBefore(result.timestamp)).collect(Collectors.toList());
+                lastGrabResult.forEach(result -> result.chattersGlobal.chatters.fillSetsFromArrays());
                 writeLog(LogStatus.Success, String.format("Подгружены lastGrabs с диска - %d записей, актуальных - %d", loadedSize, lastGrabResult.size()));
             } catch (Throwable e) {
                 writeLog(LogStatus.Error, "Ошибка при загрузке lastGrabs с диска: " + DataUtil.getStackTrace(e));
@@ -177,12 +176,6 @@ public class CircleService extends AbstractService {
                     }
 
                     //Channel Circle
-                    /*var q = session.createNativeQuery("insert into `twitch-collector`.channels_circles (channel_id, chattersCount, circle_id, collectTime) values (:channel, :count, :circle, :collect)");
-                    q.setParameter("channel", channelCircle.channel.id);
-                    q.setParameter("count", channelCircle.chattersCount);
-                    q.setParameter("circle", channelCircle.circle.id);
-                    q.setParameter("collect", channelCircle.collectTime);
-                    q.executeUpdate();*/
                     session.insert(channelCircle);
 
                     //Users Channels
@@ -496,28 +489,31 @@ public class CircleService extends AbstractService {
                 }*/
                 if (userChannel != null) {
                     //b_userChannel = true;
-                    //Fits by time
-                    var key = new Pair<>(userChannel.lastCircle.id, channel.id);
-                    ChannelCircleEntity lastUserChannelCircle;
-                    if (channelsCirclesHash.containsKey(key)) {
-                        lastUserChannelCircle = channelsCirclesHash.get(key);
-                    } else {
-                        var q = session.createNativeQuery("select * from `twitch-collector`.channels_circles where circle_id = :circle and channel_id = :channel", ChannelCircleEntity.class);
-                        q.setParameter("circle", userChannel.lastCircle.id);
-                        q.setParameter("channel", channel.id);
-                        lastUserChannelCircle = q.uniqueResult();
-                        if (lastUserChannelCircle != null)
-                            channelsCirclesHash.put(key, lastUserChannelCircle);
-                    }
-                    if (lastUserChannelCircle != null) {
-                        //b_lastChannelCircle = true;
-                        boolean fitsByPrevious = false;
-                        if (grab.previous != null) {
-                            var set = grab.previous.chattersGlobal.chatters.getSetByUserType(type.type);
-                            if (set != null){
-                                fitsByPrevious = set.contains(name);
-                            }
+
+                    // Fits by time
+                    boolean fitsByPrevious = false;
+                    if (grab.previous != null) {
+                        var set = grab.previous.chattersGlobal.chatters.getSetByUserType(type.type);
+                        if (set != null){
+                            fitsByPrevious = set.contains(name);
                         }
+                    }
+                    ChannelCircleEntity lastUserChannelCircle = null;
+                    if (!fitsByPrevious) {
+                        var key = new Pair<>(userChannel.lastCircle.id, channel.id);
+                        if (channelsCirclesHash.containsKey(key)) {
+                            lastUserChannelCircle = channelsCirclesHash.get(key);
+                        } else {
+                            var q = session.createNativeQuery("select * from `twitch-collector`.channels_circles where circle_id = :circle and channel_id = :channel", ChannelCircleEntity.class);
+                            q.setParameter("circle", userChannel.lastCircle.id);
+                            q.setParameter("channel", channel.id);
+                            lastUserChannelCircle = q.uniqueResult();
+                            if (lastUserChannelCircle != null)
+                                channelsCirclesHash.put(key, lastUserChannelCircle);
+                        }
+                    }
+                    if (fitsByPrevious || lastUserChannelCircle != null) {
+                        //b_lastChannelCircle = true;
 
                         if (fitsByPrevious){
                             writeLog(LogStatus.Warning, "fitsByPrevious = true; " + name);
