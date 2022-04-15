@@ -37,7 +37,7 @@ public class TimeUtil {
 
     public static String formatDurationHoursMs(Duration duration){
         return String.format("%02d:%02d:%02d.%03d",
-                duration.toDays(),
+                duration.toHoursPart(),
                 duration.toMinutesPart(),
                 duration.toSecondsPart(),
                 duration.toMillisPart());

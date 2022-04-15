@@ -113,6 +113,19 @@ public class ConsoleProvider {
             return true;
         }
 
+        if (cmd.startsWith("savestop ")){
+            String serviceName = cmd.substring("savestop ".length()).trim().toLowerCase(Locale.ROOT);
+            String result = ServiceManager.instance.setServiceEnabled(serviceName, false, false, true);
+            if (result == null){
+                System.out.print(colorize("Save stop to service '", Attribute.BRIGHT_GREEN_TEXT()));
+                System.out.print(colorize(serviceName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                System.out.println(colorize("' executed", Attribute.BRIGHT_GREEN_TEXT()));
+            }else{
+                System.out.println(colorize(result, Attribute.BRIGHT_RED_TEXT()));
+            }
+            return true;
+        }
+
         if (cmd.startsWith("log ")){
             String logName = cmd.substring("log ".length()).trim().toLowerCase(Locale.ROOT);
             String result = null;
@@ -183,6 +196,7 @@ public class ConsoleProvider {
         System.out.println(colorize("\t version - show information about program", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t start [service name] - start service", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t stop [service name] - stop service", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t savestop [service name] - safe service stop", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t log [service name] - open log for service", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t services - show all services names", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t running - show all running services", Attribute.BRIGHT_CYAN_TEXT()));

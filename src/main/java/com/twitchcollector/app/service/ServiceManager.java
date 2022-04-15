@@ -25,10 +25,10 @@ public class ServiceManager {
     }
 
     public String setServiceEnabled(String name, boolean value){
-        return setServiceEnabled(name, value, false);
+        return setServiceEnabled(name, value, false, false);
     }
 
-    public String setServiceEnabled(String name, boolean value, boolean internalStop){
+    public String setServiceEnabled(String name, boolean value, boolean internalStop, boolean saveStop){
         for (String sname : allServices){
             if (sname.equals(name)){
                 if (value) {
@@ -54,9 +54,13 @@ public class ServiceManager {
                         return "Service '"+sname+"' is not running";
                     }else{
                         if (services.get(sname).isStoppable) {
-                            if (!internalStop)
-                                services.get(sname).stopService();
-                            services.remove(sname);
+                            if (saveStop){
+                                services.get(sname).saveStop();
+                            }else {
+                                if (!internalStop)
+                                    services.get(sname).stopService();
+                                services.remove(sname);
+                            }
                             return null;
                         }else{
                             return "Cannot stop unstoppable service '" + sname + "'";

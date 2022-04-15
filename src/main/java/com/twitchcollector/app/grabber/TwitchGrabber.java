@@ -30,6 +30,7 @@ public class TwitchGrabber {
     }
 
     public void startGrabAsyncHttp() throws ExecutionException, InterruptedException {
+        log(LogStatus.None, String.format("Началось получение данных. Требуется загрузить информацию о %d каналах", channelsToGrab.size()));
         grabResults.clear();
 
         List<CompletableFuture<GrabChannelResult>> futures = new ArrayList<>();
@@ -55,6 +56,7 @@ public class TwitchGrabber {
         }
         var future = FutureUtils.allOf(futures);
         grabResults.addAll(future.get());
+        log(LogStatus.Success, "Получение данных завершено");
     }
 
     public void log(LogStatus status, String message){

@@ -13,7 +13,7 @@ import java.util.logging.Level;
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Locale.setDefault(new Locale("ru", "RU"));
-        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.FINEST);
+        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");

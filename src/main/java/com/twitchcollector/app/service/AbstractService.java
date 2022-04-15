@@ -15,6 +15,8 @@ public abstract class AbstractService extends Thread{
     protected boolean isReusable;
     private boolean logEnabled = false;
 
+    protected boolean running = false;
+
     public AbstractService(String serviceName){
         this(serviceName, true, true);
     }
@@ -50,12 +52,21 @@ public abstract class AbstractService extends Thread{
 
     @Override
     public void run() {
+        running = true;
         writeLog(LogStatus.Success, "Сервис запущен");
         try {
             work();
         }catch (Throwable ex){
             writeLog(LogStatus.Error, "Исключение в абстрактном сервисе: " + ex.getMessage() + " " + DataUtil.getStackTrace(ex));
             ex.printStackTrace();
+        }
+        if (!running){
+            boolean globalLogEnabled = Logger.instance.isGlobalLogEnabled();
+            Logger.instance.setGlobalLogEnabled(true);
+            Logger.instance.writeLog(LogStatus.Success, String.format("Выполнено безопасное выключение сервиса %s", serviceName));
+            Logger.instance.setGlobalLogEnabled(globalLogEnabled);
+        }else {
+            running = false;
         }
         writeLog(LogStatus.Success, "Сервис завершён");
         ServiceManager.instance.setServiceEnabled(serviceName, false);
@@ -67,5 +78,9 @@ public abstract class AbstractService extends Thread{
 
     public void stopService(){
         interrupt();
+    }
+
+    public void saveStop(){
+        running = false;
     }
 }

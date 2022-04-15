@@ -77,6 +77,9 @@ public class CircleService extends AbstractService {
         StatelessSession session = null;
         try {
             while (true) {
+                if (!running)
+                    break;
+
                 writeLog(LogStatus.None, "======================================== Новый цикл ========================================");
                 session = getSession();
 
@@ -222,7 +225,7 @@ public class CircleService extends AbstractService {
                 session.update(currentCircle);
                 session.getTransaction().commit();
 
-                writeLog(LogStatus.Success, String.format("Обработано каналов: %d (%s)", currentCircle.totalChannels, TimeUtil.formatDuration(Duration.between(currentCircle.startTime, currentCircle.endTime))));
+                writeLog(LogStatus.Success, String.format("Обработано каналов: %d (%s)", currentCircle.totalChannels, TimeUtil.formatDurationHoursMs(Duration.between(currentCircle.startTime, currentCircle.endTime))));
                 sleep(toNextCircleMs);
                 session.close();
             }
@@ -483,7 +486,14 @@ public class CircleService extends AbstractService {
                 query.setParameter("channel_id", channel.id);
                 query.setParameter("userType", type.id);
                 query.setMaxResults(1);
-                var userChannel = query.uniqueResult();
+                UserChannelEntity userChannel = null;
+                try {
+                    userChannel = query.uniqueResult();
+                }catch (Throwable t){
+                    writeLog(LogStatus.Error, String.format("userChannel uniqueResult error: %s %d %d | %s", name, channel.id, type.id, DataUtil.getStackTrace(t)));
+                    t.printStackTrace();
+                    continue;
+                }
                 /*if (userChannel == null){
                     writeLog(LogStatus.Warning, String.format("test 2 - %s %s %s %s", name, channel.id.toString(), type.id.toString(), preCircle.id.toString()));
                 }*/
@@ -516,7 +526,7 @@ public class CircleService extends AbstractService {
                         //b_lastChannelCircle = true;
 
                         if (fitsByPrevious){
-                            writeLog(LogStatus.Warning, "fitsByPrevious = true; " + name);
+                            //writeLog(LogStatus.Warning, "fitsByPrevious = true; " + name);
                         }
 
                         boolean fitsToUpdate = fitsByPrevious || circleStartTime.minusSeconds(viewerLeaveSec).compareTo(lastUserChannelCircle.collectTime) < 0;
