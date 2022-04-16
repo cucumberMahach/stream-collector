@@ -16,6 +16,8 @@ public class BotStandardBody extends BotBody {
 
     @Override
     public void onUpdate(Update update) {
+        if (update.getMessage() == null)
+            return;
         initCurrentTime();
 
         // Уведомления при включении
@@ -47,6 +49,11 @@ public class BotStandardBody extends BotBody {
         fillUserInfo(update, user);
         botDB.updateTgUser(user);
         addToHistory(update, user, "");
+    }
+
+    @Override
+    public BotDatabase getDatabase() {
+        return botDB;
     }
 
     protected void parseMessage(Update update, TgUserEntity tgUser){

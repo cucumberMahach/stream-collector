@@ -485,6 +485,7 @@ public class CircleService extends AbstractService {
                 query.setParameter("name", name);
                 query.setParameter("channel_id", channel.id);
                 query.setParameter("userType", type.id);
+                query.setFirstResult(0);
                 query.setMaxResults(1);
                 UserChannelEntity userChannel = null;
                 try {

@@ -4,6 +4,7 @@ import com.twitchcollector.app.admin.stages.dataViews.TgBanView;
 import com.twitchcollector.app.admin.stages.dataViews.TgHistoryView;
 import com.twitchcollector.app.admin.stages.dataViews.TgUserView;
 import com.twitchcollector.app.database.DatabaseUtil;
+import com.twitchcollector.app.database.SharedDatabase;
 import com.twitchcollector.app.database.entities.TgBanEntity;
 import com.twitchcollector.app.database.entities.TgHistoryEntity;
 import com.twitchcollector.app.database.entities.TgUserEntity;
@@ -71,10 +72,8 @@ public class AdminDatabase {
         var bans = new ArrayList<TgBanView>();
 
         var session = getSession();
-        var query = session.createNativeQuery("select * from `twitch-collector`.tgbans where tgUser_id = :id order by fromTime,untilTime", TgBanEntity.class);
-        query.setParameter("id", tgUser.id);
 
-        var result = query.list();
+        var result = SharedDatabase.getBans(session, tgUser, currentTime);
 
         for (var ban : result){
             bans.add(TgBanView.fromTgBan(ban, currentTime));
@@ -85,43 +84,12 @@ public class AdminDatabase {
 
     public boolean makeBan(TgBanEntity tgBan){
         var session = getSession();
-
-        var query = session.createNativeQuery("select * from `twitch-collector`.tgbans where tgUser_id = :id order by untilTime desc", TgBanEntity.class);
-        query.setParameter("id", tgBan.tgUser.id);
-        query.setMaxResults(1);
-        var ban = query.uniqueResult();
-        if (ban != null){
-            if (ban.untilTime.isBefore(tgBan.fromTime)){
-                session.beginTransaction();
-                session.insert(tgBan);
-                session.getTransaction().commit();
-                return true;
-            }else{
-                return false;
-            }
-        }else{
-            session.beginTransaction();
-            session.insert(tgBan);
-            session.getTransaction().commit();
-            return true;
-        }
+        return SharedDatabase.makeBan(session, tgBan);
     }
 
     public boolean stopBan(TgUserEntity tgUser, ZonedDateTime currentTime){
         var session = getSession();
-
-        var query = session.createNativeQuery("select * from `twitch-collector`.tgbans where tgUser_id = :id order by untilTime desc", TgBanEntity.class);
-        query.setParameter("id", tgUser.id);
-        query.setMaxResults(1);
-        var ban = query.uniqueResult();
-        if (ban != null && ban.untilTime.isAfter(currentTime)){
-            ban.untilTime = currentTime;
-            session.beginTransaction();
-            session.update(ban);
-            session.getTransaction().commit();
-            return true;
-        }
-        return false;
+        return SharedDatabase.stopBan(session, tgUser, currentTime);
     }
 
     public void updateTgBan(TgBanEntity tgBan){

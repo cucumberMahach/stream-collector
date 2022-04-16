@@ -1,5 +1,6 @@
 package com.twitchcollector.app.bot.view;
 
+import com.twitchcollector.app.bot.commands.UserInfo;
 import com.twitchcollector.app.bot.logic.BotLogic;
 import com.twitchcollector.app.database.entities.TgBanEntity;
 import com.twitchcollector.app.database.entities.TgUserEntity;
@@ -12,6 +13,7 @@ public abstract class BotView {
     public abstract void sendHelp(Update update, TgUserEntity tgUser);
     public abstract void sendEnableNotification(Update update);
     public abstract void sendBanReply(Update update, TgBanEntity tgBan);
+    public abstract void sendUserInfo(Update update, UserInfo userInfo);
 
     public void setBotLogic(BotLogic botLogic) {
         this.botLogic = botLogic;

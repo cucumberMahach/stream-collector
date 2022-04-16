@@ -1,5 +1,6 @@
 package com.twitchcollector.app.bot.logic;
 
+import com.twitchcollector.app.bot.commands.UserInfo;
 import com.twitchcollector.app.database.entities.TgBanEntity;
 import com.twitchcollector.app.database.entities.TgUserEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -27,6 +28,13 @@ public class BotStandardLogic extends BotLogic{
 
     @Override
     public void commandRequest(Update update, TgUserEntity tgUser) {
-        body.getBot().sendSticker(update.getMessage().getChatId().toString(), "CAACAgIAAxkBAAEERyxiP1p-8qp8alVe51jr5SnwpQxLrgAChhsAAs7QiElhmJB0PqwN7yME", null);
+        var userInfo = showUserInfo(update.getMessage().getText());
+        view.sendUserInfo(update, userInfo);
+    }
+
+    private UserInfo showUserInfo(String userName){
+        var userInfo = new UserInfo();
+
+        return userInfo;
     }
 }

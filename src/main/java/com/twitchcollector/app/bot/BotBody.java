@@ -37,4 +37,6 @@ public abstract class BotBody {
         this.logic = logic;
         logic.setBotBody(this);
     }
+
+    public abstract BotDatabase getDatabase();
 }
