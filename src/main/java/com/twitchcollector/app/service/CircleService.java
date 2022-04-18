@@ -2,12 +2,13 @@ package com.twitchcollector.app.service;
 
 import com.twitchcollector.app.database.DatabaseUtil;
 import com.twitchcollector.app.database.entities.*;
+import com.twitchcollector.app.grabber.Platform;
 import com.twitchcollector.app.logging.LogStatus;
 import org.hibernate.StatelessSession;
 import com.twitchcollector.app.settings.Settings;
 import com.twitchcollector.app.util.*;
 import com.twitchcollector.app.grabber.GrabChannelResult;
-import com.twitchcollector.app.grabber.TwitchGrabber;
+import com.twitchcollector.app.grabber.Grabber;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -83,7 +84,7 @@ public class CircleService extends AbstractService {
                 writeLog(LogStatus.None, "======================================== Новый цикл ========================================");
                 session = getSession();
 
-                TwitchGrabber grabber = new TwitchGrabber();
+                Grabber grabber = new Grabber();
                 grabber.setServiceToLog(this);
 
                 var query = session.createQuery("FROM ChannelToCheckEntity ORDER BY priority asc", ChannelToCheckEntity.class);
@@ -96,7 +97,7 @@ public class CircleService extends AbstractService {
                 }
 
                 for (var channel : channels) {
-                    grabber.getChannelsToGrab().add(channel.name);
+                    grabber.getChannelsToGrab().add(new Pair<>(Platform.Twitch, channel.name));
                 }
                 circleStartTime = TimeUtil.getZonedNow();
 

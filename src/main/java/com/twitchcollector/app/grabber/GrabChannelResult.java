@@ -28,6 +28,8 @@ public class GrabChannelResult {
     @SerializedName("timestamp")
     public ZonedDateTime timestamp = TimeUtil.getZonedNow();
 
+    public Platform platform;
+
     @SerializedName("error")
     public GrabChannelError error = GrabChannelError.None;
     public transient GrabAbstractException exception = null;

@@ -7,12 +7,43 @@ import com.twitchcollector.app.json.ChattersGlobal;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+class WASDToken{
+    String result;
+}
+
+class WASDChannelID{
+    long channel_id;
+}
+
+class WASDChannelIDGlobal{
+    WASDChannelID result;
+}
+
+class WASDStreamID
+{
+    long stream_id;
+}
+
+class WASDMediaContainerStreams
+{
+    WASDStreamID[] media_container_streams;
+}
+
+class WASDStreamIDGlobal
+{
+    WASDMediaContainerStreams[] result;
+}
+
 public class GrabUtil {
+    private static final Gson gson = new GsonBuilder().create();
+
     private static String executeGet(final String httpsUrl) {
         try {
             URL url = new URL(httpsUrl);
@@ -31,13 +62,11 @@ public class GrabUtil {
     }
 
     public static ChattersGlobal getChattersGlobal(final String channelName){
-        String data = executeGet(getChattersUrl(channelName));
+        String data = executeGet(getTwitchChattersUrl(channelName));
         return createChattersGlobalObject(data);
     }
 
     public static ChattersGlobal createChattersGlobalObject(final String json){
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
         try {
             return gson.fromJson(json, ChattersGlobal.class);
         }catch (JsonSyntaxException e){
@@ -45,7 +74,43 @@ public class GrabUtil {
         }
     }
 
-    public static String getChattersUrl(final String channelName) {
+    public static String parseWASDTokenJson(final String json) throws IOException {
+        var obj = gson.fromJson(json, WASDToken.class);
+        return obj.result;
+    }
+
+    public static long parseWASDChannelIDJson(final String json){
+        var obj = gson.fromJson(json, WASDChannelIDGlobal.class);
+        return obj.result.channel_id;
+    }
+
+    public static long parseWASDStreamIDJson(final String json){
+        var obj = gson.fromJson(json, WASDStreamIDGlobal.class);
+        return obj.result[0].media_container_streams[0].stream_id;
+    }
+
+    public static ChattersGlobal parseWASDParticipantsJson(final String json){
+        return null;
+    }
+
+
+    public static String getTwitchChattersUrl(final String channelName) {
         return "https://tmi.twitch.tv/group/user/" + channelName + "/chatters";
+    }
+
+    public static String getWASDTokenUrl(){
+        return "https://wasd.tv/api/auth/chat-token";
+    }
+
+    public static String getWASDChannelIDUrl(final String channelName){
+        return "https://wasd.tv/api/channels/nicknames/" + channelName;
+    }
+
+    public static String getWASDStreamIDUrl(final String channelID){
+        return "https://wasd.tv/api/v2/media-containers?limit=1&offset=0&media_container_status=RUNNING,STOPPED&media_container_type=SINGLE&channel_id=" + channelID;
+    }
+
+    public static String getWASDParticipantsUrl(final String streamID, final int offset){
+        return String.format("https://wasd.tv/api/chat/streams/%s/participants?limit=10000&offset=%d", streamID, offset);
     }
 }

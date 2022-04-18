@@ -1,10 +1,11 @@
 package com.twitchcollector.app;
 
 import com.twitchcollector.app.console.ConsoleProvider;
-import com.twitchcollector.app.grabber.GrabChannelResult;
-import com.twitchcollector.app.grabber.TwitchGrabber;
+import com.twitchcollector.app.grabber.Grabber;
+import com.twitchcollector.app.grabber.Platform;
 import com.twitchcollector.app.logging.LogStatus;
 import com.twitchcollector.app.logging.Logger;
+import com.twitchcollector.app.util.Pair;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -12,12 +13,12 @@ import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        Locale.setDefault(new Locale("ru", "RU"));
+        /*Locale.setDefault(new Locale("ru", "RU"));
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");
-        System.exit(0);
+        System.exit(0);*/
 
         /*GrabChannelResult res = null;
         long startTime = 0;
@@ -38,5 +39,11 @@ public class Main {
                 System.out.println("grabbed");
             }
         }*/
+
+        var grabber = new Grabber();
+        grabber.getChannelsToGrab().add(new Pair<>(Platform.WASD, "megaradio"));
+        grabber.startGrabAsyncHttp();
+        var result = grabber.getResults();
+        System.exit(0);
     }
 }
