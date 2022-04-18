@@ -19,4 +19,8 @@ public class ChannelToCheckEntity {
 
     @Column(name = "priority")
     public Integer priority;
+
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable = false)
+    public SiteEntity site;
 }

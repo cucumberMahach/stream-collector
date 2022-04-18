@@ -3,6 +3,8 @@ package com.twitchcollector.app.grabber;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.twitchcollector.app.grabber.wasd.WASDGrabChannelData;
+import com.twitchcollector.app.grabber.wasd.WASDGrabParticipants;
 import com.twitchcollector.app.json.ChattersGlobal;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -39,6 +41,26 @@ class WASDMediaContainerStreams
 class WASDStreamIDGlobal
 {
     WASDMediaContainerStreams[] result;
+}
+
+class WASDParticipantAvatars
+{
+    String large;
+    String small;
+    String medium;
+}
+
+class WASDParticipant
+{
+    Long user_id;
+    String user_login;
+    String user_channel_role;
+    WASDParticipantAvatars user_avatar;
+}
+
+class WASDParticipantsGlobal
+{
+    WASDParticipant[] result;
 }
 
 public class GrabUtil {
@@ -89,8 +111,22 @@ public class GrabUtil {
         return obj.result[0].media_container_streams[0].stream_id;
     }
 
-    public static ChattersGlobal parseWASDParticipantsJson(final String json){
-        return null;
+    public static WASDGrabParticipants parseWASDParticipantsJson(final String json){
+        var obj = gson.fromJson(json, WASDParticipantsGlobal.class);
+        var participants = new WASDGrabParticipants();
+        for (var p : obj.result){
+            switch (p.user_channel_role){
+                case "CHANNEL_MODERATOR":
+                    participants.moderators.add(p.user_login);
+                    break;
+                case "CHANNEL_OWNER":
+                    participants.owners.add(p.user_login);
+                    break;
+                default: // CHANNEL_USER
+                    participants.users.add(p.user_login);
+            }
+        }
+        return participants;
     }
 
 

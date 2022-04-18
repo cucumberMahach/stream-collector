@@ -44,13 +44,20 @@ public class Chatters {
         global_mods_set.clear();
         viewers_set.clear();
 
-        broadcaster_set.addAll(Arrays.asList(broadcaster));
-        vips_set.addAll(Arrays.asList(vips));
-        moderators_set.addAll(Arrays.asList(moderators));
-        staff_set.addAll(Arrays.asList(staff));
-        admins_set.addAll(Arrays.asList(admins));
-        global_mods_set.addAll(Arrays.asList(global_mods));
-        viewers_set.addAll(Arrays.asList(viewers));
+        if (broadcaster != null)
+            broadcaster_set.addAll(Arrays.asList(broadcaster));
+        if (vips != null)
+            vips_set.addAll(Arrays.asList(vips));
+        if (moderators != null)
+            moderators_set.addAll(Arrays.asList(moderators));
+        if (staff != null)
+            staff_set.addAll(Arrays.asList(staff));
+        if (admins != null)
+            admins_set.addAll(Arrays.asList(admins));
+        if (global_mods != null)
+            global_mods_set.addAll(Arrays.asList(global_mods));
+        if (viewers != null)
+            viewers_set.addAll(Arrays.asList(viewers));
     }
 
     public boolean isEqual(Chatters other){

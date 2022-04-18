@@ -19,6 +19,10 @@ public class UserEntity {
     @Column(name = "name", unique = true, nullable = false)
     public String name;
 
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable = false)
+    public SiteEntity site;
+
     @OneToMany(mappedBy="user")
     public Set<UserChannelEntity> usersChannels = new HashSet<>();
 }

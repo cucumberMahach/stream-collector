@@ -87,7 +87,7 @@ public class CircleService extends AbstractService {
                 Grabber grabber = new Grabber();
                 grabber.setServiceToLog(this);
 
-                var query = session.createQuery("FROM ChannelToCheckEntity ORDER BY priority asc", ChannelToCheckEntity.class);
+                var query = session.createNativeQuery("select * from `twitch-collector`.channelstocheck join `twitch-collector`.sites ORDER BY priority", ChannelToCheckEntity.class);
                 var channels = query.list();
 
                 if (channels.isEmpty()) {
@@ -97,7 +97,7 @@ public class CircleService extends AbstractService {
                 }
 
                 for (var channel : channels) {
-                    grabber.getChannelsToGrab().add(new Pair<>(Platform.Twitch, channel.name));
+                    grabber.getChannelsToGrab().add(new Pair<>(Platform.fromNameInDB(channel.site.site), channel.name));
                 }
                 circleStartTime = TimeUtil.getZonedNow();
 
@@ -396,6 +396,7 @@ public class CircleService extends AbstractService {
         for (String user : allUsers) {
             UserEntity userEntity = new UserEntity();
             userEntity.name = user;
+            userEntity.site = grabCh.platform.getNameInDB();
             try {
                 session.insert(userEntity);
                 counts.first++;

@@ -27,6 +27,10 @@ public class ChannelEntity {
     @Column(name = "lastCheckedTime")
     public ZonedDateTime lastCheckedTime;
 
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable = false)
+    public SiteEntity site;
+
     @OneToMany(mappedBy="channel")
     public Set<UserChannelEntity> usersChannels = new HashSet<>();
 
