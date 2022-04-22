@@ -2,6 +2,7 @@ package com.twitchcollector.app.service;
 
 import com.twitchcollector.app.database.DatabaseUtil;
 import com.twitchcollector.app.database.entities.*;
+import com.twitchcollector.app.database.utils.PlatformScope;
 import com.twitchcollector.app.grabber.Platform;
 import com.twitchcollector.app.logging.LogStatus;
 import org.hibernate.StatelessSession;
@@ -10,7 +11,6 @@ import com.twitchcollector.app.util.*;
 import com.twitchcollector.app.grabber.GrabChannelResult;
 import com.twitchcollector.app.grabber.Grabber;
 
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -34,6 +34,7 @@ public class CircleService extends AbstractService {
     private static final int threadsToUse = (int) (Runtime.getRuntime().availableProcessors() * 1.5f);
     private static final ExecutorService pool = Executors.newFixedThreadPool(threadsToUse);
     private List<GrabChannelResult> lastGrabResult = new ArrayList<>();
+    private PlatformScope platformScope;
 
     public CircleService() {
         super("circle");
@@ -87,7 +88,7 @@ public class CircleService extends AbstractService {
                 Grabber grabber = new Grabber();
                 grabber.setServiceToLog(this);
 
-                var query = session.createNativeQuery("select * from `twitch-collector`.channelstocheck join `twitch-collector`.sites ORDER BY priority", ChannelToCheckEntity.class);
+                var query = session.createNativeQuery("select * from `twitch-collector`.channelstocheck join `twitch-collector`.sites on(channelstocheck.site_id = sites.id) ORDER BY priority", ChannelToCheckEntity.class);
                 var channels = query.list();
 
                 if (channels.isEmpty()) {
@@ -138,7 +139,8 @@ public class CircleService extends AbstractService {
 
                 session = getSession();
 
-                //var maxTime = getMaxTimePerChannel(session, 10); //TODO
+                platformScope = new PlatformScope();
+                platformScope.load(session);
 
                 var userTypes = getUsersTypes(session);
 
@@ -274,19 +276,6 @@ public class CircleService extends AbstractService {
         return updated;
     }
 
-    /**
-     * @return Время в миллисекундах
-     */
-    private int getMaxTimePerChannel(StatelessSession session, int processCirclesCount){
-        var q = session.createNativeQuery("select MAX(q.time) as `time` from (select TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `twitch-collector`.`circles` where `endTime` IS NOT NULL order by endTime desc limit :lim) as q");
-        q.setParameter("lim", processCirclesCount);
-        var res = (BigDecimal) q.getSingleResult();
-        if (res == null){
-            return 0;
-        }
-        return (int) (res.floatValue() * 1000);
-    }
-
     private HashMap<String, UserTypeEntity> getUsersTypes(StatelessSession session) {
         HashMap<String, UserTypeEntity> usersTypes = new HashMap<>();
         var query = session.createQuery("from UserTypeEntity", UserTypeEntity.class);
@@ -329,9 +318,10 @@ public class CircleService extends AbstractService {
 
     private Pair<ChannelEntity, Boolean> doCurrentChannel(StatelessSession session, CircleEntity currentCircle, GrabChannelResult grabCh) {
         Pair<ChannelEntity, Boolean> pair = new Pair<>();
-        var channelsQuery = session.createQuery("FROM ChannelEntity where name = :name", ChannelEntity.class);
+        var channelsQuery = session.createQuery("FROM ChannelEntity where name = :name and site = :site", ChannelEntity.class);
         channelsQuery.setMaxResults(1);
         channelsQuery.setParameter("name", grabCh.channelName);
+        channelsQuery.setParameter("site", platformScope.get(grabCh.platform));
         var currentChannel = channelsQuery.uniqueResult();
 
         if (currentChannel == null) {
@@ -339,19 +329,12 @@ public class CircleService extends AbstractService {
             currentChannel.lastCheckedTime = grabCh.timestamp;
             currentChannel.name = grabCh.channelName;
             currentChannel.lastCircle = currentCircle;
+            currentChannel.site = platformScope.get(grabCh.platform);
             pair.second = true;
-
-            /*session.beginTransaction();
-            session.insert(currentChannel);
-            session.getTransaction().commit();*/
         } else {
             currentChannel.lastCheckedTime = grabCh.timestamp;
             currentChannel.lastCircle = currentCircle;
             pair.second = false;
-
-            /*session.beginTransaction();
-            session.update(currentChannel);
-            session.getTransaction().commit();*/
         }
         pair.first = currentChannel;
 
@@ -396,7 +379,7 @@ public class CircleService extends AbstractService {
         for (String user : allUsers) {
             UserEntity userEntity = new UserEntity();
             userEntity.name = user;
-            userEntity.site = grabCh.platform.getNameInDB();
+            userEntity.site = platformScope.get(grabCh.platform);
             try {
                 session.insert(userEntity);
                 counts.first++;
@@ -425,14 +408,16 @@ public class CircleService extends AbstractService {
             }
         }
 
+        final var site = platformScope.get(grabCh.platform);
+
         //Multithreading
         List<UserChannelEntity> toUpdate = new ArrayList<>();
         List<UserChannelEntity> toInsert = new ArrayList<>();
-        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.moderators, userTypes.get("moderator"), grabCh);
-        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.admins, userTypes.get("admin"), grabCh);
-        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.broadcaster, userTypes.get("broadcaster"), grabCh);
-        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.staff, userTypes.get("staff"), grabCh);
-        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.vips, userTypes.get("vip"), grabCh);
+        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.moderators, userTypes.get("moderator"), grabCh, site);
+        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.admins, userTypes.get("admin"), grabCh, site);
+        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.broadcaster, userTypes.get("broadcaster"), grabCh, site);
+        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.staff, userTypes.get("staff"), grabCh, site);
+        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.vips, userTypes.get("vip"), grabCh, site);
 
         final CircleEntity preC = preCircle;
         int partsCount = threadsToUse;
@@ -458,7 +443,7 @@ public class CircleService extends AbstractService {
                 pair.first = new ArrayList<>();
                 pair.second = new ArrayList<>();
                 try(StatelessSession s = getSession()) {
-                    updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get("viewer"), grabCh);
+                    updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get("viewer"), grabCh, site);
                 }
                 return pair;
             }, pool).exceptionally(throwable -> {
@@ -475,7 +460,7 @@ public class CircleService extends AbstractService {
         return result;
     }
 
-    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab) {
+    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab, SiteEntity site) {
         HashMap<Pair<Long, Long>, ChannelCircleEntity> channelsCirclesHash = new HashMap<>();
 
         for (String name : names) {
@@ -483,10 +468,11 @@ public class CircleService extends AbstractService {
             //boolean b_lastChannelCircle = false;
             //boolean b_fitsToUpdate = false;
             if (preCircle != null) {
-                var query = session.createNativeQuery("select * from (select * from `twitch-collector`.users_channels where user_id = (select id from `twitch-collector`.users where name = :name) and channel_id = :channel_id and type_id = :userType) as q join `twitch-collector`.circles on (q.lastCircle_id = circles.id) where endTime is not null order by endTime desc", UserChannelEntity.class);
+                var query = session.createNativeQuery("select * from (select * from `twitch-collector`.users_channels where user_id = (select id from `twitch-collector`.users where name = :name and site_id = :site_id) and channel_id = :channel_id and type_id = :userType) as q join `twitch-collector`.circles on (q.lastCircle_id = circles.id) where endTime is not null order by endTime desc", UserChannelEntity.class);
                 query.setParameter("name", name);
                 query.setParameter("channel_id", channel.id);
                 query.setParameter("userType", type.id);
+                query.setParameter("site_id", site.id);
                 query.setFirstResult(0);
                 query.setMaxResults(1);
                 UserChannelEntity userChannel = null;
@@ -544,8 +530,9 @@ public class CircleService extends AbstractService {
                 }
             }
 
-            var query = session.createNativeQuery("select * from `twitch-collector`.users where name = :name", UserEntity.class);
+            var query = session.createNativeQuery("select * from `twitch-collector`.users where name = :name and site_id = :site_id", UserEntity.class);
             query.setParameter("name", name);
+            query.setParameter("site_id", site.id);
             query.setFirstResult(0);
             query.setMaxResults(1);
             var user = query.uniqueResult();

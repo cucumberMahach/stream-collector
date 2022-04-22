@@ -35,6 +35,16 @@ public class Chatters {
     public transient HashSet<String> global_mods_set = new HashSet<>();
     public transient HashSet<String> viewers_set = new HashSet<>();
 
+    public Chatters(){
+        broadcaster = new String[0];
+        vips = new String[0];
+        moderators = new String[0];
+        staff = new String[0];
+        admins = new String[0];
+        global_mods = new String[0];
+        viewers = new String[0];
+    }
+
     public void fillSetsFromArrays(){
         broadcaster_set.clear();
         vips_set.clear();
