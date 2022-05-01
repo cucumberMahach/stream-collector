@@ -6,6 +6,7 @@ import com.twitchcollector.app.bot.BotDatabase;
 import com.twitchcollector.app.bot.BotStandardBody;
 import com.twitchcollector.app.bot.logic.BotStandardLogic;
 import com.twitchcollector.app.bot.view.BotStandardView;
+import com.twitchcollector.app.settings.Settings;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class BotService extends AbstractService{
 
     @Override
     protected void work() {
-        Bot bot = new Bot(this, "TwitchCollectorBot", "5144285675:AAFsbq_JZpfmloBM_3acVnP03DR3kW3DUj0");
+        Bot bot = new Bot(this, "TwitchCollectorBot", Settings.instance.getPrivateSettings().telegramToken);
 
         try {
             bot.botConnect();

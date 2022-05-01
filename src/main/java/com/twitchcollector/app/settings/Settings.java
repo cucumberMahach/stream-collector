@@ -14,9 +14,11 @@ import java.nio.charset.StandardCharsets;
 public class Settings {
     public static final Settings instance = new Settings();
 
+    private static final String STATIC_PRIVATE_FILE_NAME = "private/private.json";
     private static final String SETTINGS_FILE_NAME = "settings.json";
     private static final String STATIC_SETTINGS_FILE_NAME = "settings/settings.json";
     private SettingsObject settingsObject;
+    private PrivateSettingsObject privateObject;
     private boolean tryLoadFromCustomFile = false;
     private boolean criticalError = false;
     private boolean customFileError = false;
@@ -29,7 +31,7 @@ public class Settings {
         }
         boolean result = load(staticSettings);
         if (result)
-            result = settingsObject.isSettingsCorrect();
+            result = settingsObject != null && settingsObject.isSettingsCorrect();
         if (!result && !staticSettings){
             customFileError = true;
             if (!load(true)){
@@ -38,10 +40,18 @@ public class Settings {
         }else if (!result){
             criticalError = true;
         }
+
+        if (!criticalError){
+            boolean privateResult = loadPrivate();
+            if (!privateResult || privateObject == null || !privateObject.isSettingsCorrect()){
+                criticalError = true;
+            }
+        }
     }
 
     private boolean load(boolean staticSettings){
         try {
+            settingsObject = new SettingsObject();
             loadSettings(staticSettings);
             if (!staticSettings){
                 Logger.instance.writeLog(LogStatus.Success, "Загружены настройки из внешнего файла");
@@ -60,12 +70,26 @@ public class Settings {
         }
     }
 
+    private boolean loadPrivate() {
+        try {
+            privateObject = new PrivateSettingsObject();
+            loadPrivateSettings();
+            Logger.instance.writeLog(LogStatus.Success, "Приватные настройки загружены");
+            return true;
+        } catch (Throwable e) {
+            Logger.instance.writeLog(LogStatus.Success, "Не удалось загрузить приватные настройки: " + DataUtil.getStackTrace(e));
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private void loadSettings(boolean staticSettings) throws IOException {
         String json = "";
         if (staticSettings){
-            var stream = Settings.class.getClassLoader().getResourceAsStream(STATIC_SETTINGS_FILE_NAME);
-            var data = stream.readAllBytes();
-            stream.close();
+            byte[] data;
+            try(var stream = Settings.class.getClassLoader().getResourceAsStream(STATIC_SETTINGS_FILE_NAME)) {
+                data = stream.readAllBytes();
+            }
             json = new String(data, StandardCharsets.UTF_8);
         }else{
             try(var stream = new FileInputStream(SETTINGS_FILE_NAME)) {
@@ -77,8 +101,24 @@ public class Settings {
         settingsObject = gson.fromJson(json, SettingsObject.class);
     }
 
+    private void loadPrivateSettings() throws IOException {
+        String json = "";
+        byte[] data;
+        try(var stream = Settings.class.getClassLoader().getResourceAsStream(STATIC_PRIVATE_FILE_NAME)) {
+            data = stream.readAllBytes();
+        }
+        json = new String(data, StandardCharsets.UTF_8);
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        privateObject = gson.fromJson(json, PrivateSettingsObject.class);
+    }
+
     public SettingsObject getSettings(){
         return settingsObject;
+    }
+
+    public PrivateSettingsObject getPrivateSettings() {
+        return privateObject;
     }
 
     public boolean isTryLoadFromCustomFile() {

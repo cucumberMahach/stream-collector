@@ -39,6 +39,14 @@ public class ConsoleProvider {
         }
     }
 
+    private void privatePrivateSettingsStatus(){
+        if (Settings.instance.isCriticalError()) {
+            System.out.println(colorize("*** Критическая ошибка при загрузке настроек ***", Attribute.BRIGHT_RED_TEXT(), Attribute.ITALIC()));
+        }else{
+            System.out.println(colorize("*** Приватные настройки загружены ***", Attribute.BRIGHT_WHITE_TEXT(), Attribute.ITALIC()));
+        }
+    }
+
     public void startConsole(){
         ConsoleProvider.instance.printProgramHeader();
         scanner = new Scanner(System.in);
@@ -173,6 +181,13 @@ public class ConsoleProvider {
                 System.out.println(Settings.instance.getSettings().getString());
                 System.out.println("-----------------------------------------------");
                 break;
+            case "private":
+                System.out.println("-----------------------------------------------");
+                privatePrivateSettingsStatus();
+                System.out.println("-----------------------------------------------");
+                System.out.println(Settings.instance.getPrivateSettings().getString());
+                System.out.println("-----------------------------------------------");
+                break;
             default:
                 System.out.print(colorize("Unknown command '", Attribute.BRIGHT_RED_TEXT()));
                 System.out.print(colorize(cmd, Attribute.BRIGHT_RED_TEXT(), Attribute.BOLD()));
@@ -201,5 +216,6 @@ public class ConsoleProvider {
         System.out.println(colorize("\t services - show all services names", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t running - show all running services", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t settings - show current settings", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t private - show current private settings", Attribute.BRIGHT_CYAN_TEXT()));
     }
 }

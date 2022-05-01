@@ -25,7 +25,11 @@ lastGrabs.json
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-#IDE
+# IDE
 .idea/
+
+# Private settings
+/src/main/resources/private/*
+!/src/main/resources/private/readme.txt
 
 target/
