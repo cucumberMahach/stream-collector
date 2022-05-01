@@ -71,14 +71,21 @@ public class Chatters {
     }
 
     public boolean isEqual(Chatters other){
-        return (Arrays.deepEquals(broadcaster, other.broadcaster) &&
+        /*return (Arrays.deepEquals(broadcaster, other.broadcaster) &&
                 Arrays.deepEquals(vips,other.vips) &&
                 Arrays.deepEquals(moderators,other.moderators) &&
                 Arrays.deepEquals(staff,other.staff) &&
                 Arrays.deepEquals(admins,other.admins) &&
                 Arrays.deepEquals(global_mods,other.global_mods) &&
                 Arrays.deepEquals(viewers,other.viewers)
-        );
+        );*/
+        return broadcaster_set.equals(other.broadcaster_set) &&
+                vips_set.equals(other.vips_set) &&
+                moderators_set.equals(other.moderators_set) &&
+                staff_set.equals(other.staff_set) &&
+                admins_set.equals(other.admins_set) &&
+                global_mods_set.equals(other.global_mods_set) &&
+                viewers_set.equals(other.viewers_set);
     }
 
     public String[] getByUserType(String type){
@@ -89,6 +96,7 @@ public class Chatters {
             case "moderator" -> moderators;
             case "vip" -> vips;
             case "viewer" -> viewers;
+            case "globalMod" -> global_mods;
             default -> null;
         };
     }
@@ -101,6 +109,7 @@ public class Chatters {
             case "moderator" -> moderators_set;
             case "vip" -> vips_set;
             case "viewer" -> viewers_set;
+            case "globalMod" -> global_mods_set;
             default -> null;
         };
     }

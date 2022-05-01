@@ -1,13 +1,18 @@
 package com.twitchcollector.app.grabber;
 
+import com.twitchcollector.app.grabber.trovo.TrovoGrabChannelData;
+import com.twitchcollector.app.grabber.trovo.TrovoGrabViewers;
+import com.twitchcollector.app.grabber.trovo.TrovoRequestUsers;
+import com.twitchcollector.app.grabber.trovo.TrovoRequestViewers;
 import com.twitchcollector.app.grabber.wasd.WASDGrabChannelData;
-import com.twitchcollector.app.grabber.wasd.WASDGrabParticipants;
 import com.twitchcollector.app.logging.LogStatus;
 import com.twitchcollector.app.service.AbstractService;
+import com.twitchcollector.app.settings.Settings;
 import com.twitchcollector.app.util.FutureUtils;
 import com.twitchcollector.app.util.Pair;
 import com.twitchcollector.app.util.TimeUtil;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -31,12 +36,13 @@ public class Grabber {
 
     }
 
-    public void startGrabAsyncHttp() throws ExecutionException, InterruptedException {
+    public void startGrabAsyncHttp() throws ExecutionException, InterruptedException, IOException {
         log(LogStatus.None, String.format("Началось получение данных. Требуется загрузить информацию о %d каналах", channelsToGrab.size()));
         grabResults.clear();
 
         grabTwitch();
         grabWASD();
+        grabTrovo();
 
         log(LogStatus.Success, "Получение данных завершено");
     }
@@ -101,6 +107,13 @@ public class Grabber {
         var futureWASDClientID = FutureUtils.allOf(futuresWASDChannelID);
         var wasdClientIDResults = futureWASDClientID.get();
 
+        List<WASDGrabChannelData> wasdWithBeginError = new ArrayList<>();
+        for (var ch : wasdClientIDResults){
+            if (ch.channelID == null){
+                wasdWithBeginError.add(ch);
+            }
+        }
+
         List<CompletableFuture<WASDGrabChannelData>> futuresWASDStreamID = new ArrayList<>();
         for (final var channelData : wasdClientIDResults) {
             if (channelData.isError() || channelData.channelID == null)
@@ -122,6 +135,13 @@ public class Grabber {
         log(LogStatus.Success, String.format("Этап 2 - получение stream_id. Прошло %d каналов WASD", futuresWASDStreamID.size()));
         var futureWASDStreamID = FutureUtils.allOf(futuresWASDStreamID);
         var wasdStreamIDResults = futureWASDStreamID.get();
+
+        for (var ch : wasdStreamIDResults){
+            if (ch.streamID == null){
+                wasdWithBeginError.add(ch);
+            }
+        }
+
         List<WASDGrabChannelData> wasdDone = new ArrayList<>();
 
         int offset = 0;
@@ -166,11 +186,112 @@ public class Grabber {
             offset += 10000;
         }
 
+        wasdDone.addAll(wasdWithBeginError);
+
         for (var wasdResult : wasdDone){
             grabResults.add(wasdResult.toGrabChannelResult());
         }
 
         log(LogStatus.Success, "WASD каналы обработаны");
+    }
+
+    private void grabTrovo() throws ExecutionException, InterruptedException, IOException {
+        var usernames = channelsToGrab.stream().filter(platformStringPair -> platformStringPair.first == Platform.Trovo).toList();
+        ArrayList<TrovoGrabChannelData> trovoGrabs = new ArrayList<>();
+
+        TrovoRequestUsers requestUsers = new TrovoRequestUsers();
+        for (var pair : usernames){
+            requestUsers.user.add(pair.second);
+            var user = new TrovoGrabChannelData();
+            user.channelName = pair.second;
+            trovoGrabs.add(user);
+        }
+        log(LogStatus.Success, String.format("Требуется обработать %d каналов Trovo. Этап 1 - получение channel_id", trovoGrabs.size()));
+
+        String requestJson = requestUsers.toJson();
+
+        HttpRequest requestChannelId = HttpRequest.newBuilder()
+                .uri(URI.create(GrabUtil.getTrovoGetUsersUrl()))
+                .timeout(Duration.ofMillis(timeoutMs))
+                .header("Client-ID", Settings.instance.getPrivateSettings().trovoClientId)
+                .POST(HttpRequest.BodyPublishers.ofString(requestJson))
+                .build();
+        var response = client.send(requestChannelId, HttpResponse.BodyHandlers.ofString());
+        var channelsUsers = GrabUtil.parseTrovoUsersJson(response.body());
+
+        log(LogStatus.Success, String.format("Этап 2 - получение channel_id. Прошло %d каналов Trovo", channelsUsers.users.size()));
+
+        for (var g : trovoGrabs){
+            g.storeUser(channelsUsers);
+        }
+
+        ArrayList<TrovoGrabChannelData> trovoChannelIdResults = new ArrayList<>();
+        ArrayList<TrovoGrabChannelData> trovoWithBeginErrors = new ArrayList<>();
+
+        for (var g : trovoGrabs){
+            if (!g.isUserError())
+                trovoChannelIdResults.add(g);
+            else
+                trovoWithBeginErrors.add(g);
+        }
+
+        List<TrovoGrabChannelData> trovoDone = new ArrayList<>();
+
+        int offset = 0;
+        while (!trovoChannelIdResults.isEmpty()) {
+            List<CompletableFuture<TrovoGrabChannelData>> futuresTrovoViewers = new ArrayList<>();
+            for (final var channelData : trovoChannelIdResults) {
+                if (channelData.isError())
+                    continue;
+                var parameters = new TrovoRequestViewers();
+                parameters.limit = 0;
+                parameters.cursor = offset;
+                var requstString = parameters.toJson();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(GrabUtil.getTrovoViewersUrl(channelData.user.channelId)))
+                        .timeout(Duration.ofMillis(timeoutMs))
+                        .header("Client-ID", Settings.instance.getPrivateSettings().trovoClientId)
+                        .POST(HttpRequest.BodyPublishers.ofString(requstString))
+                        .build();
+                var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+                    if (channelData.viewers == null){
+                        channelData.viewers = GrabUtil.parseTrovoViewers(s);
+                    }else{
+                        channelData.viewers.add(GrabUtil.parseTrovoViewers(s));
+                    }
+                    channelData.participantsTimestamp = TimeUtil.getZonedNow();
+                    return channelData;
+                }).exceptionally(throwable -> {
+                    channelData.throwable = throwable;
+                    return channelData;
+                });
+                futuresTrovoViewers.add(f);
+            }
+
+            log(LogStatus.Success, String.format("Этап 3 - получение viewers. Прошло %d каналов Trovo. Сдвиг - %d", futuresTrovoViewers.size(), offset));
+            var futureTrovoViewers = FutureUtils.allOf(futuresTrovoViewers);
+            var trovoViewersResults = futureTrovoViewers.get();
+            var toDone = new ArrayList<TrovoGrabChannelData>();
+
+            for (var p : trovoViewersResults){
+                if (p.isError() || p.viewers == null || (p.viewers.addCountHistory.isEmpty() && p.viewers.countAll() < 100000) || (!p.viewers.addCountHistory.isEmpty() && p.viewers.addCountHistory.get(p.viewers.addCountHistory.size()-1) == 0)){
+                    toDone.add(p);
+                }
+            }
+
+            trovoChannelIdResults.removeAll(toDone);
+            trovoDone.addAll(toDone);
+
+            offset += 100000;
+        }
+
+        trovoDone.addAll(trovoWithBeginErrors);
+
+        for (var wasdResult : trovoDone){
+            grabResults.add(wasdResult.toGrabChannelResult());
+        }
+
+        log(LogStatus.Success, "Trovo каналы обработаны");
     }
 
     public void log(LogStatus status, String message){

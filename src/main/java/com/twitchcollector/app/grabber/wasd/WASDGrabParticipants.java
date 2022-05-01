@@ -7,7 +7,7 @@ public class WASDGrabParticipants {
     public ArrayList<String> moderators = new ArrayList<>();
     public ArrayList<String> users = new ArrayList<>();
 
-    public ArrayList<Integer> addCountHistory = new ArrayList<>();
+    public transient ArrayList<Integer> addCountHistory = new ArrayList<>();
 
     public int countAll(){
         return owners.size() + moderators.size() + users.size();

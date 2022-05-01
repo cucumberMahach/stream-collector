@@ -7,12 +7,13 @@ import com.twitchcollector.app.logging.LogStatus;
 import com.twitchcollector.app.logging.Logger;
 import com.twitchcollector.app.util.Pair;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 public class Main {
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         Locale.setDefault(new Locale("ru", "RU"));
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
@@ -42,6 +43,12 @@ public class Main {
 
         /*var grabber = new Grabber();
         grabber.getChannelsToGrab().add(new Pair<>(Platform.WASD, "megaradio"));
+        grabber.startGrabAsyncHttp();
+        var result = grabber.getResults();
+        System.exit(0);*/
+
+        /*var grabber = new Grabber();
+        grabber.getChannelsToGrab().add(new Pair<>(Platform.Trovo, "mob5ter"));
         grabber.startGrabAsyncHttp();
         var result = grabber.getResults();
         System.exit(0);*/

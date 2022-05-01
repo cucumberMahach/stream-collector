@@ -10,7 +10,7 @@ public class ChattersGlobal {
     public Chatters chatters;
 
     public int calcUsersCount(){
-        return chatters.viewers.length + chatters.moderators.length + chatters.admins.length + chatters.vips.length + chatters.broadcaster.length + chatters.staff.length;
+        return chatters.viewers.length + chatters.moderators.length + chatters.admins.length + chatters.vips.length + chatters.broadcaster.length + chatters.staff.length + chatters.global_mods.length;
     }
 
     public boolean isEqual(ChattersGlobal other){

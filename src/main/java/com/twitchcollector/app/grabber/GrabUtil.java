@@ -3,7 +3,9 @@ package com.twitchcollector.app.grabber;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.twitchcollector.app.grabber.wasd.WASDGrabChannelData;
+import com.twitchcollector.app.grabber.trovo.TrovoGrabUsers;
+import com.twitchcollector.app.grabber.trovo.TrovoGrabViewers;
+import com.twitchcollector.app.grabber.trovo.TrovoRequestViewers;
 import com.twitchcollector.app.grabber.wasd.WASDGrabParticipants;
 import com.twitchcollector.app.json.ChattersGlobal;
 
@@ -11,7 +13,6 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
@@ -129,6 +130,13 @@ public class GrabUtil {
         return participants;
     }
 
+    public static TrovoGrabUsers parseTrovoUsersJson(final String json){
+        return gson.fromJson(json, TrovoGrabUsers.class);
+    }
+
+    public static TrovoGrabViewers parseTrovoViewers(final String json){
+        return gson.fromJson(json, TrovoGrabViewers.class);
+    }
 
     public static String getTwitchChattersUrl(final String channelName) {
         return "https://tmi.twitch.tv/group/user/" + channelName + "/chatters";
@@ -148,5 +156,13 @@ public class GrabUtil {
 
     public static String getWASDParticipantsUrl(final String streamID, final int offset){
         return String.format("https://wasd.tv/api/chat/streams/%s/participants?limit=10000&offset=%d", streamID, offset);
+    }
+
+    public static String getTrovoGetUsersUrl(){
+        return "https://open-api.trovo.live/openplatform/getusers";
+    }
+
+    public static String getTrovoViewersUrl(String channelId){
+        return String.format("https://open-api.trovo.live/openplatform/channels/%s/viewers", channelId);
     }
 }

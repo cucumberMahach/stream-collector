@@ -1,5 +1,6 @@
 package com.twitchcollector.app.service;
 
+import com.google.gson.GsonBuilder;
 import com.twitchcollector.app.database.DatabaseUtil;
 import com.twitchcollector.app.database.entities.*;
 import com.twitchcollector.app.database.utils.PlatformScope;
@@ -22,10 +23,10 @@ import java.util.stream.Collectors;
 public class CircleService extends AbstractService {
     private final String LAST_GRABS_FILENAME = "lastGrabs.json";
 
-    private int toNextCircleMs = 5000;
-    private int noChannelsWaitMs = 10000;
-    private int allChannelsErrorsWaitMs = 5000;
-    private int noUpdatesWaitMs = 5000;
+    private int toNextCircleMs = 1000 * 20;
+    private int noChannelsWaitMs = 1000 * 10;
+    private int allChannelsErrorsWaitMs = 1000 * 5;
+    private int noUpdatesWaitMs = 1000 * 5;
 
     private int viewerLeaveSec = 10 * 60;
     private int lastGrabActualDurationSec = 10 * 60;
@@ -239,7 +240,6 @@ public class CircleService extends AbstractService {
                 writeLog(LogStatus.Error, "Исключение в сервисе: " + e.getMessage() + " " + DataUtil.getStackTrace(e));
         }
     }
-
     private List<GrabChannelResult> isGrabsUpdated(List<GrabChannelResult> oldG, List<GrabChannelResult> newG, List<GrabChannelResult> outRemainOlds){
         List<GrabChannelResult> newGrabs = new ArrayList<>(newG);
         List<GrabChannelResult> oldGrabs = new ArrayList<>(oldG);
@@ -418,6 +418,7 @@ public class CircleService extends AbstractService {
         updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.broadcaster, userTypes.get("broadcaster"), grabCh, site);
         updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.staff, userTypes.get("staff"), grabCh, site);
         updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.vips, userTypes.get("vip"), grabCh, site);
+        updateViewers(toUpdate, toInsert, session, currentChannel, currentCircle, preCircle, lastChannelCircle, grabCh.chattersGlobal.chatters.global_mods, userTypes.get("globalMod"), grabCh, site);
 
         final CircleEntity preC = preCircle;
         int partsCount = threadsToUse;
