@@ -5,7 +5,7 @@
 <hibernate-configuration>
     <session-factory>
 
-        <!-- com.twitchcollector.app.database connection properties -->
+        <!-- database connection properties -->
         <property name="hibernate.connection.driver_class">org.mariadb.jdbc.Driver</property>
         <property name="hibernate.jdbc.time_zone">Europe/Moscow</property>
         <property name="hibernate.connection.url">jdbc:mariadb://5.187.5.110:3306/twitch-collector?serverTimezone=Europe/Moscow?useSSL=true</property>
@@ -24,7 +24,7 @@
         <property name="hibernate.c3p0.max_statements">200</property>
         <property name="hibernate.c3p0.timeout">100</property> <!-- wait_timeout -->
 
-        <!-- show mysql queries output in com.twitchcollector.app.console -->
+        <!-- show mysql queries output in console -->
         <property name="hibernate.show_sql">false</property>
 
         <!-- cache -->
@@ -41,7 +41,7 @@
 
 
 
-        <!-- manage automatic com.twitchcollector.app.database creation -->
+        <!-- manage automatic database creation -->
         <!--<property name="hibernate.hbm2ddl.auto">create-drop</property>-->
 
     </session-factory>

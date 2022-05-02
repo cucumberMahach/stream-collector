@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.twitch-collector</groupId>
-    <artifactId>twitch-collector</artifactId>
+    <groupId>com.stream-collector</groupId>
+    <artifactId>stream-collector</artifactId>
     <version>1.0</version>
-    <description>Collects information about users on streams from the site twitch.tv</description>
+    <description>Collects information about users on streams</description>
 
     <build>
         <resources>
@@ -27,7 +27,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.twitchcollector.app.Main</mainClass>
+                            <mainClass>com.streamcollector.app.Main</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>

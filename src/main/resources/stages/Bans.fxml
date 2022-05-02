@@ -6,7 +6,7 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="612.0" prefWidth="1120.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.twitchcollector.app.admin.stages.bans.BanStage">
+<AnchorPane prefHeight="612.0" prefWidth="1120.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.streamcollector.app.admin.stages.bans.BanStage">
    <children>
       <Label layoutX="14.0" layoutY="14.0" text="Поиск:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
       <TextField fx:id="search" layoutX="54.0" layoutY="10.0" prefHeight="25.0" prefWidth="782.0" AnchorPane.leftAnchor="54.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="10.0" />
