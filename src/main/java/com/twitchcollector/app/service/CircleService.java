@@ -26,7 +26,7 @@ public class CircleService extends AbstractService {
     private int toNextCircleMs = 1000 * 20;
     private int noChannelsWaitMs = 1000 * 10;
     private int allChannelsErrorsWaitMs = 1000 * 5;
-    private int noUpdatesWaitMs = 1000 * 5;
+    private int noUpdatesWaitMs = 1000 * 20;
 
     private int viewerLeaveSec = 10 * 60;
     private int lastGrabActualDurationSec = 10 * 60;

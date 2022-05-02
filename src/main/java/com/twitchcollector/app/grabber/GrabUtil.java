@@ -5,8 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.twitchcollector.app.grabber.trovo.TrovoGrabUsers;
 import com.twitchcollector.app.grabber.trovo.TrovoGrabViewers;
-import com.twitchcollector.app.grabber.trovo.TrovoRequestViewers;
-import com.twitchcollector.app.grabber.wasd.WASDGrabParticipants;
+import com.twitchcollector.app.grabber.wasd.*;
 import com.twitchcollector.app.json.ChattersGlobal;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -16,53 +15,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
-
-class WASDToken{
-    String result;
-}
-
-class WASDChannelID{
-    long channel_id;
-}
-
-class WASDChannelIDGlobal{
-    WASDChannelID result;
-}
-
-class WASDStreamID
-{
-    long stream_id;
-}
-
-class WASDMediaContainerStreams
-{
-    WASDStreamID[] media_container_streams;
-}
-
-class WASDStreamIDGlobal
-{
-    WASDMediaContainerStreams[] result;
-}
-
-class WASDParticipantAvatars
-{
-    String large;
-    String small;
-    String medium;
-}
-
-class WASDParticipant
-{
-    Long user_id;
-    String user_login;
-    String user_channel_role;
-    WASDParticipantAvatars user_avatar;
-}
-
-class WASDParticipantsGlobal
-{
-    WASDParticipant[] result;
-}
 
 public class GrabUtil {
     private static final Gson gson = new GsonBuilder().create();
