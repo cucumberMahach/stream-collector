@@ -6,7 +6,7 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="612.0" prefWidth="1120.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.streamcollector.app.admin.stages.bans.BanStage">
+<AnchorPane prefHeight="612.0" prefWidth="1290.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.streamcollector.app.admin.stages.bans.BanStage">
    <children>
       <Label layoutX="14.0" layoutY="14.0" text="Поиск:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
       <TextField fx:id="search" layoutX="54.0" layoutY="10.0" prefHeight="25.0" prefWidth="782.0" AnchorPane.leftAnchor="54.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="10.0" />
@@ -56,6 +56,11 @@
                               <PropertyValueFactory property="lastOnlineTime" />
                             </cellValueFactory>
                         </TableColumn>
+                        <TableColumn prefWidth="171.0" text="Состояние">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="state" />
+                            </cellValueFactory>
+                        </TableColumn>
                     </columns>
                       <items>
                           <FXCollections fx:factory="observableArrayList">
@@ -78,27 +83,27 @@
                               <PropertyValueFactory property="user_id" />
                           </cellValueFactory>
                       </TableColumn>
-                        <TableColumn prefWidth="315.0" text="Причина">
+                        <TableColumn prefWidth="400.0" text="Причина">
                             <cellValueFactory>
                               <PropertyValueFactory property="reason" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn minWidth="0.0" prefWidth="149.0" text="Дата с">
+                        <TableColumn minWidth="0.0" prefWidth="157.0" text="Дата с">
                             <cellValueFactory>
                               <PropertyValueFactory property="fromTime" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn minWidth="0.0" prefWidth="125.0" text="Дата по">
+                        <TableColumn minWidth="0.0" prefWidth="164.0" text="Дата по">
                             <cellValueFactory>
                               <PropertyValueFactory property="untilTime" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="170.0" text="Продолжительность">
+                        <TableColumn prefWidth="189.0" text="Продолжительность">
                             <cellValueFactory>
                               <PropertyValueFactory property="duration" />
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="166.0" text="Осталось">
+                        <TableColumn prefWidth="184.0" text="Осталось">
                             <cellValueFactory>
                               <PropertyValueFactory property="remain" />
                             </cellValueFactory>

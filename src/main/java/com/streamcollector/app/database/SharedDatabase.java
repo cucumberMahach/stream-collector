@@ -6,17 +6,13 @@ import org.hibernate.StatelessSession;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SharedDatabase {
-    public static ArrayList<TgBanEntity> getBans(StatelessSession session, TgUserEntity tgUser, ZonedDateTime currentTime){
-        var bans = new ArrayList<TgBanEntity>();
-
+    public static List<TgBanEntity> getBans(StatelessSession session, TgUserEntity tgUser, ZonedDateTime currentTime){
         var query = session.createNativeQuery("select * from `twitch-collector`.tgbans where tgUser_id = :id order by fromTime,untilTime", TgBanEntity.class);
         query.setParameter("id", tgUser.id);
-
-        var result = query.list();
-
-        return bans;
+        return query.list();
     }
 
     public static boolean makeBan(StatelessSession session, TgBanEntity tgBan){

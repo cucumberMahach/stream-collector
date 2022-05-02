@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.*?>
 
-<AnchorPane prefHeight="670.0" prefWidth="1147.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.streamcollector.app.admin.stages.queries.QueriesStage">
+<AnchorPane prefHeight="670.0" prefWidth="1307.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.streamcollector.app.admin.stages.queries.QueriesStage">
       <SplitPane dividerPositions="0.2981651376146789, 0.7828746177370031" layoutX="7.0" layoutY="7.0" orientation="VERTICAL" prefHeight="641.0" prefWidth="1109.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
          <items>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
@@ -69,6 +69,11 @@
                               <PropertyValueFactory property="lastOnlineTime" />
                            </cellValueFactory>
                         </TableColumn>
+                        <TableColumn prefWidth="162.0" text="Состояние">
+                           <cellValueFactory>
+                              <PropertyValueFactory property="state" />
+                           </cellValueFactory>
+                        </TableColumn>
                      </columns>
                      <items>
                         <FXCollections fx:factory="observableArrayList">
@@ -91,32 +96,32 @@
                            <PropertyValueFactory property="user_id" />
                         </cellValueFactory>
                      </TableColumn>
-                     <TableColumn prefWidth="262.0" text="Сообщение">
+                     <TableColumn prefWidth="321.0" text="Сообщение">
                         <cellValueFactory>
                            <PropertyValueFactory property="message" />
                         </cellValueFactory>
                      </TableColumn>
-                     <TableColumn prefWidth="137.0" text="Результат">
+                     <TableColumn prefWidth="170.0" text="Результат">
                         <cellValueFactory>
                            <PropertyValueFactory property="result" />
                         </cellValueFactory>
                      </TableColumn>
-                     <TableColumn prefWidth="149.0" text="Сообщение в">
+                     <TableColumn prefWidth="167.0" text="Сообщение в">
                         <cellValueFactory>
                            <PropertyValueFactory property="messageTime" />
                         </cellValueFactory>
                      </TableColumn>
-                     <TableColumn prefWidth="145.0" text="Обработка в">
+                     <TableColumn prefWidth="153.0" text="Обработка в">
                         <cellValueFactory>
                            <PropertyValueFactory property="requestTime" />
                         </cellValueFactory>
                      </TableColumn>
-                     <TableColumn prefWidth="149.0" text="Ответ в">
+                     <TableColumn prefWidth="163.0" text="Ответ в">
                         <cellValueFactory>
                            <PropertyValueFactory property="answerTime" />
                         </cellValueFactory>
                      </TableColumn>
-                     <TableColumn prefWidth="129.0" text="Продолжительность">
+                     <TableColumn prefWidth="136.0" text="Продолжительность">
                         <cellValueFactory>
                            <PropertyValueFactory property="duration" />
                         </cellValueFactory>

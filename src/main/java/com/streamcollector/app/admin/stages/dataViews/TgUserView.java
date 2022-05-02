@@ -14,6 +14,7 @@ public class TgUserView {
     public final StringProperty messagesTotal = new SimpleStringProperty("");
     public final StringProperty firstOnlineTime = new SimpleStringProperty("");
     public final StringProperty lastOnlineTime = new SimpleStringProperty("");
+    public final StringProperty state = new SimpleStringProperty("");
 
     public static TgUserView fromTgUser(TgUserEntity tgUser){
         var user = new TgUserView();
@@ -26,6 +27,7 @@ public class TgUserView {
         user.messagesTotal.set(tgUser.messagesTotal.toString());
         user.firstOnlineTime.set(TimeUtil.formatZoned(tgUser.firstOnlineTime));
         user.lastOnlineTime.set(TimeUtil.formatZoned(tgUser.lastOnlineTime));
+        user.state.set(tgUser.state);
 
         return user;
     }
@@ -124,5 +126,17 @@ public class TgUserView {
 
     public void setLastOnlineTime(String lastOnlineTime) {
         this.lastOnlineTime.set(lastOnlineTime);
+    }
+
+    public String getState() {
+        return state.get();
+    }
+
+    public StringProperty stateProperty() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state.set(state);
     }
 }
