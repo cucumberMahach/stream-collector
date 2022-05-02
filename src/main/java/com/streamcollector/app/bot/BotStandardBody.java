@@ -5,6 +5,7 @@ import com.streamcollector.app.database.entities.TgHistoryEntity;
 import com.streamcollector.app.util.TimeUtil;
 import com.streamcollector.app.database.entities.TgUserEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 public class BotStandardBody extends BotBody {
     private final BotDatabase botDB;
@@ -16,39 +17,55 @@ public class BotStandardBody extends BotBody {
 
     @Override
     public void onUpdate(Update update) {
-        if (update.getMessage() == null)
-            return;
+        User tgApiUser;
+        String chatId;
+        if (update.getMessage() == null){
+            if (update.getCallbackQuery() == null){
+                return;
+            }else{
+                chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+                tgApiUser = update.getCallbackQuery().getFrom();
+            }
+        }else{
+            chatId = update.getMessage().getChatId().toString();
+            tgApiUser = update.getMessage().getFrom();
+        }
+
+
         initCurrentTime();
 
         // Уведомления при включении
-        var msgTime = TimeUtil.getZonedFromUnix(update.getMessage().getDate());
-        if (msgTime.isBefore(bot.getStartTime())){
-            var notifications = bot.getStartupNotificationsSet();
-            var id = update.getMessage().getFrom().getId().toString();
-            if (!notifications.contains(id)){
-                notifications.add(id);
+        if (update.getMessage() != null) {
+            var msgTime = TimeUtil.getZonedFromUnix(update.getMessage().getDate());
+            if (msgTime.isBefore(bot.getStartTime())) {
+                var notifications = bot.getStartupNotificationsSet();
+                var id = update.getMessage().getFrom().getId().toString();
+                if (!notifications.contains(id)) {
+                    notifications.add(id);
                     logic.enableNotificationRequest(update);
+                }
+                return;
             }
-            return;
         }
 
         // Бан
-        var tgBan = getActiveBan(update.getMessage().getFrom().getId().toString());
+        var tgBan = getActiveBan(tgApiUser.getId().toString());
         if (tgBan != null){
-            logic.banRequest(update, tgBan);
+            logic.banRequest(chatId, tgBan);
             return;
         }
 
         // Загрузка или создание пользователя
-        TgUserEntity user = getOrCreateUser(update);
+        TgUserEntity user = getOrCreateUser(tgApiUser);
         user.messagesTotal++;
 
         // Обработка сообщения
         parseMessage(update, user);
 
-        fillUserInfo(update, user);
+        fillUserInfo(tgApiUser, user);
         botDB.updateTgUser(user);
-        addToHistory(update, user, "");
+        if (update.getMessage() != null)
+            addToHistory(update, user, "");
     }
 
     @Override
@@ -57,6 +74,13 @@ public class BotStandardBody extends BotBody {
     }
 
     protected void parseMessage(Update update, TgUserEntity tgUser){
+        if (update.getMessage() == null){
+            if (update.getCallbackQuery() != null){
+                logic.callbackRequest(update, tgUser);
+            }
+            return;
+        }
+
         String message = update.getMessage().getText();
 
         if (message.equals("/start")){
@@ -68,21 +92,21 @@ public class BotStandardBody extends BotBody {
         }
     }
 
-    protected void fillUserInfo(Update update, TgUserEntity user){
-        user.firstName = update.getMessage().getFrom().getFirstName();
-        user.lastName = update.getMessage().getFrom().getLastName();
-        user.username = update.getMessage().getFrom().getUserName();
-        user.language = update.getMessage().getFrom().getLanguageCode();
+    protected void fillUserInfo(User tgApiUser, TgUserEntity user){
+        user.firstName = tgApiUser.getFirstName();
+        user.lastName = tgApiUser.getLastName();
+        user.username = tgApiUser.getUserName();
+        user.language = tgApiUser.getLanguageCode();
         user.lastOnlineTime = currentTime;
     }
 
-    protected TgUserEntity getOrCreateUser(Update update){
+    protected TgUserEntity getOrCreateUser(User tgApiUser){
         TgUserEntity tgUser = new TgUserEntity();
 
-        tgUser.tgId = update.getMessage().getFrom().getId().toString();
+        tgUser.tgId = tgApiUser.getId().toString();
         tgUser.state = "created";
         tgUser.firstOnlineTime = currentTime;
-        fillUserInfo(update, tgUser);
+        fillUserInfo(tgApiUser, tgUser);
 
         tgUser = botDB.getOrCreateTgUser(tgUser);
         return tgUser;

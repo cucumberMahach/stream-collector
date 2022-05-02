@@ -84,6 +84,19 @@ public class Bot extends TelegramLongPollingBot {
         return true;
     }
 
+    public synchronized boolean sendMsg(String chatId, SendMessage message){
+        message.enableMarkdown(true);
+        message.setChatId(chatId);
+        message.setParseMode("html");
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            service.writeLog(LogStatus.Error, "Ошибка отправки сообщения: " + DataUtil.getStackTrace(e));
+            return false;
+        }
+        return true;
+    }
+
     public BotSession getSession(){
         return session;
     }

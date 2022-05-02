@@ -13,8 +13,9 @@ public abstract class BotLogic {
     public abstract void startRequest(Update update, TgUserEntity tgUser);
     public abstract void helpRequest(Update update, TgUserEntity tgUser);
     public abstract void enableNotificationRequest(Update update);
-    public abstract void banRequest(Update update, TgBanEntity tgBan);
+    public abstract void banRequest(String chatId, TgBanEntity tgBan);
     public abstract void commandRequest(Update update, TgUserEntity tgUser);
+    public abstract void callbackRequest(Update update, TgUserEntity tgUser);
 
     public void setBotBody(BotBody body) {
         this.body = body;
