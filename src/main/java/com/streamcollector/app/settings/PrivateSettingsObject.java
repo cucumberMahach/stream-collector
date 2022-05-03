@@ -12,6 +12,9 @@ public class PrivateSettingsObject {
     @SerializedName("trovo_client_id")
     public String trovoClientId;
 
+    @SerializedName("donat_bearer")
+    public String donatBearer;
+
     public String getString(){
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
@@ -20,6 +23,6 @@ public class PrivateSettingsObject {
     }
 
     public boolean isSettingsCorrect(){
-        return telegramToken != null && trovoClientId != null;
+        return telegramToken != null && trovoClientId != null && donatBearer != null;
     }
 }

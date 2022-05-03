@@ -1,8 +1,11 @@
 package com.streamcollector.app;
 
 import com.streamcollector.app.console.ConsoleProvider;
+import com.streamcollector.app.donations.DonationsHandler;
+import com.streamcollector.app.donations.StandardDonationsHandler;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
+import com.streamcollector.app.settings.Settings;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -10,13 +13,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 public class Main {
-    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
-        Locale.setDefault(new Locale("ru", "RU"));
+    public static void main(String[] args) throws Exception {
+        /*Locale.setDefault(new Locale("ru", "RU"));
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");
-        System.exit(0);
+        System.exit(0);*/
 
         /*GrabChannelResult res = null;
         long startTime = 0;
@@ -49,5 +52,11 @@ public class Main {
         grabber.startGrabAsyncHttp();
         var result = grabber.getResults();
         System.exit(0);*/
+
+        var donat = new StandardDonationsHandler();
+        donat.setBearer(Settings.instance.getPrivateSettings().donatBearer);
+        donat.start();
+        //donat.start();
+        //donat.getDonationsByHttp(Settings.instance.getPrivateSettings().donatBearer, null);
     }
 }

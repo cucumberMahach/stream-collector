@@ -4,7 +4,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 public class TimeUtil {
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    public static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter formatterMs = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 

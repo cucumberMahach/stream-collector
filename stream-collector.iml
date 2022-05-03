@@ -15,6 +15,7 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="Hibernate" />
         <datasource-mapping>
+          <factory-entry name="stream-collector" />
           <factory-entry name="twitch-collector" value="0fd0f7d4-aadc-44e9-9b08-3e002bdf628c" />
         </datasource-mapping>
         <naming-strategy-map />
@@ -119,5 +120,6 @@
     <orderEntry type="library" name="Maven: org.openjfx:javafx-media:18" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-media:win:18" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-web:linux:18" level="project" />
+    <orderEntry type="library" name="Maven: org.java-websocket:Java-WebSocket:1.5.3" level="project" />
   </component>
 </module>
