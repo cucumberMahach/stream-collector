@@ -3,6 +3,7 @@ package com.streamcollector.app;
 import com.streamcollector.app.console.ConsoleProvider;
 import com.streamcollector.app.donations.DonationsHandler;
 import com.streamcollector.app.donations.StandardDonationsHandler;
+import com.streamcollector.app.grabber.goodgame.GoodGameWebsocket;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
 import com.streamcollector.app.settings.Settings;
@@ -14,12 +15,12 @@ import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        Locale.setDefault(new Locale("ru", "RU"));
+        /*Locale.setDefault(new Locale("ru", "RU"));
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");
-        System.exit(0);
+        System.exit(0);*/
 
         /*GrabChannelResult res = null;
         long startTime = 0;
@@ -56,5 +57,8 @@ public class Main {
         /*var donat = new StandardDonationsHandler();
         donat.setBearer(Settings.instance.getPrivateSettings().donatBearer);
         donat.start();*/
+
+        GoodGameWebsocket gg = new GoodGameWebsocket();
+        gg.connectBlocking();
     }
 }
