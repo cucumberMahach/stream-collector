@@ -7,6 +7,8 @@ import com.streamcollector.app.donations.json.httpDonations.DonationData;
 import com.streamcollector.app.donations.json.httpDonations.HttpDonations;
 import com.streamcollector.app.donations.json.websocket.ChannelMessage;
 import com.streamcollector.app.donations.json.websocket.MessageId;
+import com.streamcollector.app.logging.LogStatus;
+import com.streamcollector.app.logging.SupportLogging;
 import com.streamcollector.app.util.DataUtil;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -19,13 +21,14 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public abstract class DonationsHandler extends WebSocketClient {
+public abstract class DonationsHandler extends WebSocketClient implements SupportLogging {
 
     private static final HttpClient client = HttpClient.newBuilder().build();
     private static final Gson gson = new GsonBuilder().create();
     private static final int httpsRequestsTimeoutSec = 5;
 
     private String bearer;
+
     private OAuthUser oAuthUser;
     private OnConnectResponse onConnectResponse;
     private SubscribeResponse subscribeResponse;
@@ -78,7 +81,7 @@ public abstract class DonationsHandler extends WebSocketClient {
             throw new Exception("Connect to channels error: " + DataUtil.getStackTrace(e));
         }
 
-        System.out.println("Done!");
+        log(LogStatus.Debug, "Starting done!");
     }
 
     private void collectHttpDonations() throws Exception {
@@ -86,7 +89,7 @@ public abstract class DonationsHandler extends WebSocketClient {
 
         HttpDonations httpDonations;
         while (true){
-            System.out.printf("CurrentPage: %d", currentPage);
+            log(LogStatus.Debug, String.format("CurrentPage: %d", currentPage));
             httpDonations = getDonationsByHttp(bearer, currentPage);
 
             if (httpDonations == null)
@@ -129,13 +132,13 @@ public abstract class DonationsHandler extends WebSocketClient {
                     "id": %d
                 }
                 """, oAuthUser.socketConnectionToken, 1);
-        System.out.println(msg);
+        log(LogStatus.Debug, msg);
         send(msg);
     }
 
     @Override
     public void onMessage(String s) {
-        System.out.println("OnMessage = " + s);
+        log(LogStatus.Debug, "OnMessage = " + s);
         var messageId = gson.fromJson(s, MessageId.class);
         if (messageId.id != null && messageId.id == 1){
             onConnectResponse = gson.fromJson(s, OnConnectResponse.class);
@@ -157,12 +160,12 @@ public abstract class DonationsHandler extends WebSocketClient {
 
     @Override
     public void onClose(int i, String s, boolean b) {
-        System.out.println("OnClose = " + s);
+        log(LogStatus.Debug, "OnClose = " + s);
     }
 
     @Override
     public void onError(Exception e) {
-        System.out.println("OnError = " + DataUtil.getStackTrace(e));
+        log(LogStatus.Debug, "OnError = " + DataUtil.getStackTrace(e));
     }
 
     private void connectToChannels(SubscribeResponse subscribeResponse){
@@ -189,7 +192,7 @@ public abstract class DonationsHandler extends WebSocketClient {
                 .build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         var result = gson.fromJson(response.body(), OAuthUserHolder.class);
-        System.out.println("Response oauth: " + response.body());
+        log(LogStatus.Debug, "Response oauth: " + response.body());
         return result;
     }
 
@@ -202,7 +205,7 @@ public abstract class DonationsHandler extends WebSocketClient {
                 .build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         var result = gson.fromJson(response.body(), SubscribeResponse.class);
-        System.out.println("Response subscribe: " + response.body());
+        log(LogStatus.Debug, "Response subscribe: " + response.body());
         return result;
     }
 
@@ -224,11 +227,11 @@ public abstract class DonationsHandler extends WebSocketClient {
                 .build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.body() == null || response.body().isEmpty()){
-            System.out.println("Http donations: null");
+            log(LogStatus.Debug,"Http donations: null");
             return null;
         }
         var result = gson.fromJson(response.body(), HttpDonations.class);
-        System.out.println("Http donations: " + response.body());
+        log(LogStatus.Debug,"Http donations: " + response.body());
         return result;
     }
 }

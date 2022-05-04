@@ -70,6 +70,7 @@ public abstract class AbstractService extends Thread{
         }
         writeLog(LogStatus.Success, "Сервис завершён");
         ServiceManager.instance.setServiceEnabled(serviceName, false);
+        stopService();
     }
 
     public void startService(){

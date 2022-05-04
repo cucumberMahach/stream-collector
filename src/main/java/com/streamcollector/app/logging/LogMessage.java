@@ -19,6 +19,9 @@ public class LogMessage {
         String timestamp = formatter.format(dateTime);
         String colorized = "[]";
         switch (status){
+            case Debug -> {
+                colorized = colorize("[DEBUG]", Attribute.BOLD());
+            }
             case Success -> {
                 colorized = colorize("[SUCCESS]", Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD());
             }
@@ -39,6 +42,9 @@ public class LogMessage {
         String timestamp = formatter.format(dateTime);
         String tag = "[]";
         switch (status){
+            case Debug -> {
+                tag = "[DEBUG]";
+            }
             case Success -> {
                 tag = "[SUCCESS]";
             }

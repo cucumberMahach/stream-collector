@@ -15,6 +15,9 @@ public class SettingsObject {
     @SerializedName("admin_database")
     public DatabaseConfigType adminDatabase;
 
+    @SerializedName("donations_database")
+    public DatabaseConfigType donationsDatabase;
+
     public String getString(){
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
@@ -23,6 +26,6 @@ public class SettingsObject {
     }
 
     public boolean isSettingsCorrect(){
-        return circlesDatabase != null && botDatabase != null && adminDatabase != null;
+        return circlesDatabase != null && botDatabase != null && adminDatabase != null && donationsDatabase != null;
     }
 }

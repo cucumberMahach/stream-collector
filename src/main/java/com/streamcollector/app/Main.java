@@ -14,12 +14,12 @@ import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        /*Locale.setDefault(new Locale("ru", "RU"));
+        Locale.setDefault(new Locale("ru", "RU"));
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");
-        System.exit(0);*/
+        System.exit(0);
 
         /*GrabChannelResult res = null;
         long startTime = 0;
@@ -53,10 +53,8 @@ public class Main {
         var result = grabber.getResults();
         System.exit(0);*/
 
-        var donat = new StandardDonationsHandler();
+        /*var donat = new StandardDonationsHandler();
         donat.setBearer(Settings.instance.getPrivateSettings().donatBearer);
-        donat.start();
-        //donat.start();
-        //donat.getDonationsByHttp(Settings.instance.getPrivateSettings().donatBearer, null);
+        donat.start();*/
     }
 }

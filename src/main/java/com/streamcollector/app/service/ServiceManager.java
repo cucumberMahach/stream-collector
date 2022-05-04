@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class ServiceManager {
     public static final ServiceManager instance = new ServiceManager();
-    public static final String[] allServices = {"circle","bot","admin"};
+    public static final String[] allServices = {"circle","bot","admin","donations"};
 
     private final HashMap<String, AbstractService> services = new HashMap<>();
     private final ArrayList<String> usedServices = new ArrayList<>();
@@ -20,6 +20,8 @@ public class ServiceManager {
                 return new BotService();
             case "admin":
                 return new AdminService();
+            case "donations":
+                return new DonationsService();
         }
         return null;
     }
