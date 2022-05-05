@@ -5,7 +5,8 @@ import java.util.Objects;
 public enum Platform {
     Twitch("twitch"),
     WASD("wasd"),
-    Trovo("trovo");
+    Trovo("trovo"),
+    GoodGame("goodgame");
 
     private final String nameInDB;
 

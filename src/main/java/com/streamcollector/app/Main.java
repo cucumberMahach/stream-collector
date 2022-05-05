@@ -3,10 +3,13 @@ package com.streamcollector.app;
 import com.streamcollector.app.console.ConsoleProvider;
 import com.streamcollector.app.donations.DonationsHandler;
 import com.streamcollector.app.donations.StandardDonationsHandler;
+import com.streamcollector.app.grabber.Grabber;
+import com.streamcollector.app.grabber.Platform;
 import com.streamcollector.app.grabber.goodgame.GoodGameWebsocket;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
 import com.streamcollector.app.settings.Settings;
+import com.streamcollector.app.util.Pair;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -58,7 +61,15 @@ public class Main {
         donat.setBearer(Settings.instance.getPrivateSettings().donatBearer);
         donat.start();*/
 
-        GoodGameWebsocket gg = new GoodGameWebsocket();
-        gg.connectBlocking();
+        /*GoodGameWebsocket gg = new GoodGameWebsocket();
+        gg.connectBlocking();*/
+
+        var grabber = new Grabber();
+        grabber.getChannelsToGrab().add(new Pair<>(Platform.GoodGame, "hell_girl"));
+        grabber.getChannelsToGrab().add(new Pair<>(Platform.GoodGame, "Nikichar"));
+        grabber.getChannelsToGrab().add(new Pair<>(Platform.GoodGame, "JosephStalin"));
+        grabber.startGrabAsyncHttp();
+        var result = grabber.getResults();
+        System.exit(0);
     }
 }

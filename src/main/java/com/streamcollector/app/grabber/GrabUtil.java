@@ -3,6 +3,7 @@ package com.streamcollector.app.grabber;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.streamcollector.app.grabber.goodgame.http.GGChannelData;
 import com.streamcollector.app.grabber.wasd.*;
 import com.streamcollector.app.json.ChattersGlobal;
 import com.streamcollector.app.grabber.trovo.TrovoGrabUsers;
@@ -90,6 +91,10 @@ public class GrabUtil {
         return gson.fromJson(json, TrovoGrabViewers.class);
     }
 
+    public static GGChannelData parseGoodGameStream(final String json){
+        return gson.fromJson(json, GGChannelData.class);
+    }
+
     public static String getTwitchChattersUrl(final String channelName) {
         return "https://tmi.twitch.tv/group/user/" + channelName + "/chatters";
     }
@@ -116,5 +121,9 @@ public class GrabUtil {
 
     public static String getTrovoViewersUrl(String channelId){
         return String.format("https://open-api.trovo.live/openplatform/channels/%s/viewers", channelId);
+    }
+
+    public static String getGoodGameStreamUrl(String channelName){
+        return "https://api2.goodgame.ru/streams/" + channelName;
     }
 }

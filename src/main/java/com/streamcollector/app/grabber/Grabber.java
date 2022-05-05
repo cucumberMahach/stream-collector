@@ -1,5 +1,7 @@
 package com.streamcollector.app.grabber;
 
+import com.streamcollector.app.grabber.goodgame.GGGrabChannelData;
+import com.streamcollector.app.grabber.goodgame.GoodGameWebsocket;
 import com.streamcollector.app.util.TimeUtil;
 import com.streamcollector.app.grabber.trovo.TrovoGrabChannelData;
 import com.streamcollector.app.grabber.trovo.TrovoRequestUsers;
@@ -42,6 +44,7 @@ public class Grabber {
         grabTwitch();
         grabWASD();
         grabTrovo();
+        grabGoodGame();
 
         log(LogStatus.Success, "Получение данных завершено");
     }
@@ -291,6 +294,60 @@ public class Grabber {
         }
 
         log(LogStatus.Success, "Trovo каналы обработаны");
+    }
+
+    private void grabGoodGame() throws ExecutionException, InterruptedException {
+        List<CompletableFuture<GGGrabChannelData>> futuresGGChannelID = new ArrayList<>();
+        for (final var channel : channelsToGrab) {
+            if (channel.first != Platform.GoodGame)
+                continue;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(GrabUtil.getGoodGameStreamUrl(channel.second)))
+                    .timeout(Duration.ofMillis(timeoutMs))
+                    .header("accept", "application/vnd.goodgame.v2+json,application/hal+json,application/json")
+                    .GET()
+                    .build();
+            var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+                var result = new GGGrabChannelData();
+                result.channelName = channel.second;
+                result.channelData = GrabUtil.parseGoodGameStream(s);
+                return result;
+            }).exceptionally(throwable -> {
+                var result = new GGGrabChannelData();
+                result.channelName = channel.second;
+                result.throwable = throwable;
+                return result;
+            });
+            futuresGGChannelID.add(f);
+        }
+
+        log(LogStatus.Success, String.format("Требуется обработать %d каналов GoodGame. Этап 1 - получение channel_id", futuresGGChannelID.size()));
+        var futureGGClientID = FutureUtils.allOf(futuresGGChannelID);
+        var ggClientIDResults = futureGGClientID.get();
+
+        GoodGameWebsocket websocket = new GoodGameWebsocket();
+        List<GGGrabChannelData> ggWithBeginError = new ArrayList<>();
+        for (var ch : ggClientIDResults){
+            if (ch.channelData == null || ch.channelData.id == null){
+                ggWithBeginError.add(ch);
+            }else{
+                websocket.getChannels().add(new Pair<>(ch.channelName, ch.channelData.id.toString()));
+            }
+        }
+
+        websocket.connectBlocking();
+        long startTime = System.currentTimeMillis();
+        while (!websocket.isDone()){
+            Thread.sleep(10);
+            if (System.currentTimeMillis() - startTime >= 5000 && !websocket.isDone()){
+                break;
+            }
+        }
+        websocket.closeBlocking();
+
+        var usersList = websocket.getUsersList();
+
+        //TODO
     }
 
     public void log(LogStatus status, String message){
