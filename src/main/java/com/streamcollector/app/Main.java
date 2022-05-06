@@ -18,12 +18,12 @@ import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        /*Locale.setDefault(new Locale("ru", "RU"));
+        Locale.setDefault(new Locale("ru", "RU"));
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");
-        System.exit(0);*/
+        System.exit(0);
 
         /*GrabChannelResult res = null;
         long startTime = 0;
@@ -64,12 +64,12 @@ public class Main {
         /*GoodGameWebsocket gg = new GoodGameWebsocket();
         gg.connectBlocking();*/
 
-        var grabber = new Grabber();
+        /*var grabber = new Grabber();
         grabber.getChannelsToGrab().add(new Pair<>(Platform.GoodGame, "hell_girl"));
         grabber.getChannelsToGrab().add(new Pair<>(Platform.GoodGame, "Nikichar"));
         grabber.getChannelsToGrab().add(new Pair<>(Platform.GoodGame, "JosephStalin"));
         grabber.startGrabAsyncHttp();
         var result = grabber.getResults();
-        System.exit(0);
+        System.exit(0);*/
     }
 }

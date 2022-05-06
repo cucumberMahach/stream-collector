@@ -33,11 +33,11 @@ public class WASDGrabChannelData {
             result.chattersGlobal.chatterCount = participants.countAll();
 
             result.chattersGlobal.chatters = new Chatters();
-            result.chattersGlobal.chatters.broadcaster = participants.owners.toArray(new String[0]);
-            result.chattersGlobal.chatters.moderators = participants.moderators.toArray(new String[0]);
-            result.chattersGlobal.chatters.viewers = participants.users.toArray(new String[0]);
+            result.chattersGlobal.chatters.broadcaster.addAll(participants.owners);
+            result.chattersGlobal.chatters.moderators.addAll(participants.moderators);
+            result.chattersGlobal.chatters.viewers.addAll(participants.users);
 
-            result.chattersGlobal.chatters.fillSetsFromArrays();
+            result.chattersGlobal.chatters.fillSetsAndConstructMaps();
         }
 
         return result;

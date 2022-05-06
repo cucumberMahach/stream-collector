@@ -64,7 +64,7 @@ public class Grabber {
                 result.platform = channel.first;
                 result.channelName = channel.second;
                 result.chattersGlobal = GrabUtil.createChattersGlobalObject(s);
-                result.chattersGlobal.chatters.fillSetsFromArrays();
+                result.chattersGlobal.chatters.fillSetsAndConstructMaps();
                 return result;
             }).exceptionally(throwable -> {
                 GrabChannelResult result = new GrabChannelResult();
@@ -157,6 +157,7 @@ public class Grabber {
                         .timeout(Duration.ofMillis(timeoutMs))
                         .build();
                 var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+                    //System.out.println(s);
                     if (channelData.participants == null){
                         channelData.participants = GrabUtil.parseWASDParticipantsJson(s);
                     }else{
@@ -256,6 +257,7 @@ public class Grabber {
                         .POST(HttpRequest.BodyPublishers.ofString(requstString))
                         .build();
                 var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+                    //System.out.println(s);
                     if (channelData.viewers == null){
                         channelData.viewers = GrabUtil.parseTrovoViewers(s);
                     }else{
@@ -321,6 +323,11 @@ public class Grabber {
             futuresGGChannelID.add(f);
         }
 
+        if (futuresGGChannelID.isEmpty()){
+            log(LogStatus.Success, "GoodGame каналов нет");
+            return;
+        }
+
         log(LogStatus.Success, String.format("Требуется обработать %d каналов GoodGame. Этап 1 - получение channel_id", futuresGGChannelID.size()));
         var futureGGClientID = FutureUtils.allOf(futuresGGChannelID);
         var ggClientIDResults = futureGGClientID.get();
@@ -335,15 +342,17 @@ public class Grabber {
             }
         }
 
-        websocket.connectBlocking();
-        long startTime = System.currentTimeMillis();
-        while (!websocket.isDone()){
-            Thread.sleep(10);
-            if (System.currentTimeMillis() - startTime >= 5000 && !websocket.isDone()){
-                break;
+        if (!websocket.getChannels().isEmpty()) {
+            websocket.connectBlocking();
+            long startTime = System.currentTimeMillis();
+            while (!websocket.isDone()) {
+                Thread.sleep(10);
+                if (System.currentTimeMillis() - startTime >= timeoutMs && !websocket.isDone()) {
+                    break;
+                }
             }
+            websocket.closeBlocking();
         }
-        websocket.closeBlocking();
 
         var usersList = websocket.getUsersList();
 
