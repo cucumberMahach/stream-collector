@@ -12,6 +12,7 @@ import com.streamcollector.app.service.AbstractService;
 import com.streamcollector.app.settings.Settings;
 import com.streamcollector.app.util.FutureUtils;
 import com.streamcollector.app.util.Pair;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.net.URI;
@@ -75,6 +76,12 @@ public class Grabber {
             });
             futuresTwitch.add(f);
         }
+
+        if (futuresTwitch.isEmpty()){
+            log(LogStatus.Success, "Нет Twitch каналов для обработки");
+            return;
+        }
+
         log(LogStatus.Success, String.format("Требуется обработать %d каналов Twitch", futuresTwitch.size()));
         var futureTwitch = FutureUtils.allOf(futuresTwitch);
         grabResults.addAll(futureTwitch.get());
@@ -103,6 +110,11 @@ public class Grabber {
                 return result;
             });
             futuresWASDChannelID.add(f);
+        }
+
+        if (futuresWASDChannelID.isEmpty()){
+            log(LogStatus.Success, "Нет WASD каналов для обработки");
+            return;
         }
 
         log(LogStatus.Success, String.format("Требуется обработать %d каналов WASD. Этап 1 - получение channel_id", futuresWASDChannelID.size()));
@@ -189,6 +201,8 @@ public class Grabber {
             offset += 10000;
         }
 
+        log(LogStatus.Success, String.format("Успешно получено %d каналов WASD", wasdDone.size()));
+
         wasdDone.addAll(wasdWithBeginError);
 
         for (var wasdResult : wasdDone){
@@ -200,6 +214,12 @@ public class Grabber {
 
     private void grabTrovo() throws ExecutionException, InterruptedException, IOException {
         var usernames = channelsToGrab.stream().filter(platformStringPair -> platformStringPair.first == Platform.Trovo).toList();
+
+        if (usernames.isEmpty()){
+            log(LogStatus.Success, "Нет Trovo каналов для обработки");
+            return;
+        }
+
         ArrayList<TrovoGrabChannelData> trovoGrabs = new ArrayList<>();
 
         TrovoRequestUsers requestUsers = new TrovoRequestUsers();
@@ -289,6 +309,8 @@ public class Grabber {
             offset += 100000;
         }
 
+        log(LogStatus.Success, String.format("Успешно получено %d каналов Trovo", trovoDone.size()));
+
         trovoDone.addAll(trovoWithBeginErrors);
 
         for (var wasdResult : trovoDone){
@@ -313,18 +335,20 @@ public class Grabber {
                 var result = new GGGrabChannelData();
                 result.channelName = channel.second;
                 result.channelData = GrabUtil.parseGoodGameStream(s);
+                result.timestamp = TimeUtil.getZonedNow();
                 return result;
             }).exceptionally(throwable -> {
                 var result = new GGGrabChannelData();
                 result.channelName = channel.second;
                 result.throwable = throwable;
+                result.timestamp = TimeUtil.getZonedNow();
                 return result;
             });
             futuresGGChannelID.add(f);
         }
 
         if (futuresGGChannelID.isEmpty()){
-            log(LogStatus.Success, "GoodGame каналов нет");
+            log(LogStatus.Success, "Нет GoodGame каналов для обработки");
             return;
         }
 
@@ -338,9 +362,11 @@ public class Grabber {
             if (ch.channelData == null || ch.channelData.id == null){
                 ggWithBeginError.add(ch);
             }else{
-                websocket.getChannels().add(new Pair<>(ch.channelName, ch.channelData.id.toString()));
+                websocket.getChannels().add(ch);
             }
         }
+
+        log(LogStatus.Success, String.format("Этап 2 - получение через websocket. Прошло %d каналов Goodgame", websocket.getChannels().size()));
 
         if (!websocket.getChannels().isEmpty()) {
             websocket.connectBlocking();
@@ -354,9 +380,28 @@ public class Grabber {
             websocket.closeBlocking();
         }
 
-        var usersList = websocket.getUsersList();
+        var results = websocket.getResults();
 
-        //TODO
+        log(LogStatus.Success, String.format("Успешно получено %d каналов GoodGame", results.size()));
+
+        ArrayList<GGGrabChannelData> done = new ArrayList<>();
+        for (var wsCh : websocket.getChannels()){
+            var resCh = results.stream().filter(ch -> ch == wsCh).findFirst();
+            if (resCh.isPresent()){
+                done.add(resCh.get());
+            }else{
+                wsCh.throwable = new Exception("Websocket не выдал результат по этому каналу");
+                done.add(wsCh);
+            }
+        }
+
+        done.addAll(ggWithBeginError);
+
+        for (var doneCh : done){
+            grabResults.add(doneCh.toGrabChannelResult());
+        }
+
+        log(LogStatus.Success, "GoodGame каналы обработаны");
     }
 
     public void log(LogStatus status, String message){

@@ -27,6 +27,9 @@ public class CircleEntity {
     @Column(name = "endTime")
     public ZonedDateTime endTime;
 
+    @Column(name = "grabDuration")
+    public Integer grabDuration;
+
     @Column(name = "totalChannels")
     public Integer totalChannels;
 

@@ -45,9 +45,18 @@ public class TgUserEntity{
     @Column(name = "lastOnlineTime", nullable = false)
     public ZonedDateTime lastOnlineTime;
 
+    @Column(name = "balance", nullable = false)
+    public Long balance;
+
     @OneToMany(mappedBy="tgUser")
     public Set<TgHistoryEntity> tgHistory = new HashSet<>();
 
     @OneToMany(mappedBy="tgUser")
     public Set<TgBanEntity> tgBans = new HashSet<>();
+
+    @OneToMany(mappedBy="tgUser")
+    public Set<TgPurchaseEntity> tgPurchases = new HashSet<>();
+
+    @OneToMany(mappedBy="tgUser")
+    public Set<TgPaymentEntity> tgPayments = new HashSet<>();
 }

@@ -24,22 +24,26 @@ public class WASDGrabChannelData {
     public GrabChannelResult toGrabChannelResult(){
         var result = new GrabChannelResult();
         result.channelName = channelName;
-        result.setError(throwable);
         result.platform = Platform.WASD;
         result.timestamp = participantsTimestamp;
 
-        if (!isError() && participants != null) {
-            result.chattersGlobal = new ChattersGlobal();
-            result.chattersGlobal.chatterCount = participants.countAll();
+        if (!isError()) {
+            if (participants == null){
+                throwable = new Exception("participants == null");
+            }else {
+                result.chattersGlobal = new ChattersGlobal();
+                result.chattersGlobal.chatterCount = participants.countAll();
 
-            result.chattersGlobal.chatters = new Chatters();
-            result.chattersGlobal.chatters.broadcaster.addAll(participants.owners);
-            result.chattersGlobal.chatters.moderators.addAll(participants.moderators);
-            result.chattersGlobal.chatters.viewers.addAll(participants.users);
+                result.chattersGlobal.chatters = new Chatters();
+                result.chattersGlobal.chatters.broadcaster.addAll(participants.owners);
+                result.chattersGlobal.chatters.moderators.addAll(participants.moderators);
+                result.chattersGlobal.chatters.viewers.addAll(participants.users);
 
-            result.chattersGlobal.chatters.fillSetsAndConstructMaps();
+                result.chattersGlobal.chatters.fillSetsAndConstructMaps();
+            }
         }
 
+        result.setError(throwable);
         return result;
     }
 }
