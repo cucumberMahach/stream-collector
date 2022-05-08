@@ -8,7 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class AsyncBotBodyExecutor extends Thread{
 
-    protected BotBody botBody;
+    protected BotStandardBody botBody;
     protected ArrayBlockingQueue<Update> queue;
     protected AbstractService service;
 
@@ -40,11 +40,11 @@ public class AsyncBotBodyExecutor extends Thread{
         }
     }
 
-    public void setBotBody(BotBody botBody) {
+    public void setBotBody(BotStandardBody botBody) {
         this.botBody = botBody;
     }
 
-    public BotBody getBotBody() {
+    public BotStandardBody getBotBody() {
         return botBody;
     }
 

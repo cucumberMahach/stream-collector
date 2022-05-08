@@ -1,5 +1,6 @@
 package com.streamcollector.app.bot;
 
+import com.streamcollector.app.bot.logic.BotStandardLogic;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgHistoryEntity;
 import com.streamcollector.app.util.TimeUtil;
@@ -7,15 +8,25 @@ import com.streamcollector.app.database.entities.TgUserEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-public class BotStandardBody extends BotBody {
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.util.Base64;
+import java.util.Random;
+
+public class BotStandardBody{
+    protected ZonedDateTime currentTime;
+    protected Bot bot;
+    protected BotStandardLogic logic;
+
     private final BotDatabase botDB;
+    private final Random random = new Random();
 
     public BotStandardBody(BotDatabase botDatabase){
         this.botDB = botDatabase;
         initCurrentTime();
     }
 
-    @Override
     public void onUpdate(Update update) {
         User tgApiUser;
         String chatId;
@@ -68,7 +79,6 @@ public class BotStandardBody extends BotBody {
             addToHistory(update, user, "");
     }
 
-    @Override
     public BotDatabase getDatabase() {
         return botDB;
     }
@@ -87,6 +97,8 @@ public class BotStandardBody extends BotBody {
             logic.startRequest(update, tgUser);
         }else if (message.equals("/help")){
             logic.helpRequest(update, tgUser);
+        }else if (message.equals("/account")) {
+            logic.accountRequest(update, tgUser);
         }else{
             logic.commandRequest(update, tgUser);
         }
@@ -106,10 +118,17 @@ public class BotStandardBody extends BotBody {
         tgUser.tgId = tgApiUser.getId().toString();
         tgUser.state = "created";
         tgUser.firstOnlineTime = currentTime;
+        tgUser.donationKey = createDonationKey(tgApiUser.getId());
+
         fillUserInfo(tgApiUser, tgUser);
 
         tgUser = botDB.getOrCreateTgUser(tgUser);
         return tgUser;
+    }
+
+    private String createDonationKey(Long tgId){
+        String originalKey = String.format("%d%d%d", Math.abs(random.nextInt(Short.MAX_VALUE)), tgId, Math.abs(random.nextInt(Short.MAX_VALUE)));
+        return Base64.getEncoder().encodeToString(originalKey.getBytes(StandardCharsets.UTF_8));
     }
 
     protected TgBanEntity getActiveBan(String tgId){
@@ -133,5 +152,30 @@ public class BotStandardBody extends BotBody {
         tgHistory.requestTime = currentTime;
         tgHistory.answerTime = TimeUtil.getZonedNow();
         botDB.addToHistory(tgHistory);
+    }
+
+    protected void initCurrentTime(){
+        currentTime = TimeUtil.getZonedNow();
+    }
+
+    public void setBot(Bot bot) {
+        this.bot = bot;
+    }
+
+    public Bot getBot() {
+        return bot;
+    }
+
+    public ZonedDateTime getCurrentTime() {
+        return currentTime;
+    }
+
+    public BotStandardLogic getLogic() {
+        return logic;
+    }
+
+    public void setLogic(BotStandardLogic logic) {
+        this.logic = logic;
+        logic.setBotBody(this);
     }
 }

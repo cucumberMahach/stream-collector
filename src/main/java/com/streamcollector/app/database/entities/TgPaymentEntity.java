@@ -16,7 +16,7 @@ public class TgPaymentEntity {
     public Long id;
 
     @ManyToOne
-    @JoinColumn(name="tgUser_id", nullable = false)
+    @JoinColumn(name="tgUser_id")
     public TgUserEntity tgUser;
 
     @Column(name = "donationId")
@@ -32,4 +32,10 @@ public class TgPaymentEntity {
 
     @Column(name = "getTime")
     public ZonedDateTime getTime;
+
+    @Column(name = "message")
+    public String message;
+
+    @Column(name = "title")
+    public String title;
 }

@@ -1,40 +1,39 @@
 package com.streamcollector.app.bot.logic;
 
+import com.streamcollector.app.bot.BotStandardBody;
 import com.streamcollector.app.bot.commands.ButtonWithData;
 import com.streamcollector.app.bot.commands.LoadingMessage;
 import com.streamcollector.app.bot.commands.UserInfo;
 import com.streamcollector.app.bot.commands.UserPlatformChoice;
+import com.streamcollector.app.bot.view.BotStandardView;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgUserEntity;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class BotStandardLogic extends BotLogic{
-    @Override
+public class BotStandardLogic{
+    protected BotStandardBody body;
+    protected BotStandardView view;
+
     public void startRequest(Update update, TgUserEntity tgUser) {
         view.sendStart(update, tgUser);
     }
 
-    @Override
     public void helpRequest(Update update, TgUserEntity tgUser) {
         view.sendHelp(update, tgUser);
     }
 
-    @Override
     public void enableNotificationRequest(Update update) {
         view.sendEnableNotification(update);
     }
 
-    @Override
     public void banRequest(String chatId, TgBanEntity tgBan) {
         view.sendBanReply(chatId, tgBan);
     }
 
-    @Override
+    public void accountRequest(Update update, TgUserEntity tgUser){
+        view.sendAccountReply(update, tgUser);
+    }
+
     public void commandRequest(Update update, TgUserEntity tgUser) {
         sendPlatformChoice(update, update.getMessage().getText());
         var data = update.getCallbackQuery();
@@ -42,7 +41,6 @@ public class BotStandardLogic extends BotLogic{
         view.sendUserInfo(update, userInfo);*/
     }
 
-    @Override
     public void callbackRequest(Update update, TgUserEntity tgUser) {
         String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
         String data = update.getCallbackQuery().getData();
@@ -67,5 +65,22 @@ public class BotStandardLogic extends BotLogic{
     private UserInfo showUserInfo(String userName){
         var userInfo = new UserInfo();
         return userInfo;
+    }
+
+    public void setBotBody(BotStandardBody body) {
+        this.body = body;
+    }
+
+    public BotStandardBody getBotBody() {
+        return body;
+    }
+
+    public BotStandardView getBotView() {
+        return view;
+    }
+
+    public void setBotView(BotStandardView view) {
+        this.view = view;
+        view.setBotLogic(this);
     }
 }

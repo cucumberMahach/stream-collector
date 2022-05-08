@@ -3,9 +3,10 @@ package com.streamcollector.app.bot.view;
 import com.streamcollector.app.bot.commands.LoadingMessage;
 import com.streamcollector.app.bot.commands.UserInfo;
 import com.streamcollector.app.bot.commands.UserPlatformChoice;
-import com.streamcollector.app.util.TimeUtil;
+import com.streamcollector.app.bot.logic.BotStandardLogic;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgUserEntity;
+import com.streamcollector.app.util.TimeUtil;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -18,8 +19,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BotStandardView extends BotView{
-    @Override
+public class BotStandardView{
+    protected BotStandardLogic botLogic;
+
     public void sendStart(Update update, TgUserEntity tgUser) {
         botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), """
                 &#128075; <b>Вас приветствует Twitch Collector Bot</b>
@@ -29,7 +31,6 @@ public class BotStandardView extends BotView{
                 &#128591; <b>Пожалуйста</b>, не пробуйте использовать <b>SQL инъекции</b> на нашем боте. Спасибо""");
     }
 
-    @Override
     public void sendHelp(Update update, TgUserEntity tgUser) {
         botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), """
                 &#129488; <b>Помощь</b>
@@ -39,7 +40,6 @@ public class BotStandardView extends BotView{
                 &#128591; <b>Пожалуйста</b>, не пробуйте использовать <b>SQL инъекции</b> на нашем боте. Спасибо""");
     }
 
-    @Override
     public void sendEnableNotification(Update update) {
         botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), """
                 &#128994; <b>Бот снова работает!</b>
@@ -47,7 +47,6 @@ public class BotStandardView extends BotView{
                 Вы получили это сообщение, потому что пробовали отправить запрос выключенному боту""");
     }
 
-    @Override
     public void sendBanReply(String chatId, TgBanEntity tgBan) {
         var banUntil = TimeUtil.formatDurationDays(Duration.between(botLogic.getBotBody().getCurrentTime(), tgBan.untilTime));
         botLogic.getBotBody().getBot().sendMsg(chatId, String.format("""
@@ -57,12 +56,24 @@ public class BotStandardView extends BotView{
                 &#128197; До конца бана осталось <b>%s</b>""", tgBan.reason, banUntil));
     }
 
-    @Override
+    public void sendAccountReply(Update update, TgUserEntity tgUser){
+        long days = Duration.between(tgUser.firstOnlineTime, TimeUtil.getZonedNow()).toDays();
+        botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), String.format("""
+                <b>Мой аккаунт</b>
+                <i>Вся необходимая информация о вашем профиле</i>
+
+                &#127991; <b>Telegram ID:</b> <code>%s</code>
+                &#127913; <b>Регистрация:</b> <code>%s (%d дней)</code>
+                &#128273; <b>Уникальный ключ:</b> <code>%s</code>
+                
+                &#128182; <b>Баланс:</b> <code>%d₽</code>
+                """, tgUser.tgId, TimeUtil.formatToUserDate(tgUser.firstOnlineTime), days, tgUser.donationKey, tgUser.balance));
+    }
+
     public void sendUserInfo(Update update, UserInfo userInfo) {
         botLogic.getBotBody().getBot().sendSticker(update.getMessage().getChatId().toString(), "CAACAgIAAxkBAAEERyxiP1p-8qp8alVe51jr5SnwpQxLrgAChhsAAs7QiElhmJB0PqwN7yME", null);
     }
 
-    @Override
     public void sendUserPlatformChoice(Update update, UserPlatformChoice platformChoice) {
         SendMessage msg = new SendMessage();
         msg.setText(String.format("""
@@ -83,7 +94,6 @@ public class BotStandardView extends BotView{
         botLogic.getBotBody().getBot().sendMsg(update.getMessage().getChatId().toString(), msg);
     }
 
-    @Override
     public void manageLoadingMessage(String chatId, LoadingMessage loadingMessage) {
         var editMessage = new EditMessageReplyMarkup();
         editMessage.setChatId(chatId);
@@ -104,5 +114,9 @@ public class BotStandardView extends BotView{
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setBotLogic(BotStandardLogic botLogic) {
+        this.botLogic = botLogic;
     }
 }

@@ -68,6 +68,7 @@ public abstract class DonationsHandler extends WebSocketClient implements Suppor
         while(!collectedHttp) {
             try {
                 collectHttpDonations();
+                httpDonationsDone();
                 collectedHttp = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -95,18 +96,17 @@ public abstract class DonationsHandler extends WebSocketClient implements Suppor
             if (httpDonations == null)
                 throw new Exception("HttpDonation is null");
             for (var donat : httpDonations.data){
-                if (isDonationActual(donat)){
+                if (isDonationActual(donat, true)){
                     onNewDonation(donat);
                 }else{
                     return;
                 }
             }
-            currentPage++;
 
             if (currentPage == httpDonations.meta.lastPage){
                 return;
             }
-            Thread.sleep(500);
+            currentPage++;
         }
     }
 
@@ -116,7 +116,9 @@ public abstract class DonationsHandler extends WebSocketClient implements Suppor
 
     protected abstract void onNewDonation(DonationData donation);
 
-    protected abstract boolean isDonationActual(DonationData donation);
+    protected abstract boolean isDonationActual(DonationData donation, boolean http);
+
+    protected abstract void httpDonationsDone();
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
@@ -151,7 +153,7 @@ public abstract class DonationsHandler extends WebSocketClient implements Suppor
         }else{
             var channelMessage = gson.fromJson(s, ChannelMessage.class);
             if (channelMessage != null && channelMessage.isCorrect()){
-                if (isDonationActual(channelMessage.result.data.data)) {
+                if (isDonationActual(channelMessage.result.data.data, false)) {
                     onNewDonation(channelMessage.result.data.data);
                 }
             }

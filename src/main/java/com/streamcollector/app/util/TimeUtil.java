@@ -8,12 +8,18 @@ public class TimeUtil {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter formatterMs = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
+    private static final DateTimeFormatter formatterUserDate = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     public static ZonedDateTime getZonedNow(){
         return ZonedDateTime.ofInstant(Instant.now(), zoneId);
     }
 
     public static ZonedDateTime getZonedFromUnix(long unix){
         return ZonedDateTime.ofInstant(Instant.ofEpochSecond(unix), zoneId);
+    }
+
+    public static String formatToUserDate(ZonedDateTime zoned){
+        return formatterUserDate.format(zoned);
     }
 
     public static String formatDuration(Duration duration) {

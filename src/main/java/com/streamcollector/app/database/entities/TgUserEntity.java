@@ -46,7 +46,7 @@ public class TgUserEntity{
     public ZonedDateTime lastOnlineTime;
 
     @Column(name = "balance", nullable = false)
-    public Long balance;
+    public Long balance = 0L;
 
     @Column(name = "donationKey", nullable = false)
     public String donationKey;

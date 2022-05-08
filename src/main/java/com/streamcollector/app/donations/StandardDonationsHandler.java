@@ -1,31 +1,87 @@
 package com.streamcollector.app.donations;
 
+import com.streamcollector.app.database.DonationsDatabase;
+import com.streamcollector.app.database.entities.TgPaymentEntity;
 import com.streamcollector.app.donations.json.httpDonations.DonationData;
 import com.streamcollector.app.logging.LogStatus;
-import com.streamcollector.app.service.AbstractService;
+import com.streamcollector.app.service.DonationsService;
 import com.streamcollector.app.util.TimeUtil;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class StandardDonationsHandler extends DonationsHandler{
-    private AbstractService service = null;
+    private DonationsService service = null;
     private boolean printDebug = false;
+    private ZonedDateTime httpLastDonationTime;
+
     @Override
     protected void onNewDonation(DonationData donation) {
-        log(LogStatus.Debug, "NewDonation!");
+        var session = service.updateSession();
+
+        TgPaymentEntity payment = new TgPaymentEntity();
+        payment.donationId = donation.id;
+        payment.amount = donation.amount.intValue();
+        payment.donationTime = donation.getCreatedAt(true);
+        payment.getTime = TimeUtil.getZonedNow();
+        payment.message = donation.message.trim();
+        payment.title = donation.username;
+
+        var user = DonationsDatabase.getTgUserByDonationKey(session, payment.message);
+        if (user != null){
+            payment.tgUser = user;
+            user.balance += payment.amount;
+            DonationsDatabase.updateTgUser(session, user);
+        }
+        DonationsDatabase.insertDonation(session, payment);
+
+        log(LogStatus.Success, String.format("New Donation: %d, found user - %b", payment.donationId, user != null));
     }
 
     @Override
-    protected boolean isDonationActual(DonationData donation) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        ZonedDateTime zoned = ZonedDateTime.parse("2022-05-03 23:35:34", formatter.withZone(TimeUtil.zoneId));
-        log(LogStatus.Debug, donation.getCreatedAt(true) + " * " + zoned);
-        return donation.getCreatedAt(true).isAfter(zoned);
+    protected boolean isDonationActual(DonationData donation, boolean http) {
+        var session = service.updateSession();
+
+        var donationTime = donation.getCreatedAt(true);
+        var donationEntity = DonationsDatabase.getDonationEntity(session);
+
+        if (http){
+            if (donationEntity.lastDonationTime == null){
+                storeLastHttpDonation(donationTime);
+                return true;
+            }else{
+                if (donationTime.isAfter(donationEntity.lastDonationTime)){
+                    storeLastHttpDonation(donationTime);
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else{
+            if (donationEntity.lastDonationTime == null){
+                donationEntity.lastDonationTime = donationTime;
+                DonationsDatabase.updateDonationEntity(session, donationEntity);
+            }
+            return true;
+        }
     }
 
-    public void setService(AbstractService service) {
+    private void storeLastHttpDonation(ZonedDateTime donationTime){
+        if (httpLastDonationTime == null || donationTime.isAfter(httpLastDonationTime)) {
+            httpLastDonationTime = donationTime;
+        }
+    }
+
+    @Override
+    protected void httpDonationsDone() {
+        if (httpLastDonationTime != null){
+            var session = service.updateSession();
+            var donationEntity = DonationsDatabase.getDonationEntity(session);
+            donationEntity.lastDonationTime = httpLastDonationTime;
+            DonationsDatabase.updateDonationEntity(session, donationEntity);
+        }
+    }
+
+    public void setService(DonationsService service) {
         this.service = service;
     }
 

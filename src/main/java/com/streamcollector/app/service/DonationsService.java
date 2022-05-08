@@ -1,11 +1,16 @@
 package com.streamcollector.app.service;
 
+import com.streamcollector.app.database.DatabaseUtil;
 import com.streamcollector.app.donations.StandardDonationsHandler;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.settings.Settings;
 import com.streamcollector.app.util.DataUtil;
+import org.hibernate.StatelessSession;
 
 public class DonationsService extends AbstractService{
+
+    private StatelessSession session;
+    private long sessionTime = 0;
 
     public DonationsService(){
         super("donations", true, true);
@@ -22,6 +27,7 @@ public class DonationsService extends AbstractService{
             donations.start();
         }catch (Exception e){
             writeLog(LogStatus.Error, "Исключение при старте - " + DataUtil.getStackTrace(e));
+            return;
         }
 
         try {
@@ -37,5 +43,24 @@ public class DonationsService extends AbstractService{
         } catch (InterruptedException e) {
 
         }
+    }
+
+    private StatelessSession getSession(){
+        var settings = Settings.instance.getSettings();
+        return DatabaseUtil.getStateLessSession(settings.donationsDatabase);
+    }
+
+    public StatelessSession updateSession(){
+        if (session == null){
+            session = getSession();
+            sessionTime = System.currentTimeMillis();
+        }else{
+            if (System.currentTimeMillis() - sessionTime > 5000){
+                session.close();
+                session = getSession();
+                sessionTime = System.currentTimeMillis();
+            }
+        }
+        return session;
     }
 }
