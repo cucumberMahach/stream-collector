@@ -33,6 +33,7 @@ public class DatabaseUtil {
             configuration.addAnnotatedClass(TgBanEntity.class);
             configuration.addAnnotatedClass(TgPurchaseEntity.class);
             configuration.addAnnotatedClass(TgPaymentEntity.class);
+            configuration.addAnnotatedClass(DonationEntity.class);
 
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {

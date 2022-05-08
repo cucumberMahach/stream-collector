@@ -48,6 +48,9 @@ public class TgUserEntity{
     @Column(name = "balance", nullable = false)
     public Long balance;
 
+    @Column(name = "donationKey", nullable = false)
+    public String donationKey;
+
     @OneToMany(mappedBy="tgUser")
     public Set<TgHistoryEntity> tgHistory = new HashSet<>();
 

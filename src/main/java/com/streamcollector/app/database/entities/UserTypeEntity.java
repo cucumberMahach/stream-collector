@@ -19,6 +19,9 @@ public class UserTypeEntity {
     @Column(name = "type", nullable = false)
     public String type;
 
+    @Column(name = "platforms", nullable = false)
+    public String platforms;
+
     @OneToMany(mappedBy="type")
     public Set<UserChannelEntity> usersChannels = new HashSet<>();
 }
