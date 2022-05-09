@@ -3,19 +3,25 @@ package com.streamcollector.app.grabber;
 import java.util.Objects;
 
 public enum Platform {
-    Twitch("twitch"),
-    WASD("wasd"),
-    Trovo("trovo"),
-    GoodGame("goodgame");
+    Twitch("twitch", "Twitch"),
+    WASD("wasd", "WASD"),
+    Trovo("trovo", "Trovo"),
+    GoodGame("goodgame", "GoodGame");
 
     private final String nameInDB;
+    private final String showName;
 
-    Platform(String nameInDB){
+    Platform(String nameInDB, String showName){
         this.nameInDB = nameInDB;
+        this.showName = showName;
     }
 
     public String getNameInDB() {
         return nameInDB;
+    }
+
+    public String getShowName() {
+        return showName;
     }
 
     public static Platform fromNameInDB(String nameInDB){

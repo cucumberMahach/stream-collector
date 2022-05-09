@@ -3,12 +3,12 @@ package com.streamcollector.app.bot;
 import com.streamcollector.app.bot.logic.BotStandardLogic;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgHistoryEntity;
+import com.streamcollector.app.tasks.TasksManager;
 import com.streamcollector.app.util.TimeUtil;
 import com.streamcollector.app.database.entities.TgUserEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.Base64;
@@ -18,12 +18,14 @@ public class BotStandardBody{
     protected ZonedDateTime currentTime;
     protected Bot bot;
     protected BotStandardLogic logic;
+    protected TasksManager tasksManager;
 
     private final BotDatabase botDB;
     private final Random random = new Random();
 
-    public BotStandardBody(BotDatabase botDatabase){
+    public BotStandardBody(BotDatabase botDatabase, TasksManager tasksManager){
         this.botDB = botDatabase;
+        this.tasksManager = tasksManager;
         initCurrentTime();
     }
 
@@ -95,10 +97,8 @@ public class BotStandardBody{
 
         if (message.equals("/start")){
             logic.startRequest(update, tgUser);
-        }else if (message.equals("/help")){
-            logic.helpRequest(update, tgUser);
-        }else if (message.equals("/account")) {
-            logic.accountRequest(update, tgUser);
+        }else if (message.equals("/menu") || message.equals("Показать меню")){
+            logic.menuRequest(update, tgUser);
         }else{
             logic.commandRequest(update, tgUser);
         }
@@ -177,5 +177,9 @@ public class BotStandardBody{
     public void setLogic(BotStandardLogic logic) {
         this.logic = logic;
         logic.setBotBody(this);
+    }
+
+    public TasksManager getTasksManager() {
+        return tasksManager;
     }
 }

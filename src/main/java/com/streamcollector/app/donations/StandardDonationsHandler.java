@@ -9,7 +9,7 @@ import com.streamcollector.app.util.TimeUtil;
 
 import java.time.ZonedDateTime;
 
-public class StandardDonationsHandler extends DonationsHandler{
+public class StandardDonationsHandler extends DonationsHandler {
     private DonationsService service = null;
     private boolean printDebug = false;
     private ZonedDateTime httpLastDonationTime;
@@ -27,7 +27,7 @@ public class StandardDonationsHandler extends DonationsHandler{
         payment.title = donation.username;
 
         var user = DonationsDatabase.getTgUserByDonationKey(session, payment.message);
-        if (user != null){
+        if (user != null) {
             payment.tgUser = user;
             user.balance += payment.amount;
             DonationsDatabase.updateTgUser(session, user);
@@ -44,28 +44,26 @@ public class StandardDonationsHandler extends DonationsHandler{
         var donationTime = donation.getCreatedAt(true);
         var donationEntity = DonationsDatabase.getDonationEntity(session);
 
-        if (http){
-            if (donationEntity.lastDonationTime == null){
+        if (http) {
+            if (donationEntity.lastDonationTime == null) {
                 storeLastHttpDonation(donationTime);
                 return true;
-            }else{
-                if (donationTime.isAfter(donationEntity.lastDonationTime)){
+            } else {
+                if (donationTime.isAfter(donationEntity.lastDonationTime)) {
                     storeLastHttpDonation(donationTime);
                     return true;
-                }else{
+                } else {
                     return false;
                 }
             }
-        }else{
-            if (donationEntity.lastDonationTime == null){
-                donationEntity.lastDonationTime = donationTime;
-                DonationsDatabase.updateDonationEntity(session, donationEntity);
-            }
+        } else {
+            donationEntity.lastDonationTime = donationTime;
+            DonationsDatabase.updateDonationEntity(session, donationEntity);
             return true;
         }
     }
 
-    private void storeLastHttpDonation(ZonedDateTime donationTime){
+    private void storeLastHttpDonation(ZonedDateTime donationTime) {
         if (httpLastDonationTime == null || donationTime.isAfter(httpLastDonationTime)) {
             httpLastDonationTime = donationTime;
         }
@@ -73,7 +71,7 @@ public class StandardDonationsHandler extends DonationsHandler{
 
     @Override
     protected void httpDonationsDone() {
-        if (httpLastDonationTime != null){
+        if (httpLastDonationTime != null) {
             var session = service.updateSession();
             var donationEntity = DonationsDatabase.getDonationEntity(session);
             donationEntity.lastDonationTime = httpLastDonationTime;

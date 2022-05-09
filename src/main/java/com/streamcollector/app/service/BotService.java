@@ -7,6 +7,7 @@ import com.streamcollector.app.bot.logic.BotStandardLogic;
 import com.streamcollector.app.bot.view.BotStandardView;
 import com.streamcollector.app.settings.Settings;
 import com.streamcollector.app.bot.Bot;
+import com.streamcollector.app.tasks.TasksManager;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class BotService extends AbstractService{
     @Override
     protected void work() {
         Bot bot = new Bot(this, "TwitchCollectorBot", Settings.instance.getPrivateSettings().telegramToken);
+        TasksManager tasks = new TasksManager(this);
 
         try {
             bot.botConnect();
@@ -33,10 +35,12 @@ public class BotService extends AbstractService{
             return;
         }
 
+        tasks.start();
+
         for (int thread = 0; thread < threadsCount; thread++){
             var executor = new AsyncBotBodyExecutor(this, String.format("Thread %d", thread+1));
             executor.setQueue(queue);
-            executor.setBotBody(new BotStandardBody(new BotDatabase()));
+            executor.setBotBody(new BotStandardBody(new BotDatabase(), tasks));
             executor.getBotBody().setBot(bot);
             executor.getBotBody().setLogic(new BotStandardLogic());
             executor.getBotBody().getLogic().setBotView(new BotStandardView());
@@ -46,12 +50,16 @@ public class BotService extends AbstractService{
 
         try {
             while(true){
+                tasks.update();
                 Thread.sleep(10);
             }
         }catch (InterruptedException e){
-            destroyAllExecutors();
-            bot.getSession().stop();
+
         }
+
+        destroyAllExecutors();
+        tasks.stop();
+        bot.getSession().stop();
     }
 
     private void destroyAllExecutors(){
