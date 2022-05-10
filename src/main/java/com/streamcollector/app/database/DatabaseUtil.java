@@ -4,6 +4,7 @@ import com.streamcollector.app.database.entities.*;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
 import com.streamcollector.app.tasks.database.results.TopViewsByUserItem;
+import com.streamcollector.app.tasks.database.results.UserSearchItem;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -37,6 +38,7 @@ public class DatabaseUtil {
             configuration.addAnnotatedClass(DonationEntity.class);
 
             configuration.addAnnotatedClass(TopViewsByUserItem.class);
+            configuration.addAnnotatedClass(UserSearchItem.class);
 
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {

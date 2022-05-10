@@ -1,9 +1,11 @@
 package com.streamcollector.app.bot;
 
 import com.streamcollector.app.bot.logic.BotStandardLogic;
+import com.streamcollector.app.database.SharedDatabase;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgHistoryEntity;
 import com.streamcollector.app.tasks.TasksManager;
+import com.streamcollector.app.util.StringUtils;
 import com.streamcollector.app.util.TimeUtil;
 import com.streamcollector.app.database.entities.TgUserEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -94,6 +96,9 @@ public class BotStandardBody{
         }
 
         String message = update.getMessage().getText();
+        if (checkSQLInjection(message, tgUser)){
+            return;
+        }
 
         if (message.equals("/start")){
             logic.startRequest(update, tgUser);
@@ -102,6 +107,24 @@ public class BotStandardBody{
         }else{
             logic.commandRequest(update, tgUser);
         }
+    }
+
+    protected boolean checkSQLInjection(String text, TgUserEntity tgUser){
+        int score = StringUtils.checkSQLInjection(text);
+        if (score == 0){
+            return false;
+        }
+
+        TgBanEntity ban = new TgBanEntity();
+        ban.tgUser = tgUser;
+        ban.fromTime = TimeUtil.getZonedNow();
+        ban.untilTime = ban.fromTime.plusMinutes(60);
+        ban.reason = String.format("""
+                Использование SQL инъекций (оценка опасности вашей попытки %d баллов из %d)""", score, StringUtils.CHECK_SQL_INJECTION_MAX_SCORE);
+
+        SharedDatabase.makeBan(botDB.updateSession(), ban);
+
+        return true;
     }
 
     protected void fillUserInfo(User tgApiUser, TgUserEntity user){

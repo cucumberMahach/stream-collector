@@ -8,7 +8,8 @@ public class TimeUtil {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter formatterMs = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private static final DateTimeFormatter formatterUserDate = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter formatterUserTime = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss");
+    private static final DateTimeFormatter formatterUserDate = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
     public static ZonedDateTime getZonedNow(){
         return ZonedDateTime.ofInstant(Instant.now(), zoneId);
@@ -18,7 +19,7 @@ public class TimeUtil {
         return ZonedDateTime.ofInstant(Instant.ofEpochSecond(unix), zoneId);
     }
 
-    public static String formatToUserDate(ZonedDateTime zoned){
+    public static String formatZonedUserDate(ZonedDateTime zoned){
         return formatterUserDate.format(zoned);
     }
 
@@ -51,6 +52,10 @@ public class TimeUtil {
 
     public static String formatZoned(ZonedDateTime zoned){
         return formatter.format(zoned);
+    }
+
+    public static String formatZonedUser(ZonedDateTime zoned){
+        return formatterUserTime.format(zoned);
     }
 
     public static String formatZonedMs(ZonedDateTime zoned){

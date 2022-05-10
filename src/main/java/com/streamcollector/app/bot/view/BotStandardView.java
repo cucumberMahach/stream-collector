@@ -5,8 +5,13 @@ import com.streamcollector.app.bot.commands.UserPlatformChoice;
 import com.streamcollector.app.bot.logic.BotStandardLogic;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgUserEntity;
+import com.streamcollector.app.grabber.Platform;
+import com.streamcollector.app.tasks.database.results.TopViewsByUserItem;
+import com.streamcollector.app.tasks.database.results.UserSearchItem;
+import com.streamcollector.app.tasks.task.Task;
 import com.streamcollector.app.util.TimeUtil;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -60,7 +65,7 @@ public class BotStandardView{
         msg.setText("""
                 &#129488; <b>Меню</b>
                 
-                Для получении информации о пользователе напишите его &#129313; <b><i>ник</i></b> или отправьте <b><i>ссылку</i></b> на канал &#129300;
+                Для получении информации о пользователе напишите его &#129313; <b><i>ник</i></b> &#129300;
                 
                 &#128591; <b>Пожалуйста</b>, не пробуйте использовать <b>SQL инъекции</b> на нашем боте. Спасибо""");
 
@@ -77,6 +82,90 @@ public class BotStandardView{
         inlineKeyboardMarkup.setKeyboard(keyboard);
         msg.setReplyMarkup(inlineKeyboardMarkup);
         sendClear(update.getMessage().getChatId().toString(), msg);
+    }
+
+    public void sendUserSearchResult(Task task){
+        var deleteCmd = new DeleteMessage();
+        deleteCmd.setChatId(task.chatId);
+        deleteCmd.setMessageId(task.loadingMessage.callbackMessageId);
+        try {
+            botLogic.getBotBody().getBot().execute(deleteCmd);
+        }catch (TelegramApiException e){
+            e.printStackTrace();
+        }
+
+        String username = (String) task.parameters.get("username");
+        var users = (List<UserSearchItem>) task.results.get("users");
+        var msg = new SendMessage();
+
+        if (users.isEmpty()){
+            msg.setText(String.format("""
+                    &#128560; <b>Ни один пользователь по запросу </b><code>%s</code><b> в базе не найден</b>""", username));
+        }else{
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.format("""
+                    &#128270; <b>Поиск по пользователям</b>
+                    &#9889; <b>Запрос:</b> <code>%s</code>
+                    
+                    <i>Найденные пользователи (до 10 штук):</i>
+                    """, username));
+            for (int i = 0; i < users.size(); i++) {
+                var user = users.get(i);
+                builder.append(String.format("""
+                        <b>%d.</b> <code>%s</code>
+                        &#128640; <b>Платформа:</b> <code>%s</code>
+                        &#128368; <b>Последняя запись:</b> <code>%s</code>
+                        (<code>%s</code>)
+                        
+                        """, i + 1, user.userName, Platform.fromNameInDB(user.site).getShowName(), TimeUtil.formatZonedUser(user.lastVisit), user.channelName ));
+            }
+            msg.setText(builder.toString());
+        }
+
+        botLogic.getBotBody().getBot().sendMsg(task.chatId, msg);
+    }
+
+    public void sendUserInfoResult(Task task){
+        var deleteCmd = new DeleteMessage();
+        deleteCmd.setChatId(task.chatId);
+        deleteCmd.setMessageId(task.loadingMessage.callbackMessageId);
+        try {
+            botLogic.getBotBody().getBot().execute(deleteCmd);
+        }catch (TelegramApiException e){
+            e.printStackTrace();
+        }
+
+        boolean isUserFound = (boolean) task.results.get("is_user_found");
+        String username = (String) task.parameters.get("username");
+        Platform platform = (Platform) task.parameters.get("platform");
+
+        var msg = new SendMessage();
+
+        if (isUserFound) {
+
+            var topViews = (List<TopViewsByUserItem>) task.results.get("top_views");
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.format("""
+                    &#8505; <b>Информация по пользователю</b>
+                                            
+                    &#129313; <b>Ник:</b> <code>%s</code>
+                    &#128250; <b>Платформа:</b> <code>%s</code>
+                                            
+                    &#128158; <i>Топ 10 каналов по просмотрам за последний месяц:</i>
+                    """, username, platform.getShowName()));
+            for (int i = 0; i < topViews.size(); i++) {
+                var item = topViews.get(i);
+                builder.append(String.format("%s<b>%d.</b> <code>%s</code> <b>(%s)</b>\n", (i + 1 <= (topViews.size() >= 5 ? 3 : 1) ? "&#128293; " : ""), i + 1, item.channelName, TimeUtil.formatDurationDays(item.getDuration())));
+            }
+
+            msg.setText(builder.toString());
+        }else{
+            msg.setText(String.format("""
+                    &#128560; <b>Пользователь </b><code>%s</code><b> </b><i>(%s)</i><b> в базе не найден</b>""", username, platform.getShowName()));
+        }
+
+        botLogic.getBotBody().getBot().sendMsg(task.chatId, msg);
     }
 
     public void sendEnableNotification(Update update) {
@@ -111,7 +200,7 @@ public class BotStandardView{
                 &#128273; <b>Уникальный ключ:</b> <code>%s</code>
                 
                 &#128182; <b>Баланс:</b> <code>%d₽</code>
-                """, tgUser.tgId, TimeUtil.formatToUserDate(tgUser.firstOnlineTime), days, tgUser.donationKey, tgUser.balance));
+                """, tgUser.tgId, TimeUtil.formatZonedUserDate(tgUser.firstOnlineTime), days, tgUser.donationKey, tgUser.balance));
         send(chatId, msg);
     }
 
@@ -150,7 +239,7 @@ public class BotStandardView{
         editText.setChatId(chatId);
         editText.setMessageId(loadingMessage.callbackMessageId);
         editText.setText("""
-                <b>Выполнение запроса, ожидайте...</b>
+                &#9203; <b>Выполнение запроса, ожидайте...</b>
                 """);
 
         try {
@@ -159,6 +248,24 @@ public class BotStandardView{
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendError(String chatId, String message, Integer messageIdToDelete) {
+        if (messageIdToDelete != null){
+            var deleteCmd = new DeleteMessage();
+            deleteCmd.setChatId(chatId);
+            deleteCmd.setMessageId(messageIdToDelete);
+            try {
+                botLogic.getBotBody().getBot().execute(deleteCmd);
+            }catch (TelegramApiException e){
+                e.printStackTrace();
+            }
+        }
+
+        SendMessage msg = new SendMessage();
+        msg.setText(String.format("""
+               &#129447; <b>%s</b>""", message));
+        send(chatId, msg);
     }
 
     public void setBotLogic(BotStandardLogic botLogic) {

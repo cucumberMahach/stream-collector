@@ -109,8 +109,8 @@ public class QueriesStage implements Initializable {
             var stream = QueriesStage.class.getClassLoader().getResourceAsStream("html/history.html");
             var html = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             stream.close();
-            html = html.replaceAll("%message%", tgHistoryView.message.get().replaceAll("\n", "<br>"));
-            html = html.replaceAll("%result%", tgHistoryView.result.get().replaceAll("\n", "<br>"));
+            html = html.replace("%message%", tgHistoryView.message.get().replace("\n", "<br>"));
+            html = html.replace("%result%", tgHistoryView.result.get().replace("\n", "<br>"));
             engine.loadContent(html);
         } catch (IOException e) {
             e.printStackTrace();

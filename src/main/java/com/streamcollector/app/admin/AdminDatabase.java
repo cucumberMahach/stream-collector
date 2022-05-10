@@ -9,6 +9,7 @@ import com.streamcollector.app.admin.stages.dataViews.TgUserView;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgHistoryEntity;
 import com.streamcollector.app.database.entities.TgUserEntity;
+import com.streamcollector.app.util.StringUtils;
 import org.hibernate.StatelessSession;
 
 import java.time.ZonedDateTime;
@@ -24,6 +25,8 @@ public class AdminDatabase {
         var history = new ArrayList<TgHistoryView>();
 
         var session = getSession();
+
+        text = StringUtils.formatUserQuery(text);
 
         String q = "select * from `twitch-collector`.tghistory where (id like :text or tgUser_id like :text or message like :text or result like :text)";
         if (tgUser != null)

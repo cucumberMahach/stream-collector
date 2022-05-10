@@ -14,16 +14,38 @@ public class TaskWorker {
     }
 
     public void onNewTask(Task task){
+        switch (task.type){
+            case UserInfo -> doUserInfo(task);
+            case UserSearch -> doUserSearch(task);
+            case None -> executor.getManager().finishTask(task);
+        }
+    }
+
+    private void doUserSearch(Task task){
+        var username = (String) task.parameters.get("username");
+        var users = database.searchUsers(username, 10, false);
+        task.results.put("users", users);
+        executor.getManager().finishTask(task);
+    }
+
+    private void doUserInfo(Task task){
         var username = (String) task.parameters.get("username");
         var platform = (Platform) task.parameters.get("platform");
 
-        var now = TimeUtil.getZonedNow();
-        var from = now.minusMonths(1);
-        var to = now;
+        var user = database.getUser(username, platform);
+        if (user == null){
+            task.results.put("is_user_found", false);
+        }else {
+            task.results.put("is_user_found", true);
 
-        var topViews = database.getTopViewsByUser(username, platform, from, to, 10);
+            var now = TimeUtil.getZonedNow();
+            var from = now.minusMonths(1);
+            var to = now;
 
-        task.results.put("topViews", topViews);
+            var topViews = database.getTopViewsByUser(username, platform, from, to, 10);
+
+            task.results.put("top_views", topViews);
+        }
 
         executor.getManager().finishTask(task);
     }

@@ -8,13 +8,15 @@ import com.streamcollector.app.database.entities.TgUserEntity;
 import org.hibernate.StatelessSession;
 
 public class BotDatabase {
+    private StatelessSession session;
+    private long sessionTime;
+
     public BotDatabase(){
-        var session = getSession();
-        session.close();
+        var session = updateSession();
     }
 
     public TgUserEntity getOrCreateTgUser(TgUserEntity tgUser){
-        var session = getSession();
+        var session = updateSession();
         var query = session.createNativeQuery("select * from `twitch-collector`.tgusers where tg_id = :tgId", TgUserEntity.class);
         query.setParameter("tgId", tgUser.tgId);
         query.setMaxResults(1);
@@ -31,15 +33,14 @@ public class BotDatabase {
     }
 
     public void updateTgUser(TgUserEntity tgUser){
-        var session = getSession();
+        var session = updateSession();
         session.beginTransaction();
         session.update(tgUser);
         session.getTransaction().commit();
-        session.close();
     }
 
     public TgBanEntity getLastBanOrNull(TgUserEntity tgUser){
-        var session = getSession();
+        var session = updateSession();
         org.hibernate.query.NativeQuery<TgBanEntity> query;
         if (tgUser.id == null) {
             query = session.createNativeQuery("select * from `twitch-collector`.tgbans where (select id from `twitch-collector`.tgusers where tgusers.tg_id = :tgId) = tgbans.tgUser_id order by tgbans.untilTime desc", TgBanEntity.class);
@@ -50,20 +51,27 @@ public class BotDatabase {
         }
         query.setMaxResults(1);
         var ban = query.uniqueResult();
-        session.close();
         return ban;
     }
 
     public void addToHistory(TgHistoryEntity tgHistory){
-        var session = getSession();
+        var session = updateSession();
         session.beginTransaction();
         session.insert(tgHistory);
         session.getTransaction().commit();
-        session.close();
     }
 
-    private StatelessSession getSession(){
-        var settings = Settings.instance.getSettings();
-        return DatabaseUtil.getStateLessSession(settings.botDatabase);
+    public StatelessSession updateSession(){
+        if (session == null){
+            session = DatabaseUtil.getStateLessSession(Settings.instance.getSettings().botDatabase);
+            sessionTime = System.currentTimeMillis();
+        }else{
+            if (System.currentTimeMillis() - sessionTime > 5000){
+                session.close();
+                session = DatabaseUtil.getStateLessSession(Settings.instance.getSettings().botDatabase);
+                sessionTime = System.currentTimeMillis();
+            }
+        }
+        return session;
     }
 }

@@ -10,8 +10,14 @@ import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
 import com.streamcollector.app.settings.Settings;
 import com.streamcollector.app.util.Pair;
+import org.glassfish.jersey.server.Uri;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -71,5 +77,37 @@ public class Main {
         grabber.startGrabAsyncHttp();
         var result = grabber.getResults();
         System.exit(0);*/
+
+        /*var data = Files.readAllLines(Paths.get("C:/Users/aleks/Desktop/si.html"));
+        StringBuilder builder = new StringBuilder();
+        for (var l : data){
+            int index = l.indexOf("https://streaminside.ru/streamers/");
+            if (index != -1){
+                String s = l.substring(index + "https://streaminside.ru/streamers/".length(), l.indexOf("\"><img src=\"./STREAM INSIDE - Новости о стримерах"));
+                builder.append(s + "\n");
+            }
+        }
+        Files.writeString(Paths.get("C:/Users/aleks/Desktop/qq.txt"), builder.toString());*/
+
+        /*var data = Files.readAllLines(Paths.get("C:/Users/aleks/Desktop/new-streamers-csv.txt"));
+        var newdata = new ArrayList<String>();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < data.size(); i++){
+            var d = data.get(i);
+            data.remove(i);
+            i--;
+            boolean containts = false;
+            for (var q : newdata){
+                if (q.equals(d)){
+                    containts = true;
+                    break;
+                }
+            }
+            if (!containts){
+                newdata.add(d);
+                builder.append(d + "\r\n");
+            }
+        }
+        Files.writeString(Paths.get("C:/Users/aleks/Desktop/jj.txt"), builder.toString());*/
     }
 }
