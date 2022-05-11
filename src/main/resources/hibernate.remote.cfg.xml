@@ -26,6 +26,8 @@
 
         <!-- show mysql queries output in console -->
         <property name="hibernate.show_sql">false</property>
+        <property name="hibernate.generate_statistics">false</property>
+        <property name="hibernate.use_sql_comments">false</property>
 
         <!-- cache -->
         <property name="hibernate.cache.use_second_level_cache">true</property>

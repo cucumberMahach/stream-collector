@@ -24,7 +24,9 @@
         <property name="hibernate.c3p0.timeout">100</property> <!-- wait_timeout -->
 
         <!-- show mysql queries output in com.twitchcollector.app.console -->
-        <!--<property name="hibernate.show_sql">true</property>-->
+        <property name="hibernate.show_sql">false</property>
+        <property name="hibernate.generate_statistics">false</property>
+        <property name="hibernate.use_sql_comments">false</property>
 
         <!-- cache -->
         <property name="hibernate.cache.use_second_level_cache">true</property>

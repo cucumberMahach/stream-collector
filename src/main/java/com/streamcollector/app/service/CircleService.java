@@ -15,6 +15,7 @@ import com.streamcollector.app.settings.Settings;
 import com.streamcollector.app.grabber.GrabChannelResult;
 import com.streamcollector.app.grabber.Grabber;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -143,9 +144,11 @@ public class CircleService extends AbstractService {
                     continue;
                 }
 
+                session = getSession();
+
                 writeLog(LogStatus.Success, String.format("Обнаружено обновлений данных %d из %d каналов", updatedGrabs.size(), grabsWithoutErrors.size()));
 
-                session = getSession();
+                final float calculatedDuration = updatedGrabs.size() * getAvgTimePerChannelSec(session, 5);
 
                 platformScope = new PlatformScope();
                 platformScope.load(session);
@@ -176,7 +179,7 @@ public class CircleService extends AbstractService {
 
 
                     startTime = System.currentTimeMillis();
-                    var usersChannels = doUsersChannels(session, currentChannel, currentCircle, lastChannelCircle, userTypes, grabCh);
+                    var usersChannels = doUsersChannels(session, currentChannel, currentCircle, lastChannelCircle, userTypes, grabCh, calculatedDuration);
                     writeLog(LogStatus.Success, String.format("Подготовка зрителей к записи: %d мс", System.currentTimeMillis() - startTime));
 
                     //================================FINAL TRANSACTION================================
@@ -281,6 +284,16 @@ public class CircleService extends AbstractService {
         outRemainOlds.addAll(oldGrabs);
 
         return updated;
+    }
+
+    private float getAvgTimePerChannelSec(StatelessSession session, int processCirclesCount){
+        var q = session.createNativeQuery("select AVG(q.time) as `time` from (select TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `twitch-collector`.`circles` where `endTime` IS NOT NULL order by endTime desc limit :lim) as q");
+        q.setParameter("lim", processCirclesCount);
+        var res = (BigDecimal) q.getSingleResult();
+        if (res == null){
+            return 0;
+        }
+        return res.floatValue();
     }
 
     private HashMap<String, UserTypeEntity> getUsersTypes(StatelessSession session) {
@@ -397,7 +410,7 @@ public class CircleService extends AbstractService {
     /**
      * Связывание users и channels
      */
-    private List<Pair<List<UserChannelEntity>, List<UserChannelEntity>>> doUsersChannels(StatelessSession session, ChannelEntity currentChannel, CircleEntity currentCircle, ChannelCircleEntity lastChannelCircle, HashMap<String, UserTypeEntity> userTypes, GrabChannelResult grabCh) throws ExecutionException, InterruptedException {
+    private List<Pair<List<UserChannelEntity>, List<UserChannelEntity>>> doUsersChannels(StatelessSession session, ChannelEntity currentChannel, CircleEntity currentCircle, ChannelCircleEntity lastChannelCircle, HashMap<String, UserTypeEntity> userTypes, GrabChannelResult grabCh, float calculatedDuration) throws ExecutionException, InterruptedException {
         CircleEntity preCircle = null;
 
         if (currentCircle.number != 1) {
@@ -443,7 +456,7 @@ public class CircleService extends AbstractService {
                     pair.first = new ArrayList<>();
                     pair.second = new ArrayList<>();
                     try(StatelessSession s = getSession()) {
-                        updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get(key.dbName), grabCh, site);
+                        updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get(key.dbName), grabCh, site, calculatedDuration);
                     }
                     return pair;
                 }, pool).exceptionally(throwable -> {
@@ -461,7 +474,7 @@ public class CircleService extends AbstractService {
         return result;
     }
 
-    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab, SiteEntity site) {
+    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab, SiteEntity site, float calculatedDuration) {
         HashMap<Pair<Long, Long>, ChannelCircleEntity> channelsCirclesHash = new HashMap<>();
 
         for (String name : names) {
@@ -519,7 +532,7 @@ public class CircleService extends AbstractService {
                             //writeLog(LogStatus.Warning, "fitsByPrevious = true; " + name);
                         }
 
-                        boolean fitsToUpdate = fitsByPrevious || circleStartTime.minusSeconds(viewerLeaveSec).compareTo(lastUserChannelCircle.collectTime) < 0;
+                        boolean fitsToUpdate = fitsByPrevious || circleStartTime.minusSeconds((long) Math.max(viewerLeaveSec, calculatedDuration)).compareTo(lastUserChannelCircle.collectTime) < 0;
                         if (fitsToUpdate) {
                             //b_fitsToUpdate = true;
                             //Add to update

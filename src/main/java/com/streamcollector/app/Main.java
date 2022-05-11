@@ -1,31 +1,26 @@
 package com.streamcollector.app;
 
 import com.streamcollector.app.console.ConsoleProvider;
-import com.streamcollector.app.donations.DonationsHandler;
-import com.streamcollector.app.donations.StandardDonationsHandler;
-import com.streamcollector.app.grabber.Grabber;
-import com.streamcollector.app.grabber.Platform;
-import com.streamcollector.app.grabber.goodgame.GoodGameWebsocket;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
-import com.streamcollector.app.settings.Settings;
-import com.streamcollector.app.util.Pair;
-import org.glassfish.jersey.server.Uri;
+import org.apache.log4j.PropertyConfigurator;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
+import java.util.Properties;
 import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(new Locale("ru", "RU"));
-        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
+
+        System.setProperty("org.jboss.logging.provider", "log4j");
+        Properties props = new Properties();
+        props.load(Main.class.getResourceAsStream("/log4j.properties"));
+        PropertyConfigurator.configure(props);
+        /*java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
+        java.util.logging.Logger.getGlobal().setLevel(Level.OFF);
+        java.util.logging.Logger.getAnonymousLogger().setLevel(Level.OFF);*/
+
         Logger.instance.writeLog(LogStatus.Success, "Запуск");
         ConsoleProvider.instance.startConsole();
         Logger.instance.writeLog(LogStatus.Success, "Завершение работы");

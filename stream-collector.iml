@@ -121,5 +121,9 @@
     <orderEntry type="library" name="Maven: org.openjfx:javafx-media:win:18" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-web:linux:18" level="project" />
     <orderEntry type="library" name="Maven: org.java-websocket:Java-WebSocket:1.5.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.17.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.17.2" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-reload4j:1.7.36" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.reload4j:reload4j:1.2.19" level="project" />
   </component>
 </module>
