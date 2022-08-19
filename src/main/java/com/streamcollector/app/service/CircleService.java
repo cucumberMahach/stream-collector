@@ -175,7 +175,7 @@ public class CircleService extends AbstractService {
                     var startTime = System.currentTimeMillis();
                     var usersStatistic = doUsers(session, grabCh);
 
-                    writeLog(LogStatus.Success, String.format("Пользователи записаны (inserts - %d, ignored - %d, all - %d): %d мс", usersStatistic.first, usersStatistic.second, usersStatistic.first + usersStatistic.second, System.currentTimeMillis() - startTime));
+                    writeLog(LogStatus.Success, String.format("Пользователи записаны (inserts - %d, updates - %d, all - %d): %d мс", usersStatistic.first, usersStatistic.second, usersStatistic.first + usersStatistic.second, System.currentTimeMillis() - startTime));
 
 
                     startTime = System.currentTimeMillis();
@@ -196,7 +196,12 @@ public class CircleService extends AbstractService {
                     session.insert(channelCircle);
 
                     //Users Channels
-                    startTime = System.currentTimeMillis();
+                    Pair<Long, Long> stats = new Pair<>();
+                    for (var r : usersChannels){
+                        stats.first += r.first;
+                        stats.second += r.second;
+                    }
+                    /*startTime = System.currentTimeMillis();
                     int usersInserts = 0, usersUpdate = 0;
                     for (var r : usersChannels) {
                         if (r != null) {
@@ -209,8 +214,8 @@ public class CircleService extends AbstractService {
                                 usersInserts++;
                             }
                         }
-                    }
-                    writeLog(LogStatus.Success, String.format("Запись зрителей (inserts - %d, updates - %d, all - %d): %d мс", usersInserts, usersUpdate, usersInserts + usersUpdate, System.currentTimeMillis() - startTime));
+                    }*/
+                    writeLog(LogStatus.Success, String.format("Запись зрителей (inserts - %d, updates - %d, all - %d): %d мс", stats.first, stats.second, stats.first + stats.second, System.currentTimeMillis() - startTime));
 
                     //Current Circle update
                     currentCircle.totalChannels++;
@@ -381,7 +386,7 @@ public class CircleService extends AbstractService {
      * <p>
      * Возвращает:
      * Первое число - вставки
-     * Второе число - проигнорировано
+     * Второе число - апдейты
      */
     private Pair<Integer, Integer> doUsers(StatelessSession session, GrabChannelResult grabCh) {
         Pair<Integer, Integer> counts = new Pair<>(0, 0);
@@ -392,15 +397,28 @@ public class CircleService extends AbstractService {
 
         session.beginTransaction();
         for (String user : allUsers) {
-            UserEntity userEntity = new UserEntity();
+            /*UserEntity userEntity = new UserEntity();
             userEntity.name = user;
             userEntity.site = platformScope.get(grabCh.platform);
-            try {
+            userEntity.lastVisit = grabCh.timestamp;*/
+
+            var query = session.createNativeQuery("select manageUsers(:name, :site, :lastVisit);");
+            query.setParameter("name", user);
+            query.setParameter("site", platformScope.get(grabCh.platform).id);
+            query.setParameter("lastVisit", grabCh.timestamp);
+            var res = (int) query.getSingleResult();
+            if (res == 1){
+                counts.second++;
+            }else if (res == 2){
+                counts.first++;
+            }
+
+            /*try {
                 session.insert(userEntity);
                 counts.first++;
             } catch (Exception ignored) {
                 counts.second++;
-            }
+            }*/
         }
         session.getTransaction().commit();
 
@@ -410,7 +428,7 @@ public class CircleService extends AbstractService {
     /**
      * Связывание users и channels
      */
-    private List<Pair<List<UserChannelEntity>, List<UserChannelEntity>>> doUsersChannels(StatelessSession session, ChannelEntity currentChannel, CircleEntity currentCircle, ChannelCircleEntity lastChannelCircle, HashMap<String, UserTypeEntity> userTypes, GrabChannelResult grabCh, float calculatedDuration) throws ExecutionException, InterruptedException {
+    private List<Pair<Long, Long>> doUsersChannels(StatelessSession session, ChannelEntity currentChannel, CircleEntity currentCircle, ChannelCircleEntity lastChannelCircle, HashMap<String, UserTypeEntity> userTypes, GrabChannelResult grabCh, float calculatedDuration) throws ExecutionException, InterruptedException {
         CircleEntity preCircle = null;
 
         if (currentCircle.number != 1) {
@@ -426,11 +444,9 @@ public class CircleService extends AbstractService {
         final var site = platformScope.get(grabCh.platform);
 
         //Multithreading
-        List<UserChannelEntity> toUpdate = new ArrayList<>();
-        List<UserChannelEntity> toInsert = new ArrayList<>();
 
         int usersInPart = Math.max(100, (int) Math.ceil(grabCh.chattersGlobal.chatterCount / (double) threadsToUse));
-        List<CompletableFuture<Pair<List<UserChannelEntity>, List<UserChannelEntity>>>> futures = new ArrayList<>();
+        List<CompletableFuture<Pair<Long, Long>>> futures = new ArrayList<>();
         final CircleEntity preC = preCircle;
 
         for (var key : UserType.values()){
@@ -451,12 +467,10 @@ public class CircleService extends AbstractService {
 
             for (final var part : parts) {
                 final String[] collection = arr.stream().skip(part.first).limit(part.second - part.first).toArray(String[]::new);
-                CompletableFuture<Pair<List<UserChannelEntity>, List<UserChannelEntity>>> f = CompletableFuture.supplyAsync(() -> {
-                    Pair<List<UserChannelEntity>, List<UserChannelEntity>> pair = new Pair<>();
-                    pair.first = new ArrayList<>();
-                    pair.second = new ArrayList<>();
+                CompletableFuture<Pair<Long, Long>> f = CompletableFuture.supplyAsync(() -> {
+                    Pair<Long, Long> pair = new Pair<>();
                     try(StatelessSession s = getSession()) {
-                        updateViewers(pair.first, pair.second, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get(key.dbName), grabCh, site, calculatedDuration);
+                        updateViewers(pair, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get(key.dbName), grabCh, site, calculatedDuration);
                     }
                     return pair;
                 }, pool).exceptionally(throwable -> {
@@ -469,15 +483,16 @@ public class CircleService extends AbstractService {
 
         var future = FutureUtils.allOf(futures);
         var result = future.get();
-        result.add(new Pair<>(toUpdate, toInsert));
+        //result.add(new Pair<>(toUpdate, toInsert));
 
         return result;
     }
 
-    private void updateViewers(List<UserChannelEntity> toUpdate, List<UserChannelEntity> toInsert, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab, SiteEntity site, float calculatedDuration) {
+    private void updateViewers(Pair<Long, Long> stats, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab, SiteEntity site, float calculatedDuration) {
         HashMap<Pair<Long, Long>, ChannelCircleEntity> channelsCirclesHash = new HashMap<>();
 
         for (String name : names) {
+            /*
             //boolean b_userChannel = false;
             //boolean b_lastChannelCircle = false;
             //boolean b_fitsToUpdate = false;
@@ -497,9 +512,6 @@ public class CircleService extends AbstractService {
                     t.printStackTrace();
                     continue;
                 }
-                /*if (userChannel == null){
-                    writeLog(LogStatus.Warning, String.format("test 2 - %s %s %s %s", name, channel.id.toString(), type.id.toString(), preCircle.id.toString()));
-                }*/
                 if (userChannel != null) {
                     //b_userChannel = true;
 
@@ -564,6 +576,31 @@ public class CircleService extends AbstractService {
             toInsert.add(userChannel);
 
             //writeLog(LogStatus.Warning, String.format("test - %b %b %b", b_userChannel, b_lastChannelCircle, b_fitsToUpdate));
+            */
+
+            boolean fitsByPrevious = false;
+            if (grab.previous != null) {
+                var set = grab.previous.chattersGlobal.chatters.getSetByUserType(type.type);
+                if (set != null){
+                    fitsByPrevious = set.contains(name);
+                }
+            }
+
+            var query = session.createNativeQuery("select manageUsersChannels(:ch_id, :cur_cir_id, :pre_cir_id, :name, :type, :site, :fits_by_prev, :datetime);");
+            query.setParameter("ch_id", channel.id);
+            query.setParameter("cur_cir_id", currentCircle.id);
+            query.setParameter("pre_cir_id", preCircle == null ? 0 : preCircle.id);
+            query.setParameter("name", name);
+            query.setParameter("type", type.id);
+            query.setParameter("site", site.id);
+            query.setParameter("fits_by_prev", fitsByPrevious);
+            query.setParameter("datetime", grab.timestamp);
+            var res = (int) query.getSingleResult();
+            if (res == 1){
+                stats.second++;
+            }else if (res == 2){
+                stats.first++;
+            }
         }
     }
 }

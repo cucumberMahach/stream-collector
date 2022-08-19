@@ -3,6 +3,7 @@ package com.streamcollector.app.database.entities;
 import jdk.jfr.Unsigned;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,6 +23,9 @@ public class UserEntity {
     @ManyToOne
     @JoinColumn(name="site_id", nullable = false)
     public SiteEntity site;
+
+    @Column(name = "lastVisit", nullable = false)
+    public ZonedDateTime lastVisit;
 
     @OneToMany(mappedBy="user")
     public Set<UserChannelEntity> usersChannels = new HashSet<>();
