@@ -6,6 +6,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class PrivateSettingsObject {
 
+    @SerializedName("telegram_token_test")
+    public String telegramTokenTest;
     @SerializedName("telegram_token")
     public String telegramToken;
 
@@ -23,6 +25,6 @@ public class PrivateSettingsObject {
     }
 
     public boolean isSettingsCorrect(){
-        return telegramToken != null && trovoClientId != null && donatBearer != null;
+        return telegramToken != null && trovoClientId != null && donatBearer != null && telegramTokenTest != null;
     }
 }

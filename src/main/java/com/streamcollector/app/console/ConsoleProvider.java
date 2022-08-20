@@ -206,16 +206,16 @@ public class ConsoleProvider {
 
     private void printHelp(){
         System.out.println(colorize("Commands:", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t exit - quit from program", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t help - view all commands", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t version - show information about program", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t start [service name] - start service", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t stop [service name] - stop service", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t savestop [service name] - safe service stop", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t log [service name] - open log for service", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t services - show all services names", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t running - show all running services", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t settings - show current settings", Attribute.BRIGHT_CYAN_TEXT()));
-        System.out.println(colorize("\t private - show current private settings", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t exit                      - quit from program", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t help                      - view all commands", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t version                   - show information about program", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t start     [service name]  - start service", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t stop      [service name]  - stop service", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t savestop  [service name]  - safe service stop", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t log       [service name]  - open log for service", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t services                  - show all services names", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t running                   - show all running services", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t settings                  - show current settings", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t private                   - show current private settings", Attribute.BRIGHT_CYAN_TEXT()));
     }
 }

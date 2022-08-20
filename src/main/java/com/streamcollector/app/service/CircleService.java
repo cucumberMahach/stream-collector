@@ -165,12 +165,22 @@ public class CircleService extends AbstractService {
                     var currentChannelPair = doCurrentChannel(session, currentCircle, grabCh);
                     var currentChannel = currentChannelPair.first;
 
+                    //Channel
+                    if (currentChannelPair.second) {
+                        session.insert(currentChannel);
+                    } else {
+                        session.update(currentChannel);
+                    }
+
                     ChannelCircleEntity lastChannelCircle = null;
                     if (lastCircle != null && !currentChannelPair.second) {
                         lastChannelCircle = getLastChannelCircle(session, lastCircle, currentChannel);
                     }
 
                     var channelCircle = doChannelCircle(currentCircle, currentChannel, grabCh);
+
+                    //Channel Circle
+                    session.insert(channelCircle);
 
                     var startTime = System.currentTimeMillis();
                     var usersStatistic = doUsers(session, grabCh);
@@ -183,20 +193,12 @@ public class CircleService extends AbstractService {
                     writeLog(LogStatus.Success, String.format("Подготовка зрителей к записи: %d мс", System.currentTimeMillis() - startTime));
 
                     //================================FINAL TRANSACTION================================
-                    session.beginTransaction();
 
-                    //Channel
-                    if (currentChannelPair.second) {
-                        session.insert(currentChannel);
-                    } else {
-                        session.update(currentChannel);
-                    }
 
-                    //Channel Circle
-                    session.insert(channelCircle);
+
 
                     //Users Channels
-                    Pair<Long, Long> stats = new Pair<>();
+                    Pair<Long, Long> stats = new Pair<>(0L, 0L);
                     for (var r : usersChannels){
                         stats.first += r.first;
                         stats.second += r.second;
@@ -219,6 +221,7 @@ public class CircleService extends AbstractService {
 
                     //Current Circle update
                     currentCircle.totalChannels++;
+                    session.beginTransaction();
                     session.update(currentCircle);
                     session.getTransaction().commit();
                     //=================================================================================
@@ -406,7 +409,7 @@ public class CircleService extends AbstractService {
             query.setParameter("name", user);
             query.setParameter("site", platformScope.get(grabCh.platform).id);
             query.setParameter("lastVisit", grabCh.timestamp);
-            var res = (int) query.getSingleResult();
+            var res = (byte) query.getSingleResult();
             if (res == 1){
                 counts.second++;
             }else if (res == 2){
@@ -468,7 +471,7 @@ public class CircleService extends AbstractService {
             for (final var part : parts) {
                 final String[] collection = arr.stream().skip(part.first).limit(part.second - part.first).toArray(String[]::new);
                 CompletableFuture<Pair<Long, Long>> f = CompletableFuture.supplyAsync(() -> {
-                    Pair<Long, Long> pair = new Pair<>();
+                    Pair<Long, Long> pair = new Pair<>(0L, 0L);
                     try(StatelessSession s = getSession()) {
                         updateViewers(pair, s, currentChannel, currentCircle, preC, lastChannelCircle, collection, userTypes.get(key.dbName), grabCh, site, calculatedDuration);
                     }
@@ -491,6 +494,7 @@ public class CircleService extends AbstractService {
     private void updateViewers(Pair<Long, Long> stats, StatelessSession session, ChannelEntity channel, CircleEntity currentCircle, CircleEntity preCircle, ChannelCircleEntity lastChannelCircle, String[] names, UserTypeEntity type, GrabChannelResult grab, SiteEntity site, float calculatedDuration) {
         HashMap<Pair<Long, Long>, ChannelCircleEntity> channelsCirclesHash = new HashMap<>();
 
+        session.beginTransaction();
         for (String name : names) {
             /*
             //boolean b_userChannel = false;
@@ -595,12 +599,13 @@ public class CircleService extends AbstractService {
             query.setParameter("site", site.id);
             query.setParameter("fits_by_prev", fitsByPrevious);
             query.setParameter("datetime", grab.timestamp);
-            var res = (int) query.getSingleResult();
+            var res = (byte) query.getSingleResult();
             if (res == 1){
                 stats.second++;
             }else if (res == 2){
                 stats.first++;
             }
         }
+        session.getTransaction().commit();
     }
 }

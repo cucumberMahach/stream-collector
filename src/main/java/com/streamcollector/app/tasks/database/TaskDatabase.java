@@ -20,12 +20,11 @@ public class TaskDatabase {
         var session = updateSession();
         text = StringUtils.formatUserQuery(text);
         var query = session.createNativeQuery("""
-        select user_name, q.id, lastVisit, site, ch_id, channels.name as ch_name from
-        (
-        select users.name as user_name, users.id as id, MAX(endTime) as lastVisit, sites.site as site, users_channels.channel_id as ch_id from `twitch-collector`.users_channels join `twitch-collector`.users on(users_channels.user_id = users.id) join `twitch-collector`.circles on(circles.id = users_channels.lastCircle_id) join `twitch-collector`.sites on(sites.id = users.site_id) where users.name like :text group by users.id order by MAX(endTime) desc
-        ) as q
-        join
-        `twitch-collector`.channels on(channels.id = ch_id)
+        select users.id as id, name as user_name, lastVisit, site
+        from users
+        join sites on (sites.id = users.site_id)
+        where name like :text
+        order by lastVisit desc
         """, UserSearchItem.class);
         query.setParameter("text", concreteUser ? text : "%" + text + "%");
         query.setMaxResults(maxCount);
@@ -46,10 +45,10 @@ public class TaskDatabase {
         var query = session.createNativeQuery("""
             select row_number() over (order by channel_id) as id, channel_id, name, SUM(GREATEST(t - minus_sec_f - minus_sec_l, 0)) as t_all from
             (
-            select channel_id, t, (IF(:per_last < c_l_endTime, TIME_TO_SEC(TIMEDIFF(c_l_endTime,:per_last)), 0)) as minus_sec_l, (IF(:per_first > c_f_startTime, TIME_TO_SEC(TIMEDIFF(:per_first,c_f_startTime)), 0)) as minus_sec_f
+            select channel_id, t, (IF(:per_last < c_l_endTime, TIMESTAMPDIFF(SECOND,:per_last, c_l_endTime), 0)) as minus_sec_l, (IF(:per_first > c_f_startTime, TIMESTAMPDIFF(SECOND,c_f_startTime,:per_first), 0)) as minus_sec_f
             from
             (
-            select channel_id, c_f.startTime as 'c_f_startTime', c_l.endTime as 'c_l_endTime', TIME_TO_SEC(TIMEDIFF(c_l.endTime , c_f.startTime)) as t
+            select channel_id, c_f.startTime as 'c_f_startTime', c_l.endTime as 'c_l_endTime', TIMESTAMPDIFF(SECOND, c_f.startTime,c_l.endTime ) as t
             from
             `twitch-collector`.users_channels
             join

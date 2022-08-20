@@ -1,0 +1,33 @@
+https://tmi.twitch.tv/group/user/jesusavgn/chatters
+https://tmi.twitch.tv/group/user/juice/chatters
+https://tmi.twitch.tv/group/user/cheatbanned/chatters
+https://tmi.twitch.tv/group/user/zxcursed/chatters
+
+https://gist.github.com/FrederickGeek8/dadf37b80204ba99ae44b70c7a04ee21
+
+https://wasd.tv/api/auth/chat-token
+https://wasd.tv/api/channels/nicknames/{username}
+https://wasd.tv/api/v2/media-containers?limit=1&offset=0&media_container_status=RUNNING,STOPPED&media_container_type=SINGLE&channel_id={userid}
+https://wasd.tv/api/chat/streams/953881/participants?limit=10000&offset=0
+
+select * from (SELECT * FROM users_channels where users_channels.user_id = (select user_id from users where users.name = '') and channel_id = '' and users_channels.type = '') as q join circles on(q.lastCircle_id = circles.id) where circles.number = '';
+
+select id, TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `circles` where `endTime` IS NOT NULL group by id order by endTime desc limit 3;
+select MAX(q.time) as `time` from (select TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `twitch-collector`.`circles` where `endTime` IS NOT NULL order by endTime desc limit 3) as q
+
+
+private float getMaxTimePerChannel(StatelessSession session, int processCirclesCount){
+        var q = session.createNativeQuery("select MAX(q.time) as `time` from (select TIME_TO_SEC(TIMEDIFF(endTime, startTime))/totalChannels as `time` from `twitch-collector`.`circles` where `endTime` IS NOT NULL order by endTime desc limit :lim) as q");
+        q.setParameter("lim", processCirclesCount);
+        var res = (BigDecimal) q.getSingleResult();
+        if (res == null){
+            return 0;
+        }
+        return res.floatValue();
+    }
+
+
+
+Что смотрел одновременно
+select * from users_channels as f where user_id = 2699 and exists
+(select id from users_channels as s where s.user_id = 2699 and s.channel_id != f.channel_id and (((s.firstCircle_id BETWEEN f.firstCircle_id and f.lastCircle_id) and (s.lastCircle_id BETWEEN f.firstCircle_id and f.lastCircle_id)) or ((f.firstCircle_id BETWEEN s.firstCircle_id and s.lastCircle_id) and (f.lastCircle_id BETWEEN s.firstCircle_id and s.lastCircle_id))));

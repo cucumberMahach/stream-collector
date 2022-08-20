@@ -25,7 +25,7 @@ public class BotService extends AbstractService{
 
     @Override
     protected void work() {
-        Bot bot = new Bot(this, "TwitchCollectorBot", Settings.instance.getPrivateSettings().telegramToken);
+        Bot bot = new Bot(this, "TwitchCollectorBot", Settings.instance.getSettings().botTestAccount ? Settings.instance.getPrivateSettings().telegramTokenTest : Settings.instance.getPrivateSettings().telegramToken);
         TasksManager tasks = new TasksManager(this);
 
         try {

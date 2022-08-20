@@ -80,6 +80,38 @@ public class Chatters {
         arrMap.put(UserType.Followers, followers);
         arrMap.put(UserType.Subscribers, subscribers);
 
+        broadcaster_set.clear();
+        vips_set.clear();;
+        moderators_set.clear();
+        staff_set.clear();
+        admins_set.clear();
+        global_mods_set.clear();
+        viewers_set.clear();
+        stream_moder_set.clear();
+        smoderator_set.clear();
+        ace_set.clear();
+        aceplus_set.clear();
+        creators_set.clear();
+        editors_set.clear();
+        followers_set.clear();
+        subscribers_set.clear();
+
+        broadcaster_set.addAll(broadcaster);
+        vips_set.addAll(vips);
+        moderators_set.addAll(moderators);
+        staff_set.addAll(staff);
+        admins_set.addAll(admins);
+        global_mods_set.addAll(global_mods);
+        viewers_set.addAll(viewers);
+        stream_moder_set.addAll(stream_moder);
+        smoderator_set.addAll(smoderator);
+        ace_set.addAll(ace);
+        aceplus_set.addAll(aceplus);
+        creators_set.addAll(creators);
+        editors_set.addAll(editors);
+        followers_set.addAll(followers);
+        subscribers_set.addAll(subscribers);
+
         setMap.put(UserType.Broadcaster, broadcaster_set);
         setMap.put(UserType.Vip, vips_set);
         setMap.put(UserType.Moderator, moderators_set);

@@ -6,7 +6,9 @@ public enum Platform {
     Twitch("twitch", "Twitch"),
     WASD("wasd", "WASD"),
     Trovo("trovo", "Trovo"),
-    GoodGame("goodgame", "GoodGame");
+    GoodGame("goodgame", "GoodGame"),
+
+    None("", "none");
 
     private final String nameInDB;
     private final String showName;
@@ -31,6 +33,6 @@ public enum Platform {
                 return v;
             }
         }
-        return null;
+        return Platform.None;
     }
 }

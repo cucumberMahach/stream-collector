@@ -18,10 +18,4 @@ public class UserSearchItem {
 
     @Column(name = "lastVisit")
     public ZonedDateTime lastVisit;
-
-    @Column(name = "ch_name")
-    public String channelName;
-
-    @Column(name = "ch_id")
-    public Long channelId;
 }

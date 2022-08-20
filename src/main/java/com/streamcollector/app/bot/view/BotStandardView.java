@@ -65,7 +65,7 @@ public class BotStandardView{
         msg.setText("""
                 &#129488; <b>Меню</b>
                 
-                Для получении информации о пользователе напишите его &#129313; <b><i>ник</i></b> &#129300;
+                Для получении информации о пользователе напишите его <b><i>ник</i></b> &#129313;
                 
                 &#128591; <b>Пожалуйста</b>, не пробуйте использовать <b>SQL инъекции</b> на нашем боте. Спасибо""");
 
@@ -115,9 +115,8 @@ public class BotStandardView{
                         <b>%d.</b> <code>%s</code>
                         &#128640; <b>Платформа:</b> <code>%s</code>
                         &#128368; <b>Последняя запись:</b> <code>%s</code>
-                        (<code>%s</code>)
                         
-                        """, i + 1, user.userName, Platform.fromNameInDB(user.site).getShowName(), TimeUtil.formatZonedUser(user.lastVisit), user.channelName ));
+                        """, i + 1, user.userName, Platform.fromNameInDB(user.site).getShowName(), TimeUtil.formatZonedUser(user.lastVisit)));
             }
             msg.setText(builder.toString());
         }
@@ -263,8 +262,7 @@ public class BotStandardView{
         }
 
         SendMessage msg = new SendMessage();
-        msg.setText(String.format("""
-               &#129447; <b>%s</b>""", message));
+        msg.setText(String.format("&#129447; <b>%s</b>", message));
         send(chatId, msg);
     }
 

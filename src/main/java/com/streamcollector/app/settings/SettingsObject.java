@@ -12,6 +12,9 @@ public class SettingsObject {
     @SerializedName("bot_database")
     public DatabaseConfigType botDatabase;
 
+    @SerializedName("bot_test_account")
+    public Boolean botTestAccount;
+
     @SerializedName("admin_database")
     public DatabaseConfigType adminDatabase;
 
@@ -26,6 +29,6 @@ public class SettingsObject {
     }
 
     public boolean isSettingsCorrect(){
-        return circlesDatabase != null && botDatabase != null && adminDatabase != null && donationsDatabase != null;
+        return circlesDatabase != null && botDatabase != null && adminDatabase != null && donationsDatabase != null && botTestAccount != null;
     }
 }

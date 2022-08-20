@@ -1,6 +1,7 @@
 {
   "circles_database": "Local",
   "bot_database": "Local",
+  "bot_test_account": true,
   "admin_database": "Local",
   "donations_database": "Local"
 }
