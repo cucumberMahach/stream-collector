@@ -60,6 +60,7 @@ public class BotStandardLogic{
         if (data.startsWith("userinfo:")){
             var parameters = data.split(":");
             createUserInfoTask(parameters, callbackMessageId, chatId);
+            createUserLastViewsTask(parameters, chatId);
         }else if (data.startsWith("menu:")){
             if (data.equals("menu:account")){
                 view.sendAccountReply(chatId, tgUser);
@@ -68,6 +69,36 @@ public class BotStandardLogic{
             var parameters = data.split(":");
             createUserSearchTask(parameters, callbackMessageId, chatId);
         }
+    }
+
+    private void createUserLastViewsTask(String[] parameters, String chatId){
+        if (parameters.length != 3){
+            // error;
+            return;
+        }
+        var platform = Platform.fromNameInDB(parameters[1]);
+        if (platform == null){
+            //error
+            return;
+        }
+        var username = parameters[2];
+        if (username.isEmpty()){
+            //error
+            return;
+        }
+
+        Task task = new Task();
+        task.type = TaskType.UserLastViews;
+        task.chatId = chatId;
+
+        task.parameters.put("platform", platform);
+        task.parameters.put("username", username);
+        task.parameters.put("maxCount", 10);
+        task.onFinished = () -> {
+            view.sendUserLastViewsResult(task);
+        };
+
+        getBotBody().getTasksManager().executeTask(task);
     }
 
     private void createUserSearchTask(String[] parameters, Integer callbackMessageId, String chatId){

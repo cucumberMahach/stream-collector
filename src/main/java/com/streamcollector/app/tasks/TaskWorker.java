@@ -17,8 +17,28 @@ public class TaskWorker {
         switch (task.type){
             case UserInfo -> doUserInfo(task);
             case UserSearch -> doUserSearch(task);
+            case UserLastViews -> doUserLastViews(task);
             case None -> executor.getManager().finishTask(task);
         }
+    }
+
+    private void doUserLastViews(Task task){
+        var username = (String) task.parameters.get("username");
+        var platform = (Platform) task.parameters.get("platform");
+        var maxCount = (Integer) task.parameters.get("maxCount");
+
+        var user = database.getUser(username, platform);
+        if (user == null){
+            task.results.put("is_user_found", false);
+        }else {
+            task.results.put("is_user_found", true);
+
+            var lastViews = database.getLastViewsByUser(username, platform, maxCount);
+
+            task.results.put("last_views", lastViews);
+        }
+
+        executor.getManager().finishTask(task);
     }
 
     private void doUserSearch(Task task){

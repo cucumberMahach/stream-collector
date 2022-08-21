@@ -3,6 +3,7 @@ package com.streamcollector.app.database;
 import com.streamcollector.app.database.entities.*;
 import com.streamcollector.app.logging.LogStatus;
 import com.streamcollector.app.logging.Logger;
+import com.streamcollector.app.tasks.database.results.LastViewsByUserItem;
 import com.streamcollector.app.tasks.database.results.TopViewsByUserItem;
 import com.streamcollector.app.tasks.database.results.UserSearchItem;
 import org.hibernate.HibernateException;
@@ -39,6 +40,7 @@ public class DatabaseUtil {
 
             configuration.addAnnotatedClass(TopViewsByUserItem.class);
             configuration.addAnnotatedClass(UserSearchItem.class);
+            configuration.addAnnotatedClass(LastViewsByUserItem.class);
 
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {

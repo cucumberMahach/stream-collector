@@ -3,5 +3,7 @@
   "bot_database": "Local",
   "bot_test_account": true,
   "admin_database": "Local",
-  "donations_database": "Local"
+  "donations_database": "Local",
+  "remover_enabled": true,
+  "remover_optimize": true
 }

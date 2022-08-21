@@ -1,12 +1,16 @@
 package com.streamcollector.app.console;
 
 import com.diogonunes.jcolor.Attribute;
+import com.streamcollector.app.database.DatabaseUtil;
 import com.streamcollector.app.logging.Logger;
+import com.streamcollector.app.remover.Remover;
 import com.streamcollector.app.service.ServiceManager;
 import com.streamcollector.app.settings.Settings;
+import com.streamcollector.app.util.Lambda;
 import com.streamcollector.app.util.PropertiesFile;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
@@ -156,6 +160,30 @@ public class ConsoleProvider {
             return true;
         }
 
+        if (cmd.startsWith("exec ")){
+            String execName = cmd.substring("exec ".length()).trim().toLowerCase(Locale.ROOT);
+
+            Lambda printSuccess  = () -> {
+                System.out.print(colorize("Scenario for '", Attribute.BRIGHT_GREEN_TEXT()));
+                System.out.print(colorize(execName, Attribute.BRIGHT_GREEN_TEXT(), Attribute.BOLD()));
+                System.out.println(colorize("' executed", Attribute.BRIGHT_GREEN_TEXT()));
+            };
+
+            switch (execName){
+                case "remover":
+                    printSuccess.execute();
+                    forceRemover();
+                    break;
+                default:
+                    System.out.print(colorize("Unknown scenario '", Attribute.BRIGHT_RED_TEXT()));
+                    System.out.print(colorize(execName, Attribute.BRIGHT_RED_TEXT(), Attribute.BOLD()));
+                    System.out.println(colorize("'. Enter 'help' for view all commands", Attribute.BRIGHT_RED_TEXT()));
+                    break;
+            }
+
+            return true;
+        }
+
         switch (cmd){
             case "help":
                 printHelp();
@@ -197,6 +225,14 @@ public class ConsoleProvider {
         return false;
     }
 
+    private void forceRemover(){
+        var settings = Settings.instance.getSettings();
+        var session = DatabaseUtil.getStateLessSession(settings.circlesDatabase);
+        var remover = new Remover(null);
+        remover.forced(session);
+        session.close();
+    }
+
     public void printProgramHeader(){
         System.out.print(colorize(PropertiesFile.instance.getArtifactId().toUpperCase(Locale.ROOT), Attribute.BRIGHT_MAGENTA_TEXT()));
         System.out.print(colorize(" v" + PropertiesFile.instance.getVersion(), Attribute.BRIGHT_YELLOW_TEXT()));
@@ -213,6 +249,7 @@ public class ConsoleProvider {
         System.out.println(colorize("\t stop      [service name]  - stop service", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t savestop  [service name]  - safe service stop", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t log       [service name]  - open log for service", Attribute.BRIGHT_CYAN_TEXT()));
+        System.out.println(colorize("\t exec      [remover|...]   - exec scenario", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t services                  - show all services names", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t running                   - show all running services", Attribute.BRIGHT_CYAN_TEXT()));
         System.out.println(colorize("\t settings                  - show current settings", Attribute.BRIGHT_CYAN_TEXT()));

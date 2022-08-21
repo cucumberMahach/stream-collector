@@ -21,6 +21,12 @@ public class SettingsObject {
     @SerializedName("donations_database")
     public DatabaseConfigType donationsDatabase;
 
+    @SerializedName("remover_enabled")
+    public Boolean removerEnabled;
+
+    @SerializedName("remover_optimize")
+    public Boolean removerOptimize;
+
     public String getString(){
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
@@ -29,6 +35,6 @@ public class SettingsObject {
     }
 
     public boolean isSettingsCorrect(){
-        return circlesDatabase != null && botDatabase != null && adminDatabase != null && donationsDatabase != null && botTestAccount != null;
+        return circlesDatabase != null && botDatabase != null && adminDatabase != null && donationsDatabase != null && botTestAccount != null && removerEnabled != null && removerOptimize != null;
     }
 }

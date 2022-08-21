@@ -4,6 +4,7 @@ import com.streamcollector.app.database.entities.*;
 import com.streamcollector.app.database.utils.PlatformScope;
 import com.streamcollector.app.database.DatabaseUtil;
 import com.streamcollector.app.grabber.UserType;
+import com.streamcollector.app.remover.Remover;
 import com.streamcollector.app.util.DataUtil;
 import com.streamcollector.app.util.FutureUtils;
 import com.streamcollector.app.util.Pair;
@@ -40,6 +41,7 @@ public class CircleService extends AbstractService {
     private static final ExecutorService pool = Executors.newFixedThreadPool(threadsToUse);
     private List<GrabChannelResult> lastGrabResult = new ArrayList<>();
     private PlatformScope platformScope;
+    private Remover remover;
 
     public CircleService() {
         super("circle");
@@ -82,6 +84,7 @@ public class CircleService extends AbstractService {
     protected void work() {
         loadLastGrabs();
         StatelessSession session = null;
+        remover = new Remover(this);
         try {
             while (true) {
                 if (!running)
@@ -248,8 +251,9 @@ public class CircleService extends AbstractService {
                 session.getTransaction().commit();
 
                 writeLog(LogStatus.Success, String.format("Обработано каналов: %d (%s)", currentCircle.totalChannels, TimeUtil.formatDurationHoursMs(Duration.between(currentCircle.startTime, currentCircle.endTime))));
-                sleep(toNextCircleMs);
+                remover.check(session);
                 session.close();
+                sleep(toNextCircleMs);
             }
         } catch (Exception e) {
             if (session != null)

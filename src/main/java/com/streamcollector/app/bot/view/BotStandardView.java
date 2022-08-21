@@ -6,6 +6,7 @@ import com.streamcollector.app.bot.logic.BotStandardLogic;
 import com.streamcollector.app.database.entities.TgBanEntity;
 import com.streamcollector.app.database.entities.TgUserEntity;
 import com.streamcollector.app.grabber.Platform;
+import com.streamcollector.app.tasks.database.results.LastViewsByUserItem;
 import com.streamcollector.app.tasks.database.results.TopViewsByUserItem;
 import com.streamcollector.app.tasks.database.results.UserSearchItem;
 import com.streamcollector.app.tasks.task.Task;
@@ -124,6 +125,41 @@ public class BotStandardView{
         botLogic.getBotBody().getBot().sendMsg(task.chatId, msg);
     }
 
+    public void sendUserLastViewsResult(Task task){
+        boolean isUserFound = (boolean) task.results.get("is_user_found");
+        String username = (String) task.parameters.get("username");
+        Platform platform = (Platform) task.parameters.get("platform");
+
+        var msg = new SendMessage();
+
+        if (isUserFound) {
+
+            var lastViews = (List<LastViewsByUserItem>) task.results.get("last_views");
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.format("""
+                    &#8505; <b>Последние каналы пользователя</b>
+                    &#129313; <b>Ник:</b> <code>%s</code>
+                    &#128250; <b>Платформа:</b> <code>%s</code>
+                    
+                    &#128165; <i>Последние 10 каналов, которые смотрел пользователь:</i>
+                    <i>(время просмотра указывается за последний месяц)</i>
+                    """, username, platform.getShowName()));
+            for (int i = 0; i < lastViews.size(); i++) {
+                var item = lastViews.get(i);
+                builder.append(String.format("%s<b>%d.</b> <code>%s</code> <b>(%s)</b>\n<code>%s</code>\n\n", (i + 1 <= (lastViews.size() >= 5 ? 3 : 1) ? "&#128293; " : ""), i + 1, item.channelName, TimeUtil.formatDurationDays(item.getDurationAllTime()), TimeUtil.formatZonedUser(item.timestamp)));
+            }
+
+            msg.setText(builder.toString());
+        }else{
+            return;
+            /*msg.setText(String.format("""
+                    &#128560; <b>Пользователь </b><code>%s</code><b> </b><i>(%s)</i><b> в базе не найден</b>""", username, platform.getShowName()));*/
+        }
+
+        botLogic.getBotBody().getBot().sendMsg(task.chatId, msg);
+    }
+
     public void sendUserInfoResult(Task task){
         var deleteCmd = new DeleteMessage();
         deleteCmd.setChatId(task.chatId);
@@ -146,11 +182,10 @@ public class BotStandardView{
 
             StringBuilder builder = new StringBuilder();
             builder.append(String.format("""
-                    &#8505; <b>Информация по пользователю</b>
-                                            
+                    &#8505; <b>Топ каналов пользователя</b>
                     &#129313; <b>Ник:</b> <code>%s</code>
                     &#128250; <b>Платформа:</b> <code>%s</code>
-                                            
+                    
                     &#128158; <i>Топ 10 каналов по просмотрам за последний месяц:</i>
                     """, username, platform.getShowName()));
             for (int i = 0; i < topViews.size(); i++) {

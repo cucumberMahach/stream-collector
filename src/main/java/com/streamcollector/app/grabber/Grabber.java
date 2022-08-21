@@ -29,7 +29,7 @@ public class Grabber {
     private final ArrayList<Pair<Platform, String>> channelsToGrab = new ArrayList<>();
     private final List<GrabChannelResult> grabResults = new ArrayList<>();
     private AbstractService service = null;
-    private long timeoutMs = 7000;
+    private long timeoutMs = 2500;
 
     private static final ExecutorService pool = Executors.newFixedThreadPool(5);
     private static final HttpClient client = HttpClient.newBuilder().executor(pool).build();
@@ -50,47 +50,52 @@ public class Grabber {
         log(LogStatus.Success, "Получение данных завершено");
     }
 
-    private void grabTwitch() throws ExecutionException, InterruptedException {
+    private void grabTwitch() {
         // Twitch
-        List<CompletableFuture<GrabChannelResult>> futuresTwitch = new ArrayList<>();
+        List<String> twitchChannels = new ArrayList<>();
         for (final var channel : channelsToGrab) {
             if (channel.first != Platform.Twitch)
                 continue;
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GrabUtil.getTwitchChattersUrl(channel.second)))
-                    .timeout(Duration.ofMillis(timeoutMs))
-                    .build();
-            var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
-                GrabChannelResult result = new GrabChannelResult();
-                result.platform = channel.first;
-                result.channelName = channel.second;
-                result.chattersGlobal = GrabUtil.createChattersGlobalObject(s);
-                result.chattersGlobal.chatters.fillSetsAndConstructMaps();
-                return result;
-            }).exceptionally(throwable -> {
-                GrabChannelResult result = new GrabChannelResult();
-                result.platform = channel.first;
-                result.channelName = channel.second;
-                result.setError(throwable);
-                return result;
-            });
-            futuresTwitch.add(f);
+            twitchChannels.add(channel.second);
         }
 
-        if (futuresTwitch.isEmpty()){
+        if (twitchChannels.isEmpty()){
             log(LogStatus.Success, "Нет Twitch каналов для обработки");
             return;
         }
 
-        log(LogStatus.Success, String.format("Требуется обработать %d каналов Twitch", futuresTwitch.size()));
-        var futureTwitch = FutureUtils.allOf(futuresTwitch);
-        grabResults.addAll(futureTwitch.get());
+        log(LogStatus.Success, String.format("Требуется обработать %d каналов Twitch", twitchChannels.size()));
+
+        List<GrabChannelResult> results = new ArrayList<>();
+        for (final var channel : twitchChannels) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(GrabUtil.getTwitchChattersUrl(channel)))
+                    .timeout(Duration.ofMillis(timeoutMs))
+                    .build();
+            try {
+                var f = client.send(request, HttpResponse.BodyHandlers.ofString());
+                GrabChannelResult result = new GrabChannelResult();
+                result.platform = Platform.Twitch;
+                result.channelName = channel;
+                result.chattersGlobal = GrabUtil.createChattersGlobalObject(f.body());
+                result.chattersGlobal.chatters.fillSetsAndConstructMaps();
+                results.add(result);
+            }catch (Exception e) {
+                GrabChannelResult result = new GrabChannelResult();
+                result.platform = Platform.Twitch;
+                result.channelName = channel;
+                result.setError(e);
+                results.add(result);
+            }
+        }
+
+        grabResults.addAll(results);
         log(LogStatus.Success, "Twitch каналы обработаны");
     }
 
-    private void grabWASD() throws ExecutionException, InterruptedException {
+    private void grabWASD(){
         // WASD
-        List<CompletableFuture<WASDGrabChannelData>> futuresWASDChannelID = new ArrayList<>();
+        List<WASDGrabChannelData> wasdClientIDResults = new ArrayList<>();
         for (final var channel : channelsToGrab) {
             if (channel.first != Platform.WASD)
                 continue;
@@ -98,28 +103,26 @@ public class Grabber {
                     .uri(URI.create(GrabUtil.getWASDChannelIDUrl(channel.second)))
                     .timeout(Duration.ofMillis(timeoutMs))
                     .build();
-            var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+            try {
+                var f = client.send(request, HttpResponse.BodyHandlers.ofString());
                 var result = new WASDGrabChannelData();
                 result.channelName = channel.second;
-                result.channelID = GrabUtil.parseWASDChannelIDJson(s);
-                return result;
-            }).exceptionally(throwable -> {
+                result.channelID = GrabUtil.parseWASDChannelIDJson(f.body());
+                wasdClientIDResults.add(result);
+            }catch (Exception e){
                 var result = new WASDGrabChannelData();
                 result.channelName = channel.second;
-                result.throwable = throwable;
-                return result;
-            });
-            futuresWASDChannelID.add(f);
+                result.throwable = e;
+                wasdClientIDResults.add(result);
+            }
         }
 
-        if (futuresWASDChannelID.isEmpty()){
+        if (wasdClientIDResults.isEmpty()){
             log(LogStatus.Success, "Нет WASD каналов для обработки");
             return;
         }
 
-        log(LogStatus.Success, String.format("Требуется обработать %d каналов WASD. Этап 1 - получение channel_id", futuresWASDChannelID.size()));
-        var futureWASDClientID = FutureUtils.allOf(futuresWASDChannelID);
-        var wasdClientIDResults = futureWASDClientID.get();
+        log(LogStatus.Success, String.format("Требуется обработать %d каналов WASD. Этап 1 - получение channel_id", wasdClientIDResults.size()));
 
         List<WASDGrabChannelData> wasdWithBeginError = new ArrayList<>();
         for (var ch : wasdClientIDResults){
@@ -128,7 +131,7 @@ public class Grabber {
             }
         }
 
-        List<CompletableFuture<WASDGrabChannelData>> futuresWASDStreamID = new ArrayList<>();
+        List<WASDGrabChannelData> wasdStreamIDResults = new ArrayList<>();
         for (final var channelData : wasdClientIDResults) {
             if (channelData.isError() || channelData.channelID == null)
                 continue;
@@ -136,19 +139,17 @@ public class Grabber {
                     .uri(URI.create(GrabUtil.getWASDStreamIDUrl(channelData.channelID.toString())))
                     .timeout(Duration.ofMillis(timeoutMs))
                     .build();
-            var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
-                channelData.streamID = GrabUtil.parseWASDStreamIDJson(s);
-                return channelData;
-            }).exceptionally(throwable -> {
-                channelData.throwable = throwable;
-                return channelData;
-            });
-            futuresWASDStreamID.add(f);
+            try {
+                var f = client.send(request, HttpResponse.BodyHandlers.ofString());
+                channelData.streamID = GrabUtil.parseWASDStreamIDJson(f.body());
+                wasdStreamIDResults.add(channelData);
+            }catch (Exception e){
+                channelData.throwable = e;
+                wasdStreamIDResults.add(channelData);
+            }
         }
 
-        log(LogStatus.Success, String.format("Этап 2 - получение stream_id. Прошло %d каналов WASD", futuresWASDStreamID.size()));
-        var futureWASDStreamID = FutureUtils.allOf(futuresWASDStreamID);
-        var wasdStreamIDResults = futureWASDStreamID.get();
+        log(LogStatus.Success, String.format("Этап 2 - получение stream_id. Прошло %d каналов WASD", wasdStreamIDResults.size()));
 
         for (var ch : wasdStreamIDResults){
             if (ch.streamID == null){
@@ -160,7 +161,7 @@ public class Grabber {
 
         int offset = 0;
         while (!wasdStreamIDResults.isEmpty()) {
-            List<CompletableFuture<WASDGrabChannelData>> futuresWASDParticipants = new ArrayList<>();
+            List<WASDGrabChannelData> wasdParticipantsResults = new ArrayList<>();
             for (final var channelData : wasdStreamIDResults) {
                 if (channelData.isError() || channelData.streamID == null)
                     continue;
@@ -168,25 +169,23 @@ public class Grabber {
                         .uri(URI.create(GrabUtil.getWASDParticipantsUrl(channelData.streamID.toString(), offset)))
                         .timeout(Duration.ofMillis(timeoutMs))
                         .build();
-                var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
-                    //System.out.println(s);
-                    if (channelData.participants == null){
-                        channelData.participants = GrabUtil.parseWASDParticipantsJson(s);
-                    }else{
-                        channelData.participants.add(GrabUtil.parseWASDParticipantsJson(s));
+                try {
+                    var f = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    if (channelData.participants == null) {
+                        channelData.participants = GrabUtil.parseWASDParticipantsJson(f.body());
+                    } else {
+                        channelData.participants.add(GrabUtil.parseWASDParticipantsJson(f.body()));
                     }
                     channelData.participantsTimestamp = TimeUtil.getZonedNow();
-                    return channelData;
-                }).exceptionally(throwable -> {
-                    channelData.throwable = throwable;
-                    return channelData;
-                });
-                futuresWASDParticipants.add(f);
+                    wasdParticipantsResults.add(channelData);
+                }catch (Exception e) {
+                    channelData.throwable = e;
+                    wasdParticipantsResults.add(channelData);
+                }
+
             }
 
-            log(LogStatus.Success, String.format("Этап 3 - получение participants. Прошло %d каналов WASD. Сдвиг - %d", futuresWASDParticipants.size(), offset));
-            var futureWASDParticipants = FutureUtils.allOf(futuresWASDParticipants);
-            var wasdParticipantsResults = futureWASDParticipants.get();
+            log(LogStatus.Success, String.format("Этап 3 - получение participants. Прошло %d каналов WASD. Сдвиг - %d", wasdParticipantsResults.size(), offset));
             var toDone = new ArrayList<WASDGrabChannelData>();
 
             for (var p : wasdParticipantsResults){
@@ -262,7 +261,7 @@ public class Grabber {
 
         int offset = 0;
         while (!trovoChannelIdResults.isEmpty()) {
-            List<CompletableFuture<TrovoGrabChannelData>> futuresTrovoViewers = new ArrayList<>();
+            List<TrovoGrabChannelData> trovoViewersResults = new ArrayList<>();
             for (final var channelData : trovoChannelIdResults) {
                 if (channelData.isError())
                     continue;
@@ -276,25 +275,23 @@ public class Grabber {
                         .header("Client-ID", Settings.instance.getPrivateSettings().trovoClientId)
                         .POST(HttpRequest.BodyPublishers.ofString(requstString))
                         .build();
-                var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+                try{
+                var f = client.send(request, HttpResponse.BodyHandlers.ofString());
                     //System.out.println(s);
                     if (channelData.viewers == null){
-                        channelData.viewers = GrabUtil.parseTrovoViewers(s);
+                        channelData.viewers = GrabUtil.parseTrovoViewers(f.body());
                     }else{
-                        channelData.viewers.add(GrabUtil.parseTrovoViewers(s));
+                        channelData.viewers.add(GrabUtil.parseTrovoViewers(f.body()));
                     }
                     channelData.participantsTimestamp = TimeUtil.getZonedNow();
-                    return channelData;
-                }).exceptionally(throwable -> {
-                    channelData.throwable = throwable;
-                    return channelData;
-                });
-                futuresTrovoViewers.add(f);
+                    trovoViewersResults.add(channelData);
+                }catch (Exception e) {
+                    channelData.throwable = e;
+                    trovoViewersResults.add(channelData);
+                }
             }
 
-            log(LogStatus.Success, String.format("Этап 3 - получение viewers. Прошло %d каналов Trovo. Сдвиг - %d", futuresTrovoViewers.size(), offset));
-            var futureTrovoViewers = FutureUtils.allOf(futuresTrovoViewers);
-            var trovoViewersResults = futureTrovoViewers.get();
+            log(LogStatus.Success, String.format("Этап 3 - получение viewers. Прошло %d каналов Trovo. Сдвиг - %d", trovoViewersResults.size(), offset));
             var toDone = new ArrayList<TrovoGrabChannelData>();
 
             for (var p : trovoViewersResults){
@@ -321,7 +318,7 @@ public class Grabber {
     }
 
     private void grabGoodGame() throws ExecutionException, InterruptedException {
-        List<CompletableFuture<GGGrabChannelData>> futuresGGChannelID = new ArrayList<>();
+        List<GGGrabChannelData> ggClientIDResults = new ArrayList<>();
         for (final var channel : channelsToGrab) {
             if (channel.first != Platform.GoodGame)
                 continue;
@@ -331,30 +328,29 @@ public class Grabber {
                     .header("accept", "application/vnd.goodgame.v2+json,application/hal+json,application/json")
                     .GET()
                     .build();
-            var f = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body).thenApply(s -> {
+            try {
+                var f = client.send(request, HttpResponse.BodyHandlers.ofString());
+
                 var result = new GGGrabChannelData();
                 result.channelName = channel.second;
-                result.channelData = GrabUtil.parseGoodGameStream(s);
+                result.channelData = GrabUtil.parseGoodGameStream(f.body());
                 result.timestamp = TimeUtil.getZonedNow();
-                return result;
-            }).exceptionally(throwable -> {
+                ggClientIDResults.add(result);
+            }catch (Exception e) {
                 var result = new GGGrabChannelData();
                 result.channelName = channel.second;
-                result.throwable = throwable;
+                result.throwable = e;
                 result.timestamp = TimeUtil.getZonedNow();
-                return result;
-            });
-            futuresGGChannelID.add(f);
+                ggClientIDResults.add(result);
+            }
         }
 
-        if (futuresGGChannelID.isEmpty()){
+        if (ggClientIDResults.isEmpty()){
             log(LogStatus.Success, "Нет GoodGame каналов для обработки");
             return;
         }
 
-        log(LogStatus.Success, String.format("Требуется обработать %d каналов GoodGame. Этап 1 - получение channel_id", futuresGGChannelID.size()));
-        var futureGGClientID = FutureUtils.allOf(futuresGGChannelID);
-        var ggClientIDResults = futureGGClientID.get();
+        log(LogStatus.Success, String.format("Требуется обработать %d каналов GoodGame. Этап 1 - получение channel_id", ggClientIDResults.size()));
 
         GoodGameWebsocket websocket = new GoodGameWebsocket();
         List<GGGrabChannelData> ggWithBeginError = new ArrayList<>();
