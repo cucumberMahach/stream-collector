@@ -45,7 +45,7 @@ public class TasksManager {
         started = false;
     }
 
-    public void update(){
+    public synchronized void update(){
         for (Task task : finished) {
             task.onFinished.onEvent();
         }
@@ -56,7 +56,7 @@ public class TasksManager {
         queue.add(task);
     }
 
-    public void finishTask(Task task){
+    public synchronized void finishTask(Task task){
         finished.add(task);
     }
 

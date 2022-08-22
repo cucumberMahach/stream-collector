@@ -29,7 +29,7 @@ public class Grabber {
     private final ArrayList<Pair<Platform, String>> channelsToGrab = new ArrayList<>();
     private final List<GrabChannelResult> grabResults = new ArrayList<>();
     private AbstractService service = null;
-    private long timeoutMs = 2500;
+    private long timeoutMs = 3500;
 
     private static final ExecutorService pool = Executors.newFixedThreadPool(5);
     private static final HttpClient client = HttpClient.newBuilder().executor(pool).build();
