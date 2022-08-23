@@ -169,11 +169,13 @@ public class CircleService extends AbstractService {
                     var currentChannel = currentChannelPair.first;
 
                     //Channel
+                    session.beginTransaction();
                     if (currentChannelPair.second) {
                         session.insert(currentChannel);
                     } else {
                         session.update(currentChannel);
                     }
+                    session.getTransaction().commit();
 
                     ChannelCircleEntity lastChannelCircle = null;
                     if (lastCircle != null && !currentChannelPair.second) {
@@ -183,7 +185,9 @@ public class CircleService extends AbstractService {
                     var channelCircle = doChannelCircle(currentCircle, currentChannel, grabCh);
 
                     //Channel Circle
+                    session.beginTransaction();
                     session.insert(channelCircle);
+                    session.getTransaction().commit();
 
                     var startTime = System.currentTimeMillis();
                     var usersStatistic = doUsers(session, grabCh);
