@@ -72,6 +72,7 @@
 MySQL и MariaDB (готовый скрипт базы данных - db_script.sql).
 
 Также необходимо создать функции в базе данных (_files/queries/func *.sql). В итоге БД должна иметь следующую структуру:
+
 ![](/_assets/screen_db.png "Screenshot DB")
 
 Запуск приложения:
