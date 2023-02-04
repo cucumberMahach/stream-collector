@@ -71,6 +71,9 @@
 Модель базы данных находится в файле db_model.mwb (открывается в MySQL Workbench 8.0). Далее производится экспорт модели в SQL скрипт и устранение различий синтаксиса
 MySQL и MariaDB (готовый скрипт базы данных - db_script.sql).
 
+Также необходимо создать функции в базе данных (_files/queries/func *.sql). В итоге БД должна иметь следующую структуру:
+![](/_assets/screen_db.png "Screenshot DB")
+
 Запуск приложения:
 ```
 java -jar stream-collector-2.0-jar-with-dependencies.jar
