@@ -93,6 +93,8 @@ java -jar stream-collector-2.0-jar-with-dependencies.jar
 Все возможные команды можно посмотреть, набрав в консоли `help`.
 
 ## Скриншоты
+![](/_assets/cli.png "Screenshot CLI")
+
 ![](/_assets/screen1.png "Screenshot 1")
 
 ![](/_assets/screen2.png "Screenshot 2")
